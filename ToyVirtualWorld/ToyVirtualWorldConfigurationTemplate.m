@@ -12,10 +12,12 @@
 clear; close all;
 
 %% Set up some parameters for portability
-projectName = 'VirtualWorldColorConstancy';
-dataDirRoot = '/Users1/Shared/Matlab/Analysis/';
+projectName = 'ToyVirtualWorld';
+dataDirRoot = '/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/IBIO_data/VirtualWorldColorConstancy';
 dataDirName = 'ToyVirtualWorld';
-dataDir = fullfile(dataDirRoot,projectName,dataDirName,'');
+dataDir = fullfile(dataDirRoot,projectName,'');
 if (~exist(dataDir,'dir'))
     mkdir(dataDir);
 end
+setpref(projectName, 'recipesFolder',dataDir);
+setpref(projectName, 'workingFolder',fullfile(dataDir,'Working',''));
