@@ -12,7 +12,7 @@
 % We could build one scene for each leaf.  In this case each scene would
 % have just one inserted object.  We could also build scenes that contain
 % multiple inserted objects.  Then the question is how many and which
-% leaves go into each scene? 
+% leaves go into each scene?
 %
 % I think what we discussed is for each scene to have one leaf from each
 % object.  This would be a very large space to explore.  For example, say
@@ -40,8 +40,6 @@ defaultMappings = fullfile( ...
 % virutal scenes options for inserted objects
 scaleMin = 0.25;
 scaleMax = 2.0;
-rotMin = 0;
-rotMax = 359;
 
 % where to save new recipes
 projectName = 'ToyVirtualWorld';
@@ -50,69 +48,53 @@ if (~exist(recipeFolder, 'dir'))
     mkdir(recipeFolder);
 end
 
-%% Choose how many recipes to make and from what components.
-baseSceneSet = { ...
-    'CheckerBoard', ...
-    'IndoorPlant'};
+%% Choose various "raw materials" we will use in creating scenes.
 
-objectSet = { ...
-    'Barrel', ...
-    'BigBall'};
+% textured materials in matte and ward flavors
+[textureIds, textures, matteTextured, wardTextured, filePaths] = ...
+    GetWardLandTextureMaterials([], hints);
 
-lightSet = { ...
-    'BigBall', ...
-    'SmallBall'};
+% Macbeth color checker materials in matte and ward flavors
+[matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
 
-%% Build multiple recipes based on the sets above.
-objectConditions = [0 5];
-lightConditions = [0 3];
+% CIE-LAB tempterature correlated daylight spectra
+lightSpectra = GetWardLandIlluminantSpectra(6500, 3000, [4000 12000], 20, hints);
 
-nSceneConditions = numel(baseSceneSet);
-nObjectConditions = numel(objectConditions);
-nLightConditions = numel(lightConditions);
-nRecipes = nSceneConditions * nObjectConditions * nLightConditions;
 
-for ss = 1:nSceneConditions
-    baseScene = baseSceneSet{ss};
-    
-    for oo = 1:nObjectConditions
-        nObjects = objectConditions(oo);
-        
-        for ll = 1:nLightConditions
-            nLights = lightConditions(ll);
-            
-            recipeName = sprintf('%s-%02d-Obj-%02d-Illum', baseScene, nObjects, nLights);
-            hints.recipeName = recipeName;
-            ChangeToWorkingFolder(hints);
-            
-            % copy resources into this recipe working folder
-            [textureIds, textures, matteTextured, wardTextured, filePaths] = ...
-                GetWardLandTextureMaterials(3:6, hints);
-            [matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
-            lightSpectra = GetWardLandIlluminantSpectra(6500, 3000, [4000 12000], 20, hints);
-            
-            % choose a 50/50 mix of textured and Macbeth materials
-            nPick = 10;
-            textureInds = randi(numel(matteTextured), [1 nPick]);
-            macbethInds = randi(numel(matteMacbeth), [1 nPick]);
-            matteMaterials = cat(2, matteTextured(textureInds), matteMacbeth(macbethInds));
-            wardMaterials = cat(2, wardTextured(textureInds), wardMacbeth(macbethInds));
-            
-            % choose objects, materials, lights, and spectra
-            choices = GetWardLandChoices(baseScene, ...
-                objectSet, nObjects, ...
-                lightSet, nLights, ...
-                scaleMin, scaleMax, rotMin, rotMax, ...
-                matteMaterials, wardMaterials, lightSpectra);
-            
-            % assemble the recipe
-            recipe = BuildWardLandRecipe( ...
-                defaultMappings, choices, textureIds, textures, hints);
-            
-            % archive it
-            archiveFile = fullfile(recipeFolder, hints.recipeName);
-            excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
-            PackUpRecipe(recipe, archiveFile, excludeFolders);
-        end
-    end
-end
+%% Which base scenes do we want?
+%   This parameter set chooses some scenes found in
+%   VirtualScenes/ModelRepository/BaseScenes
+baseSceneSet(1) = ReadMetadata('CheckerBoard');
+baseSceneSet(2) = ReadMetadata('IndoorPlant');
+
+%% Which reflective objects do we want to insert?
+%   This parameter set chooses some objects found in
+%   VirtualScenes/ModelRepository/Objects
+%   And for each one, assigns:
+%       position
+%       rotation
+%       scale
+%       material
+
+metaData = ReadMetadata('Barrel');
+objectSet(1).metadata = metaData;
+objectSet(1).position = GetDonutPosition([0 0; 0 0; 0 0;], metaData.objectBox, [.5 .5 .5]);
+objectSet(1).rotation = [45 60 0];
+objectSet(1).scale = 1.5;
+objectSet(1).matteMaterial = matteMacbeth{1};
+objectSet(1).wardMaterial = wardMacbeth{1};
+
+
+%% Which reflective objects do we want to insert?
+%   This parameter set chooses some objects found in
+%   VirtualScenes/ModelRepository/Objects
+%   And for each one, assigns:
+%       position
+%       rotation
+%       scale
+%       material
+%       emitted spectrum
+
+lightSet(1).metadata = ReadMetadata('BigBall');
+
+
