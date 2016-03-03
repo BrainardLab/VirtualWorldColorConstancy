@@ -37,10 +37,6 @@ hints.isPlot = false;
 defaultMappings = fullfile( ...
     VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
-% virutal scenes options for inserted objects
-scaleMin = 0.25;
-scaleMax = 2.0;
-
 % where to save new recipes
 projectName = 'ToyVirtualWorld';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'),'Originals');
