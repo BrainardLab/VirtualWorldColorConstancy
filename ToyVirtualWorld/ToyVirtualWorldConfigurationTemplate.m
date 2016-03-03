@@ -13,7 +13,7 @@ clear; close all;
 
 %% Set up some parameters for portability
 projectName = 'ToyVirtualWorld';
-dataDirRoot = '/Volumes/Users1/Dropbox (Aguirre-Brainard Lab)/IBIO_data/VirtualWorldColorConstancy';
+dataDirRoot = '/home/ben/Documents/MATLAB/virtual-scenes';
 dataDirName = 'ToyVirtualWorld';
 dataDir = fullfile(dataDirRoot,projectName,'');
 if (~exist(dataDir,'dir'))

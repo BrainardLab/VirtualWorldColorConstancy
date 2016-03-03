@@ -1,7 +1,6 @@
 %% Locate, unpack, and execute many WardLand recipes created earlier.
 %
-% Use this script to render many archived recipes created earlier, using
-% MakeManyWardLandRecipes.
+% Use this script to render many archived recipes created earlier.
 %
 % You can configure a few recipe parameters at the top of this script.
 % The values will apply to all generated recipes.  For example, you can
