@@ -1,27 +1,46 @@
 %% Construct and archive a set of many Ward Land recipes.
 %
-% The idea here is to specify up front values for several parameter sets.
-% Each parameter set contains possibilities for things like "which object
-% do we insert?", "which material do we use", or "where do we insert the
-% object?".
+% The idea here is to generate many WardLand scenes.  We choose values for
+% several parameter sets and build a scene for each combination of values.
 %
-% Then we can iterate all the parameter sets using lots of nested loops and
-% construct all the unique sets of parameter values.  I'll call one such
-% set of parameter a "leaf".
+% For now, there are 3 parameter sets:
+% 
+% baseSceneSet chooses some parent scenes located in 
+%   VirtualScenes/ModelRepository/BaseScenes
 %
-% We could build one scene for each leaf.  In this case each scene would
-% have just one inserted object.  We could also build scenes that contain
-% multiple inserted objects.  Then the question is how many and which
-% leaves go into each scene?
+% lightSet chooses some objects found in
+%   VirtualScenes/ModelRepository/Objects
+% For each one, it also assigns a:
+%       position, relative to scene bounding boxes
+%       rotation
+%       scale
+%       material
+%       emitted spectrum
 %
-% I think what we discussed is for each scene to have one leaf from each
-% object.  This would be a very large space to explore.  For example, say
-% we obtained 8 leaves each for objects a, b, and c.  From that raw
-% material we could create 16^3 = 4096 scenes!  And that is only for 3
-% objects and a low estimate of the number of leaves per scene.
+% objectSet also chooses some objects found in
+%   VirtualScenes/ModelRepository/Objects
+% For each one, it also assigns a:
+%       position, relative to scene bounding boxes
+%       rotation
+%       scale
+%       material
 %
-% I am wondering if this is really what we want.  Or, is there some other
-% way to explore the scene space that would be more practival?
+% We include all the objects in each scene.  So this part is constant
+% across recipes.
+%
+% We could add more parameter sets.  For example, one natural extension
+% would be to extract a materialSet, separate from the objectSet, and then
+% make combinations of materials and objects.  We could do likewise for
+% positions, rotations, light spectra, etc.
+%
+% Another extension might be to add additional object sets.  We could
+% think of one set as the "fixed" objects, and the other sets as the
+% "changing" objects.
+%
+% Potentially, we could extract lots of parameter sets.  The number of
+% resulting combinations and recipes would grow geometrically.  So maybe we
+% want to think about which parameter sets we care about most and focus on
+% these?
 %
 % BSH
 
@@ -53,7 +72,7 @@ end
 % Macbeth color checker materials in matte and ward flavors
 [matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
 
-% CIE-LAB tempterature correlated daylight spectra
+% CIE-LAB tempterature-correlated daylight spectra
 lowTemp = 4000;
 highTemp = 12000;
 nSpectra = 20;
@@ -93,9 +112,19 @@ lightSet(1).name = 'BigBall';
 lightSet(1).boxPosition = [0.5 0.5 0.5];
 lightSet(1).rotation = [45 60 0];
 lightSet(1).scale = 1.5;
-lightSet(1).matteMaterial = matteMacbeth{1};
-lightSet(1).wardMaterial = wardMacbeth{1};
+lightSet(1).matteMaterial = matteMacbeth{4};
+lightSet(1).wardMaterial = wardMacbeth{4};
 lightSet(1).lightSpectrum = lightSpectra{1};
+
+lightSet(2).name = 'SmallBall';
+lightSet(2).boxPosition = [0.25 0.75 0.25];
+lightSet(2).rotation = [0 0 10];
+lightSet(2).scale = .8;
+lightSet(2).matteMaterial = matteMacbeth{4};
+lightSet(2).wardMaterial = wardMacbeth{4};
+lightSet(2).lightSpectrum = lightSpectra{end};
+
+% etc...
 
 %% Which reflective objects do we want to insert?
 %   This parameter set chooses some objects found in
@@ -113,6 +142,15 @@ objectSet(1).scale = 1.5;
 objectSet(1).matteMaterial = matteMacbeth{1};
 objectSet(1).wardMaterial = wardMacbeth{1};
 
+objectSet(2).name = 'Xylophone';
+objectSet(2).boxPosition = [0.75 0.1 0.25];
+objectSet(2).rotation = [45 0 45];
+objectSet(2).scale = .9;
+objectSet(2).matteMaterial = matteTextured{1};
+objectSet(2).wardMaterial = wardTextured{1};
+
+% etc...
+
 %% Run through various combinations of scenes and lights.
 %   The goal of this section is to produce several WardLand scene recipes.
 %   First we make some "choices" about what will go in the scene.
@@ -127,9 +165,10 @@ objectSet(1).wardMaterial = wardMacbeth{1};
 %             insertedObjects: [1x1 struct]
 %              insertedLights: [1x1 struct]
 %
-%   The file name for each recipe will descripe the choices somewhat.  For
-%   a full account of what went into the scene, please consult the choices
-%   struct.  This will be saved in the recipe as resipe.inputs.choices.
+%   The file name for each recipe will describe the choices somewhat, but
+%   no completely.  For a full account of what went into the scene, please
+%   consult the choices struct.  This will be saved in the recipe as
+%   resipe.inputs.choices. 
 
 nScenes = numel(baseSceneSet);
 nLights = numel(lightSet);

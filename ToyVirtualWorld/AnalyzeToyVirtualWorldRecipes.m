@@ -1,7 +1,6 @@
 %% Locate, unpack, and execute many WardLand recipes created earlier.
 %
-% Use this script to analyze many archived recipes rendered earlier, using
-% RenderManyWardLandRecipes.
+% Use this script to analyze many archived recipes rendered earlier.
 %
 % You can configure a few recipe parameters at the top of this script.
 %
