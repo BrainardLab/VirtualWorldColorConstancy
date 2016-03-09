@@ -49,15 +49,15 @@ clear;
 clc;
 
 % batch renderer options
+projectName = 'ToyVirtualWorld';
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref('VirtualScenes', 'workingFolder');
+hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.isPlot = false;
 
 defaultMappings = fullfile( ...
     VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
 % where to save new recipes
-projectName = 'ToyVirtualWorld';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'),'Originals');
 if (~exist(recipeFolder, 'dir'))
     mkdir(recipeFolder);
