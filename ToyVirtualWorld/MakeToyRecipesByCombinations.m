@@ -69,8 +69,8 @@ end
 [textureIds, textures, matteTextured, wardTextured, textureFiles] = ...
     GetWardLandTextureMaterials([], hints);
 
-% Macbeth color checker materials in matte and ward flavors
-[matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
+% Macbeth color checker materials in m[atte and ward flavors
+matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
 
 % CIE-LAB tempterature-correlated daylight spectra
 lowTemp = 4000;
