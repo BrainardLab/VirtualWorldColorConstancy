@@ -68,5 +68,3 @@ theReflectanceScaled = theLuminanceTarget*theReflectance/theLuminance;
 theLuminanceScaled = theLuminanceSensitivity*(theIlluminant.*theReflectanceScaled);
 fprintf('Target luminance = %g, actual scaled luminance = %g\n',theLuminanceTarget,theLuminanceScaled);
 
-
-
