@@ -1,4 +1,4 @@
-function [theWavelengths, theReflectance, theReflectanceScaled] = computeLuminance(whichMaterial,theLuminanceTarget)
+function [theWavelengths, theReflectance, theReflectanceScaled, theLuminance] = computeLuminance(whichMaterial,theLuminanceTarget)
 
 % This function takes the material number and target luminanace level and 
 % returns the scaled reflectance for the given material based on the target
