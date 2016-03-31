@@ -256,7 +256,16 @@ for bb = 1:nBaseScenes
             
             for ss = 1:nShapes
                 % fourth loop chooses one shape for the "center" object
+                %   and points the camera at the "center" object
                 shapeName = shapeSet{ss};
+                
+                % build a lookat for the camera
+                %   'eyeX eyeY eyeZ targetX targetY targetZ upX upY upZ'
+                eye = GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox);
+                target = GetDonutPosition([0 0; 0 0; 0 0], ...
+                    sceneData.objectBox, objectSlotSet(1).boxPosition);
+                up = [0 1 0];
+                lookAt = sprintf('%f %f %f ', eye, target, up);
                 
                 % what shapes are left?
                 otherShapes = find(ss ~= 1:nShapes);
@@ -287,7 +296,7 @@ for bb = 1:nBaseScenes
                     hints.recipeName = sprintf('%s-on-%s-in-%s', ...
                         reflectanceNameSet{rr}, shapeSet{ss}, baseSceneSet{bb});
                     recipe = BuildWardLandRecipe( ...
-                        defaultMappings, choices, textureIds, textures, hints);
+                        defaultMappings, choices, textureIds, textures, lookAt, hints);
                     
                     % remember the recipe choices
                     recipe.input.choices = choices;
@@ -300,6 +309,7 @@ for bb = 1:nBaseScenes
                     archiveFile = fullfile(recipeFolder, hints.recipeName);
                     excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
                     PackUpRecipe(recipe, archiveFile, excludeFolders);
+
                 end
             end
         end
