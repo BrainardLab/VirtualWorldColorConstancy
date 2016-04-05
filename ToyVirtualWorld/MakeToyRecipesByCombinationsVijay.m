@@ -2,64 +2,11 @@
 %
 % The idea here is to generate many WardLand scenes.  We choose values for
 % several parameter sets and build a scene for several combinations of
-% values, taken from each set.
+% parameter values, drawing from each parameter set.
 %
-% Here are the parameter set's we're working with:
+% (The way we do this has been in flux.  So maybe we write the
+% documentation after the design has settled and things are working.)
 %
-% reflectanceSet -- select several reflectances.  For each of these,
-% we want to generate on the order of 100 scenes.  The generated scenes
-% will be named after this reflectance.  The "center" object of the scene
-% will use this reflectance.
-%
-% shapeSet -- select several 3D models which can be inserted into slots.
-% The models are identified by name and correspond to files located in
-%   VirtualScenes/ModelRepository/Objects
-%
-% objectSlotSet -- chooses some "slots" where we can insert objects into
-% the scene.  The first slot is for the "center" object which gets the
-% fixedReflectance.  The remaining slots are for other objects.  Here are
-% the parameters that make up a slot:
-%	position, relative to scene bounding boxes
-%	rotation
-%	scale
-%
-% baseSceneSet -- select several 3D models which make up most of the scene
-% geometry and camera.  The models are identified by name and correspond to
-% files located in
-%   VirtualScenes/ModelRepository/BaseScenes
-%
-% lightSet -- choose some light sources to insert into the scene.  Here are
-% the parameters tha make up a light:
-%   one of the 3D models in VirtualScenes/ModelRepository/Objects
-%	position, relative to scene bounding boxes
-%	rotation
-%	scale
-%	material
-%	emitted spectrum
-%
-% Here's how we combine all these sets to make each scene:
-%   - iterate the baseSceneSet, one at a time
-%   - iterate the lightSet, one at a time
-%   - iterate the reflectanceSet, one at a time
-%   - iterate the shapeSet, one at a time
-%   - apply the chosen reflectance and shape to the "center" object in the
-%   first object slot
-%   - fill the remaining object slots by shuffling the remaining
-%   reflectances and shapes.  Do this a small, fixed number of times (don't
-%   be exhaustive with the shuffling permutations).  Call this nShuffles.
-%   - pack all this up as a scene
-%
-% From this outline, we can figure out how many scenes we'll get:
-%   nScenes = ...
-%       nFixedReflectances * nShapes * nShuffles * nBaseScenes * nLights;
-%
-% The number of object slots doesn't affect the number of total scenes
-% because we use all of the object slots every time.
-%
-% The number of reflectances and shapes must be at least as great as the
-% number of object slots.
-%
-% BSH
 
 %% Overall configuration.
 clear;
@@ -80,22 +27,15 @@ if (~exist(recipeFolder, 'dir'))
     mkdir(recipeFolder);
 end
 
-%% Choose various "raw materials" we will use in creating scenes.
-
-% textured materials in matte and ward flavors
-[textureIds, textures, matteTextured, wardTextured, textureFiles] = ...
-    GetWardLandTextureMaterials([], hints);
-
-% Macbeth color checker materials in matte and ward flavors
-[matteMacbeth, wardMacbeth] = GetWardLandMaterials(hints);
+%% Choose various CIE-LAB temperature-correlated daylight spectra.
 
 % CIE-LAB tempterature-correlated daylight spectra
 lowTemp = 4000;
 highTemp = 12000;
-nSpectra = 20;
-temps = round(linspace(lowTemp, highTemp, nSpectra));
-lightSpectra = cell(1, nSpectra);
-for bb = 1:nSpectra
+nIlluminantSpectra = 20;
+temps = round(linspace(lowTemp, highTemp, nIlluminantSpectra));
+lightSpectra = cell(1, nIlluminantSpectra);
+for bb = 1:nIlluminantSpectra
     lightSpectra(bb) = GetWardLandIlluminantSpectra( ...
         temps(bb), ...
         0, ...
@@ -104,21 +44,28 @@ for bb = 1:nSpectra
         hints);
 end
 
+% flat reflectance for illuminants
+matteIlluminant = BuildDesription('material', 'matte', ...
+    {'diffuseReflectance'}, ...
+    {'300:0.5 800:0.5'}, ...
+    {'spectrum'});
+wardIlluminant = BuildDesription('material', 'anisoward', ...
+    {'diffuseReflectance', 'specularReflectance'}, ...
+    {'300:0.5 800:0.5', '300:0.1 800:0.1'}, ...
+    {'spectrum', 'spectrum'});
+
+
 % remember where these raw materials are so we can copy them, below
 commonResourceFolder = GetWorkingFolder('resources', false, hints);
 
-%% Choose our reflectances.
 
-% WardLand expects reflectances in matt-ward pairs.
-matteReflectanceSet = cat(2, matteTextured(1:2), matteMacbeth(1:2));
-wardReflectanceSet = cat(2, wardTextured(1:2), wardMacbeth(1:2));
-
-%% Which shapes do we want to insert into slots?
+%% Which shapes do we want to insert into the scene?
 shapeSet = { ...
     'BigBall', ...
     'SmallBall', ...
     'RingToy', ...
     'Barrel'};
+nShapes = numel(shapeSet);
 
 %% Which base scenes do we want?
 baseSceneSet = { ...
@@ -126,100 +73,126 @@ baseSceneSet = { ...
     'IndoorPlant', ...
     'Library', ...
     'TableChairs'};
-
-%% How many scenes are we making?
-nReflectance = 5;
-% nReflectances = numel(reflectanceNameSet);
-nShapes = numel(shapeSet);
 nBaseScenes = numel(baseSceneSet);
 
-
-%% 
-% The first loop runs through the target luminance levels for the standard day-light oberserver
+%% Assemble recipies by combinations of target luminances reflectances.
+% The first loop runs through the target luminance levels for the standard
+% day-light oberserver.
+%
 % The second loop runs through the reflectance levels we want to use in
 % rendering
+
+% luminanceLevels = 0.1 : 0.1 : 1;
+% nReflectances = 5;
+
+luminanceLevels = [0.1, 0.9];
+nReflectances = 2;
+
+for targetLuminanceLevel = luminanceLevels
     
-for targetLuminanceLevel = 0.1 : 0.1 :1
-    for rr = 1 : 1 : nReflectance
-        [theWavelengths, theReflectance, theReflectanceScaled, theLuminance] = ...
-            computeLuminance(rr, targetLuminanceLevel);
-        targetMaterialRefelectance = theReflectanceScaled;
+    for rr = 1:nReflectances
         
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%% Pick the base scene
-        bIndex = randi(size(baseSceneSet,2),1); % index for the base scene chosen randomly
+        %% Pick the base scene randomly.
+        bIndex = randi(size(baseSceneSet, 2), 1);
         choices.baseSceneName = baseSceneSet{bIndex};
         sceneData = ReadMetadata(choices.baseSceneName);
+        
+        %% Assign a random reflectance to each object in the base scene.
         nBaseMaterials = numel(sceneData.materialIds);
-        whichMaterials = 1 + mod((1:nBaseMaterials)-1, numel(matteMacbeth));
-        choices.baseSceneMatteMaterials = matteMacbeth(whichMaterials);
-        choices.baseSceneWardMaterials = wardMacbeth(whichMaterials);
-    
-        % assign arbitrary but constant light spectra for the base scene itself
+        choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
+        choices.baseSceneWardMaterials = cell(1, nBaseMaterials);
+        for mm = 1:nBaseMaterials
+            [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
+                randi(nReflectances), [], hints);
+            choices.baseSceneMatteMaterials{mm} = matteMaterial;
+            choices.baseSceneWardMaterials{mm} = wardMaterial;
+        end
+        
+        %% Assign a random illuminant to each light in the base scene.
         nBaseLights = numel(sceneData.lightIds);
-        whichLights = 1 + mod((1:nBaseLights)-1, numel(lightSpectra));
+        whichLights = randi(nIlluminantSpectra, [1, nBaseLights]);
         choices.baseSceneLights = lightSpectra(whichLights);
-
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%% Pick the light Source
-        light.name = shapeSet{randi(nShapes,1)};
-        light.boxPosition = rand(1,3);
-        light.rotation = randi(180, 1, 3);
-        light.scale = 1 + rand();
-        ll = randi(size(matteMacbeth,2),1);
-        light.matteMaterial = matteMacbeth{ll};
-        light.wardMaterial = wardMacbeth{ll};
-        light.lightSpectrum = lightSpectra{randi(nSpectra)};
         
-        % convert the abstract "box positoin" into a concrete xyz
-        % within the chosen base scene
-        lightPosition = GetDonutPosition( ...
-            sceneData.lightExcludeBox, sceneData.lightBox, light.boxPosition);
+        %% Pick a light shape to insert.
+        %   pack up the light in the format expected for Ward Land
+        choices.insertedLights.names = shapeSet(randi(nShapes, 1));
+        choices.insertedLights.positions = {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
+        choices.insertedLights.rotations = {randi([0, 359], [1, 3])};
+        choices.insertedLights.scales = {1 + rand()};
+        choices.insertedLights.matteMaterialSets = {matteIlluminant};
+        choices.insertedLights.wardMaterialSets = {wardIlluminant};
+        choices.insertedLights.lightSpectra = lightSpectra(randi(nIlluminantSpectra));
         
-        % pack up the light in the format expected for Ward Land
-        choices.insertedLights.names = {light.name};
-        choices.insertedLights.positions = {lightPosition};
-        choices.insertedLights.rotations = {light.rotation};
-        choices.insertedLights.scales = {light.scale};
-        choices.insertedLights.matteMaterialSets = {light.matteMaterial};
-        choices.insertedLights.wardMaterialSets = {light.wardMaterial};
-        choices.insertedLights.lightSpectra = {light.lightSpectrum};
-       
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        %%% Pick the target object
-        targetShapeIndex = randi(nShapes,1);
-        targetShapeName = shapeSet{targetShapeIndex};
+        %% Pick a target object and random number of "others" to insert.
+        %   the "target" object is always number 1.
+        nOtherObjects = 1 + randi(5);
+        nObjects = 1 + nOtherObjects;
+        shapeIndices = randi(nShapes, [1 nObjects]);
         
-        nOtherShapes = 1+randi(5); % number of other shapes inserted apart from target shape
-        otherShapeIndex = randi(nShapes,1,nOtherShapes);
-        
-        shapeInds = [targetShapeIndex otherShapeIndex];
- 
-        for oo = 1: (1+nOtherShapes)
-            objectSlotSet(oo).boxPosition = rand(3,1);
-            objectSlotSet(oo).rotation = randi(180,3,1);
-            objectSlotSet(oo).scale = 0.5 + rand();
+        % pack up the objects in the format expected for Ward Land
+        choices.insertedObjects.names = shapeSet(shapeIndices);
+        choices.insertedObjects.positions = cell(1, nObjects);
+        choices.insertedObjects.rotations = cell(1, nObjects);
+        choices.insertedObjects.scales = cell(1, nObjects);
+        choices.insertedObjects.matteMaterialSets = cell(1, nObjects);
+        choices.insertedObjects.wardMaterialSets = cell(1, nObjects);
+        for oo = 1:numel(shapeIndices)
+            % object pose in scene
+            choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+            choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
+            choices.insertedObjects.scales{oo} = 1 + rand();
+            
+            % object reflectance
+            [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
+                randi(nReflectances), [], hints);
+            choices.insertedObjects.matteMaterialSets{oo} = matteMaterial;
+            choices.insertedObjects.wardMaterialSets{oo} = wardMaterial;
         end
         
-        nSlots = numel(objectSlotSet);
-        reflectanceInds = randi(nReflectance,1,nOtherShapes);
-        
-        % format our selections as a WardLand "choices" struct
-        
-        choices.insertedObjects.names = shapeSet(shapeInds);
-        choices.insertedObjects.rotations = {objectSlotSet.rotation};
-        choices.insertedObjects.scales =  {objectSlotSet.scale};
-%         choices.insertedObjects.matteMaterialSets = matteReflectanceSet(reflectanceInds);
-%         choices.insertedObjects.wardMaterialSets = wardReflectanceSet(reflectanceInds);
-        choices.insertedObjects.positions = cell(1, nSlots);
-        for oo = 1:nSlots
-            % "box position" -> xyz in chosen base scene
-            slot = objectSlotSet(oo);
-            choices.insertedObjects.positions{oo} = ...
-            GetDonutPosition([0 0; 0 0; 0 0], sceneData.objectBox, slot.boxPosition);
-        end
-                    
+        %% Choose a unique name for this recipe.
+        recipeName = sprintf('luminance-%0.2f-reflectance-%03d-%s-%s', ...
+            targetLuminanceLevel, ...
+            rr, ...
+            choices.insertedObjects.names{1}, ...
+            choices.baseSceneName);
+        recipeName('.' == recipeName) = '_';
+        hints.recipeName = recipeName;
         
         
+        %% Choose a standard, numbered reflectance for the target object.
+        %   and scale it based on the target luminance
+        %   this writes a spectrum file to the working "resources" folder
+        %   so we need to pass in the hints and hints.recipeName
+        [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminance( ...
+            rr, targetLuminanceLevel, hints);
+        
+        % force the target object to use this computed reflectance
+        choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
+        choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
+        
+        %% Position the camera.
+        %   "eye" position is random in the "donut" region.
+        %   "target" position is the target object
+        %   "up" points along positive y-axis
+        eye = GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox);
+        target = choices.insertedObjects.positions{1};
+        up = [0 1 0];
+        lookAt = sprintf('%f %f %f ', eye, target, up);
+        
+        %% Pack up the scene.
+        recipe = BuildWardLandRecipe( ...
+            defaultMappings, choices, {}, {}, lookAt, hints);
+        
+        % remember the recipe choices
+        recipe.input.choices = choices;
+        
+        % copy common resources into this recipe folder
+        recipeResourceFolder = GetWorkingFolder('resources', false, hints);
+        copyfile(commonResourceFolder, recipeResourceFolder, 'f');
+        
+        % save the recipe to the recipesFolder
+        archiveFile = fullfile(recipeFolder, hints.recipeName);
+        excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
+        PackUpRecipe(recipe, archiveFile, excludeFolders);
     end
 end

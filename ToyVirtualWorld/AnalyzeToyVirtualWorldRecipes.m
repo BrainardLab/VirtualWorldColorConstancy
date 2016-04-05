@@ -72,13 +72,13 @@ for ii = 1:nRecipes
 end
 
 %% Show a grand summary across packed up recipes.
-fig = SummarizeSpatialStats(reductions);
-figName = sprintf('Summary of %d recipes', nRecipes);
-set(fig, ...
-    'PaperPositionMode', 'auto', ...
-    'Position', [100 100 1000 1100], ...
-    'Name', figName);
-figureFile = fullfile(figureFolder, 'aaa-wardland-summary.fig');
-WriteImage(figureFile, fig);
-pngFile = fullfile(figureFolder, 'aaa-wardland-summary.png');
-saveas(fig, pngFile);
+% fig = SummarizeSpatialStats(reductions);
+% figName = sprintf('Summary of %d recipes', nRecipes);
+% set(fig, ...
+%     'PaperPositionMode', 'auto', ...
+%     'Position', [100 100 1000 1100], ...
+%     'Name', figName);
+% figureFile = fullfile(figureFolder, 'aaa-wardland-summary.fig');
+% WriteImage(figureFile, fig);
+% pngFile = fullfile(figureFolder, 'aaa-wardland-summary.png');
+% saveas(fig, pngFile);
