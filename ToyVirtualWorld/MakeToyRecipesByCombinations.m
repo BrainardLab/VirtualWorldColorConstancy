@@ -54,10 +54,8 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'300:0.5 800:0.5', '300:0.1 800:0.1'}, ...
     {'spectrum', 'spectrum'});
 
-
 % remember where these raw materials are so we can copy them, below
 commonResourceFolder = GetWorkingFolder('resources', false, hints);
-
 
 %% Which shapes do we want to insert into the scene?
 shapeSet = { ...
@@ -119,7 +117,7 @@ for targetLuminanceLevel = luminanceLevels
         choices.insertedLights.positions = ...
             {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
         choices.insertedLights.rotations = {randi([0, 359], [1, 3])};
-        choices.insertedLights.scales = {1 + rand()};
+        choices.insertedLights.scales = {.5 + rand()};
         choices.insertedLights.matteMaterialSets = {matteIlluminant};
         choices.insertedLights.wardMaterialSets = {wardIlluminant};
         choices.insertedLights.lightSpectra = lightSpectra(randi(nIlluminantSpectra));
@@ -141,7 +139,7 @@ for targetLuminanceLevel = luminanceLevels
             % object pose in scene
             choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
             choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
-            choices.insertedObjects.scales{oo} = 1 + rand();
+            choices.insertedObjects.scales{oo} = .5 + rand();
             
             % object reflectance
             [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
@@ -172,12 +170,12 @@ for targetLuminanceLevel = luminanceLevels
         choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
         
         %% Position the camera.
-        %   "eye" position is random in the "donut" region.
-        %   "target" position is the target object
-        %   "up" points along positive y-axis
-        eye = GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox);
+        %   "eye" position is from the first camera "slot"
+        %   "target" position is the target object's position
+        %   "up" direction is from the first camera "slot"
+        eye = sceneData.cameraSlots(1).position;
         target = choices.insertedObjects.positions{1};
-        up = [0 1 0];
+        up = sceneData.cameraSlots(1).up;
         lookAt = sprintf('%f %f %f ', eye, target, up);
         
         %% Pack up the scene.
