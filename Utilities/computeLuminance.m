@@ -25,8 +25,8 @@ theReflectance = theReflectanceData(:,2);
 
 if isempty(theLuminanceTarget)
     %% Use the reflectance as-is.
-    scaleFactor = 1;
-    theReflectanceScaled = theReflectance;    
+    theReflectanceScaled = theReflectance;  
+    reflectanceName = sprintf('reflectance-%d', whichMaterial);
 else
     %% Scale the reflectance for target luminance.
     
@@ -55,11 +55,11 @@ else
     % scale the reflectance
     scaleFactor = theLuminanceTarget / theLuminance;
     theReflectanceScaled = scaleFactor * theReflectance;
+    reflectanceName = sprintf('reflectance-%d-luminance-%.2f', whichMaterial, theLuminanceTarget);
 end
 
 %% Write a new spectrum file with the scaled reflectance.
 resourceFolder = GetWorkingFolder('resources', false, hints);
-reflectanceName = sprintf('reflectance-%d-scale-%.2f', whichMaterial, scaleFactor);
 spectrumFile = fullfile(resourceFolder, [reflectanceName '.spd']);
 WriteSpectrumFile(theWavelengths, theReflectanceScaled, spectrumFile);
 
