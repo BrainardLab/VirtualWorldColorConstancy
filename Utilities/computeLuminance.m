@@ -59,9 +59,10 @@ else
 end
 
 %% Write a new spectrum file with the scaled reflectance.
+spectrumFile = [reflectanceName '.spd'];
 resourceFolder = GetWorkingFolder('resources', false, hints);
-spectrumFile = fullfile(resourceFolder, [reflectanceName '.spd']);
-WriteSpectrumFile(theWavelengths, theReflectanceScaled, spectrumFile);
+spectrumFullPath = fullfile(resourceFolder, spectrumFile);
+WriteSpectrumFile(theWavelengths, theReflectanceScaled, spectrumFullPath);
 
 %% Pack up material descriptions that work with WardLand.
 matteMaterial = BuildDesription('material', 'matte', ...
