@@ -73,46 +73,11 @@ if exist(parentSceneAbsPath, 'file')
 end
 copyfile(modelAbsPath, parentSceneAbsPath);
 
-%% Set up the base scene lights.
-% turn off base scene and inserted lights when making pixel masks
-blackArea = BuildDesription('light', 'area', ...
-    {'intensity'}, ...
-    {'300:0 800:0'}, ...
-    {'spectrum'});
-maskBaseSceneLightSet = cell(1, numel(sceneMetadata.lightIds));
-[maskBaseSceneLightSet{:}] = deal(blackArea);
+%% Set up materials and lights for the full "normal" rendering.
 
-maskInsertedLightSet = cell(1, numel(choices.insertedLights.names));
-[maskInsertedLightSet{:}] = deal(blackArea);
-
-%% Set up the "flash" light for making object pixel masks.
-% use a uniform spectrum for the "flash"
-flashModel = 'CameraFlash';
-flashMetadata = ReadMetadata(flashModel);
-whiteArea = BuildDesription('light', 'area', ...
-    {'intensity'}, ...
-    {'300:1 800:1'}, ...
-    {'spectrum'});
-flashLightId = ['light-flash-' flashMetadata.lightIds{1}];
-
-% use a uniform reflectance for the "flash"
-whiteMatte = BuildDesription('material', 'matte', ...
-    {'diffuseReflectance'}, ...
-    {'300:1 800:1'}, ...
-    {'spectrum'});
-flashMaterialId = ['light-flash-' flashMetadata.materialIds{1}];
-
-% position the flash relative to the camera
-flashPosition = 'Camera';
-flashRotation = 'Camera';
-flashScale = 'Camera';
-
-%% Set up materials for the full "normal" rendering.
-
-% build a grand list of material and light ids, matte, and ward materials
+% build a grand list of materials and lights
 allMaterialIds = sceneMetadata.materialIds;
-allSceneMatteMaterials = choices.baseSceneMatteMaterials;
-allSceneInsertedLightIds = cell(1, numel(choices.insertedLights.names));
+normalMatteMaterials = choices.baseSceneMatteMaterials;
 
 % inserted object material ids get prefixed with the object number
 nInserted = numel(choices.insertedObjects.names);
@@ -125,40 +90,102 @@ for oo = 1:nInserted
         objectMaterialIds{mm} = [idPrefix objectMetadata.materialIds{mm}];
     end
     allMaterialIds = cat(2, allMaterialIds, objectMaterialIds);
-    allSceneMatteMaterials = cat(2, allSceneMatteMaterials, ...
-        choices.insertedObjects.matteMaterialSets{oo});
+    objectMaterials = choices.insertedObjects.matteMaterialSets{oo};
+    if iscell(objectMaterials)
+        normalMatteMaterials = cat(2, normalMatteMaterials, objectMaterials);
+    else
+        materialCell = cell(1, nObjectMaterials);
+        [materialCell{:}] = deal(objectMaterials);
+        normalMatteMaterials = cat(2, normalMatteMaterials, materialCell);
+    end
 end
 
 % inserted light material ids get prefixed with the light number
 nInserted = numel(choices.insertedLights.names);
+insertedLightIds = {};
+normalInsertedLightSpectra = {};
 for oo = 1:nInserted
     idPrefix = sprintf('light-%d-', oo);
     objectMetadata = ReadMetadata(choices.insertedLights.names{oo});
+    
     nObjectMaterials = numel(objectMetadata.materialIds);
     objectMaterialIds = cell(1, nObjectMaterials);
     for mm = 1:nObjectMaterials
         objectMaterialIds{mm} = [idPrefix objectMetadata.materialIds{mm}];
-    end
+    end    
     allMaterialIds = cat(2, allMaterialIds, objectMaterialIds);
-    allSceneMatteMaterials = cat(2, allSceneMatteMaterials, ...
-        choices.insertedLights.matteMaterialSets{oo});
-    allSceneInsertedLightIds{oo} = [idPrefix objectMetadata.lightIds{1}];
+    objectMaterials = choices.insertedLights.matteMaterialSets{oo};
+    if iscell(objectMaterials)
+        normalMatteMaterials = cat(2, normalMatteMaterials, objectMaterials);
+    else
+        materialCell = cell(1, nObjectMaterials);
+        [materialCell{:}] = deal(objectMaterials);
+        normalMatteMaterials = cat(2, normalMatteMaterials, materialCell);
+    end
+    
+    nObjectLights = numel(objectMetadata.lightIds);
+    objectLightIds = cell(1, nObjectLights);
+    for ll = 1:nObjectLights
+        objectLightIds{ll} = [idPrefix objectMetadata.lightIds{ll}];
+    end
+    insertedLightIds = cat(2, insertedLightIds, objectLightIds);
+    lightSpectra = choices.insertedLights.lightSpectra{oo};
+    if iscell(lightSpectra)
+        normalInsertedLightSpectra = cat(2, normalInsertedLightSpectra, lightSpectra);
+    else
+        lightCell = cell(1, nObjectLights);
+        [lightCell{:}] = deal(lightSpectra);
+        normalInsertedLightSpectra = cat(2, normalInsertedLightSpectra, lightCell);
+    end
 end
 
-%% Set up materials for the "mask" rendering.
+%% Set up materials and lights for the "mask" rendering.
+%   this is to identify the target object
+%   the target object is always the first one inserted
 
 % start by making all materials black
 blackMatte = BuildDesription('material', 'matte', ...
     {'diffuseReflectance'}, ...
     {'300:0 800:0'}, ...
     {'spectrum'});
-nMaterials = numel(allSceneMatteMaterials);
-allMaskMaterials = cell(1, nMaterials);
-[allMaskMaterials{:}] = deal(blackMatte);
+nMaterials = numel(normalMatteMaterials);
+maskMatteMaterials = cell(1, nMaterials);
+[maskMatteMaterials{:}] = deal(blackMatte);
 
 % make the target object white
-targetObjectIndex = 1 + numel(sceneMetadata.materialIds);
-allMaskMaterials{targetObjectIndex} = whiteMatte;
+whiteMatte = BuildDesription('material', 'matte', ...
+    {'diffuseReflectance'}, ...
+    {'300:1 800:1'}, ...
+    {'spectrum'});
+targetMetadata = ReadMetadata(choices.insertedObjects.names{1});
+nTargetMaterials = numel(targetMetadata.materialIds);
+nBaseMaterials = numel(sceneMetadata.materialIds);
+targetMaterialInds = nBaseMaterials + (1:nTargetMaterials);
+[maskMatteMaterials{targetMaterialInds}] = deal(whiteMatte);
+
+% make inserted lights black
+blackArea = BuildDesription('light', 'area', ...
+    {'intensity'}, ...
+    {'300:0 800:0'}, ...
+    {'spectrum'});
+maskBaseLightSpectra = cell(1, numel(sceneMetadata.lightIds));
+[maskBaseLightSpectra{:}] = deal(blackArea);
+
+maskInsertedLightSpectra = cell(1, numel(insertedLightIds));
+[maskInsertedLightSpectra{:}] = deal(blackArea);
+
+% make the target object an emitter
+whiteArea = BuildDesription('light', 'area', ...
+    {'intensity'}, ...
+    {'300:1 800:1'}, ...
+    {'spectrum'});
+targetLightIds = targetMetadata.lightIds;
+nTargetLights = numel(targetLightIds);
+for ll = 1:nTargetLights
+    targetLightIds{ll} = ['object-1-' targetLightIds{ll}];
+end
+targetLightSpectra = cell(1, nTargetLights);
+[targetLightSpectra{:}] = deal(whiteArea);
 
 %% Optionally append a lookAt transform for the Camera.
 if isempty(lookAt)
@@ -201,27 +228,25 @@ AppendMappings(mappingsFile, mappingsFile, ...
 AppendMappings(mappingsFile, mappingsFile, ...
     sceneMetadata.lightIds, choices.baseSceneLights, 'Generic normal', 'base scene lights');
 AppendMappings(mappingsFile, mappingsFile, ...
-    allSceneInsertedLightIds, choices.insertedLights.lightSpectra, 'Generic normal', 'inserted lights');
+    insertedLightIds, normalInsertedLightSpectra, 'Generic normal', 'inserted lights');
 AppendMappings(mappingsFile, mappingsFile, ...
-    allMaterialIds, allSceneMatteMaterials, 'Generic normal', 'materials');
+    allMaterialIds, normalMatteMaterials, 'Generic normal', 'materials');
 
 % quick "mask" rendering
-AppendMappings(mappingsFile, mappingsFile, ...
-    configs.Mitsuba.ids, configs.Mitsuba.full.descriptions, ...
+AppendMappings(freshMappings, mappingsFile, ...
+    configs.Mitsuba.ids, configs.Mitsuba.quick.descriptions, ...
     [configs.Mitsuba.quick.blockName ' mask'], 'config');
 AppendMappings(mappingsFile, mappingsFile, ...
     configs.PBRT.ids, configs.PBRT.quick.descriptions, ...
-    [configs.PBRT.full.blockName ' mask'], 'config');
+    [configs.PBRT.quick.blockName ' mask'], 'config');
 AppendMappings(mappingsFile, mappingsFile, ...
-    allMaterialIds, allMaskMaterials, 'Generic mask', 'base scene lights');
+    sceneMetadata.lightIds, maskBaseLightSpectra, 'Generic mask', 'base scene lights');
 AppendMappings(mappingsFile, mappingsFile, ...
-    allSceneInsertedLightIds, maskInsertedLightSet, 'Generic mask', 'inserted lights');
+    insertedLightIds, maskInsertedLightSpectra, 'Generic mask', 'inserted lights');
 AppendMappings(mappingsFile, mappingsFile, ...
-    sceneMetadata.lightIds, maskBaseSceneLightSet, 'Generic mask', 'materials');
+    allMaterialIds, maskMatteMaterials, 'Generic mask', 'materials');
 AppendMappings(mappingsFile, mappingsFile, ...
-    {flashLightId}, {whiteArea}, 'Generic mask', 'flash light');
-AppendMappings(mappingsFile, mappingsFile, ...
-    {flashMaterialId}, {whiteMatte}, 'Generic mask', 'flash material');
+    targetLightIds, targetLightSpectra, 'Generic mask', 'target is emitter');
 
 % any auxiliary objects
 AppendMappings(mappingsFile, mappingsFile, ...
@@ -233,14 +258,8 @@ AppendMappings(mappingsFile, mappingsFile, ...
 allNames = {'imageName', 'groupName'};
 allValues = cat(1, {'normal', 'normal'}, {'mask', 'mask'});
 
-% columns for the inserted flash light
-flashNames = {'light-flash', 'position-flash', 'rotation-flash', 'scale-flash'};
-flashSceneValues = {'none', 'none', 'none', 'none'};
-flashMaskValues = {flashModel, flashPosition, flashRotation, flashScale};
-flashValues = cat(1, flashSceneValues, flashMaskValues);
-
-allNames = cat(2, allNames, flashNames);
-allValues = cat(2, allValues, flashValues);
+allNames = cat(2, allNames);
+allValues = cat(2, allValues);
 
 % append columns for each inserted object
 nInserted = numel(choices.insertedObjects.names);
@@ -294,7 +313,8 @@ recipe = NewRecipe([], executive, parentSceneRelativePath, ...
 
 % remember how materials were assigned
 recipe.processing.allMaterialIds = allMaterialIds;
-recipe.processing.allSceneMatteMaterials = allSceneMatteMaterials;
-recipe.processing.allMaskMaterials = allMaskMaterials;
-recipe.processing.allSceneInsertedLightIds = allSceneInsertedLightIds;
-
+recipe.processing.normalMatteMaterials = normalMatteMaterials;
+recipe.processing.maskMatteMaterials = maskMatteMaterials;
+recipe.processing.insertedLightIds = insertedLightIds;
+recipe.processing.normalInsertedLightSpectra = normalInsertedLightSpectra;
+recipe.processing.maskInsertedLightSpectra = maskInsertedLightSpectra;

@@ -27,8 +27,8 @@ renderingFolder = fullfile(getpref(projectName, 'recipesFolder'),'Rendered');
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
 hints.workingFolder = getpref(projectName, 'workingFolder');
-hints.imageWidth = 640;
-hints.imageHeight = 480;
+hints.imageWidth = 640 / 2;
+hints.imageHeight = 480 / 2;
 
 %% Locate and render each packed-up recipe.
 
