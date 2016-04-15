@@ -52,7 +52,8 @@ colorMap = [0 0 0; mutedColors];
 targetMask = LoadRecipeProcessingImageFile(recipe, 'radiance', 'mask');
 if ~isempty(targetMask)
     isTarget = 0 < sum(targetMask, 3);
-    targetShapeIndex = mode(shapeIndexMask(isTarget));
+    candidateIndexes = shapeIndexMask(isTarget);
+    targetShapeIndex = mode(candidateIndexes);
     
     % color in the target shape
     colorMap(1 + targetShapeIndex, :) = [255 0 0];
@@ -79,7 +80,6 @@ if ~isempty(targetMask)
     recipe.processing.target.bottom = targetBottom;
     recipe.processing.target.left = targetLeft;
     recipe.processing.target.right = targetRight;
-    fprintf('Target shape is number %d!\n', targetShapeIndex);
 end
 
 shapeColors = zeros(recipe.input.hints.imageHeight, recipe.input.hints.imageWidth, 3, 'uint8');
