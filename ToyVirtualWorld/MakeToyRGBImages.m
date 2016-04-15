@@ -1,5 +1,5 @@
 %% Convert recipe multi-spectral renderings to sRGB representations.
-%   @param recipe a recipe from BuildWardLandRecipe()
+%   @param recipe a recipe from BuildToyRecipe()
 %   @param toneMapFactor passed to MakeMontage()
 %   @param isScale passed to MakeMontage()
 %

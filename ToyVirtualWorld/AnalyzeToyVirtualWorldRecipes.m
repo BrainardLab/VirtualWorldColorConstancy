@@ -45,6 +45,6 @@ for ii = 1:nRecipes
     
     % run basic recipe analysis functions
     recipe = MakeToyRGBImages(recipe, toneMapFactor, isScale);
-    %recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
-    %recipe = MakeToyShapeIndexFactoidImages(recipe);
+    recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
+    recipe = MakeToyShapeIndexFactoidImages(recipe);
 end

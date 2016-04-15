@@ -1,12 +1,12 @@
 %% Compute the "albedo" factoid images for a WardLand recipe.
-%   @param recipe a recipe struct from BuildWardLandRecipe()
+%   @param recipe a recipe struct from BuildToyRecipe()
 %   @param toneMapFactor passed to MakeMontage()
 %   @param isScale passed to MakeMontage()
 %
 % @details
 % Uses Mitsuba and results from MakeRecipeSceneFiles() to compute the
-% "albedo" factoid for the "matte" condition in the given WardLand @a
-% recipe.
+% "albedo" factoid for the "normal" and "mask" conditions in the given Toy
+% Virtual World @a recipe.
 %
 % @details
 % Returns the given @a recipe, updated with albedo image data saved
@@ -14,10 +14,10 @@
 %
 % @details
 % Usage:
-%   recipe = MakeRecipeAlbedoFactoidImages(recipe, toneMapFactor, isScale)
+%   recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale)
 %
 % @ingroup WardLand
-function recipe = MakeRecipeAlbedoFactoidImages(recipe, toneMapFactor, isScale)
+function recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale)
 
 if nargin < 2 || isempty(toneMapFactor)
     toneMapFactor = 100;
@@ -27,40 +27,47 @@ if nargin < 3 || isempty(isScale)
     isScale = true;
 end
 
-%% Get the "matte" scene file.
+%% Get the "normal" and "mask" scene files.
 nScenes = numel(recipe.rendering.scenes);
 for ii = 1:nScenes
     scene = recipe.rendering.scenes{ii};
-    if strcmp('matte', scene.imageName)
-        relativeSceneFile = scene.mitsubaFile;
-        break;
+    if strcmp('normal', scene.imageName)
+        normalSceneFile = GetWorkingAbsolutePath(scene.mitsubaFile, recipe.input.hints);
+    elseif strcmp('mask', scene.imageName)
+        maskSceneFile = GetWorkingAbsolutePath(scene.mitsubaFile, recipe.input.hints);
     end
 end
-
-sceneFile = GetWorkingAbsolutePath(relativeSceneFile, recipe.input.hints);
 
 %% Invoke Mitsuba for the "albedo" factoid.
 mitsuba = getpref('Mitsuba');
 factoids = {'albedo'};
 
-[status, result, newScene, exrOutput, factoidOutput] = ...
-    RenderMitsubaFactoids(sceneFile, [], [], [], ...
+% the normal rendering
+[~, ~, ~, ~, normalFactoids] = ...
+    RenderMitsubaFactoids(normalSceneFile, [], [], [], ...
     factoids, 'spectrum', recipe.input.hints, mitsuba);
+[~, S, order] = GetWlsFromSliceNames(normalFactoids.albedo.channels);
+normalAlbedo = normalFactoids.albedo.data(:,:,order);
 
-[wls, S, order] = GetWlsFromSliceNames(factoidOutput.albedo.channels);
-albedo = factoidOutput.albedo.data(:,:,order);
+% the mask rendering
+[~, ~, ~, ~, maskFactoids] = ...
+    RenderMitsubaFactoids(maskSceneFile, [], [], [], ...
+    factoids, 'spectrum', recipe.input.hints, mitsuba);
+[~, ~, order] = GetWlsFromSliceNames(maskFactoids.albedo.channels);
+maskAlbedo = maskFactoids.albedo.data(:,:,order);
 
 
 %% Make sRGB representations.
-albedoSRGB = uint8(MultispectralToSRGB(albedo, S, toneMapFactor, isScale));
+normalAlbedoSrgb = uint8(MultispectralToSRGB(normalAlbedo, S, toneMapFactor, isScale));
+maskAlbedoSrgb = uint8(MultispectralToSRGB(maskAlbedo, S, toneMapFactor, isScale));
 
 %% Save images.
 group = 'albedo';
 format = 'mat';
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'albedo', format, albedo);
-recipe = SaveRecipeProcessingImageFile(recipe, 'reflectance', 'reflectance', format, albedo);
+recipe = SaveRecipeProcessingImageFile(recipe, group, 'normalAlbedo', format, normalAlbedo);
+recipe = SaveRecipeProcessingImageFile(recipe, group, 'maskAlbedo', format, maskAlbedo);
 
 format = 'png';
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'SRGBAlbedo', format, albedoSRGB);
-recipe = SaveRecipeProcessingImageFile(recipe, 'reflectance', 'SRGBReflectance', format, albedoSRGB);
+recipe = SaveRecipeProcessingImageFile(recipe, group, 'normalAlbedoSrgb', format, normalAlbedoSrgb);
+recipe = SaveRecipeProcessingImageFile(recipe, group, 'maskAlbedoSrgb', format, maskAlbedoSrgb);
 
