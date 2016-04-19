@@ -27,42 +27,39 @@ if nargin < 3 || isempty(isScale)
     isScale = true;
 end
 
-%% Load scene renderings.
+recipe = makeNamedImages(recipe, 'mask', toneMapFactor, isScale);
+recipe = makeNamedImages(recipe, 'normal', toneMapFactor, isScale);
+
+
+%% Make RGBZ images based on a named rendering.
+function recipe = makeNamedImages(recipe, name, toneMapFactor, isScale)
+% load the rendering
 nRenderings = numel(recipe.rendering.radianceDataFiles);
-maskDataFiles = {};
+namedDataFile = [];
 for ii = 1:nRenderings
     dataFile = recipe.rendering.radianceDataFiles{ii};
-    if ~isempty(strfind(dataFile, 'normal.mat'))
-        normalDataFile = dataFile;
-    elseif ~isempty(strfind(dataFile, 'mask.mat'))
-        maskDataFile = dataFile;
+    if ~isempty(strfind(dataFile, [name '.mat']))
+        namedDataFile = dataFile;
     end
 end
 
-%% Get multi-spectral and sRGB radiance images.
-normalRendering = load(normalDataFile);
-normalRadiance = normalRendering.multispectralImage;
+if isempty(namedDataFile)
+    return;
+end
 
-maskRendering = load(maskDataFile);
-maskRadiance = maskRendering.multispectralImage;
+% get multi-spectral and sRGB radiance images
+namedRendering = load(namedDataFile);
+namedRadiance = namedRendering.multispectralImage;
 
-S = normalRendering.S;
-[normalSrgb, normalXyz] = toRgbAndXyz(normalRadiance, S, toneMapFactor, isScale);
-[maskSrgb, maskXyz] = toRgbAndXyz(maskRadiance, S, toneMapFactor, isScale);
+S = namedRendering.S;
+[normalSrgb, normalXyz] = toRgbAndXyz(namedRadiance, S, toneMapFactor, isScale);
 
-%% Save images to disk.
+% save images to disk
 group = 'radiance';
-format = 'png';
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'normalSrgb', format, normalSrgb);
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'maskSrgb', format, maskSrgb);
-
-format = 'mat';
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'normalXyz', format, normalXyz);
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'maskXyz', format, maskXyz);
-
+recipe = SaveRecipeProcessingImageFile(recipe, group, [name 'Srgb'], 'png', normalSrgb);
+recipe = SaveRecipeProcessingImageFile(recipe, group, [name 'Xyz'], 'mat', normalXyz);
 recipe = SetRecipeProcessingData(recipe, group, 'S', S);
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'normal', 'mat', normalRadiance);
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'mask', 'mat', maskRadiance);
+recipe = SaveRecipeProcessingImageFile(recipe, group, name, 'mat', namedRadiance);
 
 
 %% Get uint8 versions of sRGB and XYZ images.
