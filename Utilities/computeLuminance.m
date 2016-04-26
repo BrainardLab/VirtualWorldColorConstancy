@@ -15,17 +15,12 @@ function [theWavelengths, theReflectanceScaled, reflectanceName, matteMaterial, 
 
 % 3/23/16 vs  wrote it.
 
-% Load in the surface reflectance functions associated with whichMaterial
-
-matteMacbethMaterials = GetWardLandMaterials();
-theMaterial = matteMacbethMaterials{whichMaterial};
-theReflectanceData = load(theMaterial.properties.propertyValue);
-theWavelengths = theReflectanceData(:,1);
-theReflectance = theReflectanceData(:,2);
+% Load in the surface reflectance function associated with whichMaterial
+[theWavelengths, theReflectance] = LoadReflectance(whichMaterial);
 
 if isempty(theLuminanceTarget)
     %% Use the reflectance as-is.
-    theReflectanceScaled = theReflectance;  
+    theReflectanceScaled = theReflectance;
     reflectanceName = sprintf('reflectance-%d', whichMaterial);
 else
     %% Scale the reflectance for target luminance.

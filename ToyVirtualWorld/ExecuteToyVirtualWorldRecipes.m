@@ -37,7 +37,7 @@ timer = tic();
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nScenes = numel(archiveFiles);
 for ii = 1:nScenes
-    % get the recupe
+    % get the recipe
     recipe = UnpackRecipe(archiveFiles{ii}, hints);
     
     % modify rendering options

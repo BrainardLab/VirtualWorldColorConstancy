@@ -37,7 +37,6 @@ set(0, 'DefaultAxesFontSize', 14)
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
 
-reductions = cell(1, nRecipes);
 for ii = 1:nRecipes
     % get the recipe
     recipe = UnpackRecipe(archiveFiles{ii}, hints);
