@@ -21,7 +21,7 @@ end
 figureFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Figures');
 
 % location of analysed folder
-analysedFolder = fullfile(getpref(projectName, 'recipesFolder'),'Analysed');
+renderingFolder = fullfile(getpref(projectName, 'recipesFolder'),'Rendered');
 
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
@@ -50,10 +50,5 @@ for ii = 1:nRecipes
     recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
     recipe = MakeToyShapeIndexFactoidImages(recipe);
     
-        % save the results in a separate folder
-    [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
-    analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-    excludeFolders = {'temp'};
-    PackUpRecipe(recipe, analysedArchiveFile, excludeFolders);
-
+    
 end

@@ -87,8 +87,8 @@ nBaseScenes = numel(baseSceneSet);
 % The third loop may repeat the recipe generation for the same conditions,
 % in case the target object was occluded.
 
-luminanceLevels = [0.1 0.9];
-nReflectances = 2;
+luminanceLevels = [0.1:0.3:0.9];
+nReflectances = 10;
 maxAttempts = 10;
 
 % keep track of how many attempts per scene
@@ -182,7 +182,6 @@ for targetLuminanceLevel = luminanceLevels
                 rr, targetLuminanceLevel, hints);
             
             % force the target object to use this computed reflectance
-            choices.insertedObjects.scales{1} = 1 + rand();
             choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
@@ -208,13 +207,11 @@ for targetLuminanceLevel = luminanceLevels
             
             %% Do a mask rendering, reject if target object is occluded.
             rejected = CheckTargetObjectOcclusion(recipe, ...
-                'targetPixelThresholdMin', 0.1, 'targetPixelThresholdMax', 0.8, ...
-                'totalBoundingBoxPixels', 2601); % 2601 = 51* 51
+                'targetPixelThresholdMin', 0.2, 'targetPixelThresholdMax', 0.8, ...
+                'totaBoundingBoxPixels', 51);
             if ~rejected
                 break;
             end
-%             recipeFolder = GetWorkingFolder('', false, hints);
-%             rmdir(recipeFolder,'s');
         end
         
         if rejected

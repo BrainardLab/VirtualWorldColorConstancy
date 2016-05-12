@@ -30,6 +30,7 @@ hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.imageWidth = 640 / 2;
 hints.imageHeight = 480 / 2;
 
+
 %% Locate and render each packed-up recipe.
 
 timer = tic();

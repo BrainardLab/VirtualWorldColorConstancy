@@ -52,12 +52,11 @@ targetInds = find(isTarget) - 1;
     targetBottom = max(targetRows);
     targetLeft = min(targetCols);
     targetRight = max(targetCols);
-    targetCenterR = targetTop + floor((targetBottom-targetTop)/2);
-    targetCenterC = targetLeft + floor((targetRight-targetLeft)/2);
+    tragetCenterR = targetTop + floor((targetBottom-targetTop)/2);
+    tragetCenterC = targetLeft + floor((targetRight-targetLeft)/2);
     
 rejected = ( (targetPixelCount/totalBoundingBoxPixels < targetPixelThresholdMin || ...
-    targetPixelCount/totalBoundingBoxPixels > targetPixelThresholdMax) ...
-    || ~(isTarget(targetCenterR,targetCenterC)) );
+    targetPixelCount/totalBoundingBoxPixels > targetPixelThresholdMax) ...;
     
-fprintf('target pixels %d, %d -> rejected %d\n', ...
-    targetPixelCount , isTarget(targetCenterR,targetCenterC),rejected);
+fprintf('target pixels %d/%d -> rejected %d\n', ...
+    targetPixelCount, targetPixelThreshold, rejected);

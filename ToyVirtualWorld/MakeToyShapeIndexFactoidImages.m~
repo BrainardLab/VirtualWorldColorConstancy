@@ -85,21 +85,14 @@ if ~isempty(targetMask)
     recipe.processing.target.left = targetLeft;
     recipe.processing.target.right = targetRight;
     recipe.processing.target.cropLocationC=cropLocationC;
-    recipe.processing.target.cropLocationR=cropLocationR;
-
-    % Crop the image for analysis
-    targetNormal = LoadRecipeProcessingImageFile(recipe, 'radiance', 'normal');
-    croppedImage = targetNormal(cropLocationR:cropLocationR+50,cropLocationC:cropLocationC+50,:);
-    recipe.processing.target.croppedImage = croppedImage;
+    recipe.processing.target.cropLocationC=cropLocationR;
     
 end
 
 shapeColors = zeros(recipe.input.hints.imageHeight, recipe.input.hints.imageWidth, 3, 'uint8');
 shapeColors(:) = colorMap(1 + shapeIndexMask, :);
 
-
 %% Save mask images.
 group = 'shapes';
 recipe = SaveRecipeProcessingImageFile(recipe, group, 'shapeIndexes', 'mat', shapeIndexMask);
 recipe = SaveRecipeProcessingImageFile(recipe, group, 'shapeColors', 'png', shapeColors);
-recipe = SaveRecipeProcessingImageFile(recipe, group, 'croppedImage', 'mat', croppedImage);

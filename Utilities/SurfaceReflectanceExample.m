@@ -4,7 +4,7 @@
 clear; close all;
 
 % Desired wl sampling
-S = [400 10 31];
+S = [400 5 61];
 
 %% Munsell surfaces
 load sur_nickerson
@@ -46,3 +46,12 @@ end
 figure; clf;
 plot(SToWls(S),newSurfaces);
     
+
+%% 
+theWavelengths = SToWls(S);
+for ii = 1 : 500
+filename = ['reflectance_' num2str(ii) '.spd'];
+fid = fopen(filename,'w');
+fprintf(fid,'%3d %3.6f\n',[theWavelengths,newSurfaces(:,ii)]');
+fclose(fid);
+end
