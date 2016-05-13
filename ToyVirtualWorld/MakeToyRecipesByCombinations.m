@@ -22,9 +22,9 @@ defaultMappings = fullfile( ...
     VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
 % where to save new recipes
-recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
-if (~exist(recipeFolder, 'dir'))
-    mkdir(recipeFolder);
+originalFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
+if (~exist(originalFolder, 'dir'))
+    mkdir(originalFolder);
 end
 
 %% Choose various CIE-LAB temperature-correlated daylight spectra.
@@ -111,6 +111,20 @@ for targetLuminanceLevel = luminanceLevels
             choices.baseSceneName = baseSceneSet{bIndex};
             sceneData = ReadMetadata(choices.baseSceneName);
             
+            %% Pick the target object randomly.
+            targetShapeIndex = randi(nShapes, 1);
+            targetShapeName = shapeSet{targetShapeIndex};
+            
+            %% Choose a unique name for this recipe.
+            recipeName = sprintf('luminance-%0.2f-reflectance-%03d-%s-%s', ...
+                targetLuminanceLevel, ...
+                rr, ...
+                targetShapeName, ...
+                choices.baseSceneName);
+            recipeName('.' == recipeName) = '_';
+            hints.recipeName = recipeName;
+            
+            
             %% Assign a random reflectance to each object in the base scene.
             nBaseMaterials = numel(sceneData.materialIds);
             choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
@@ -142,16 +156,16 @@ for targetLuminanceLevel = luminanceLevels
             %   the "target" object is always number 1.
             nOtherObjects = 0;%1 + randi(5);
             nObjects = 1 + nOtherObjects;
-            shapeIndices = randi(nShapes, [1 nObjects]);
+            otherShapeIndices = randi(nShapes, [1 nOtherObjects]);
             
             % pack up the objects in the format expected for Ward Land
-            choices.insertedObjects.names = shapeSet(shapeIndices);
+            choices.insertedObjects.names = cat(2, {targetShapeName}, shapeSet(otherShapeIndices));
             choices.insertedObjects.positions = cell(1, nObjects);
             choices.insertedObjects.rotations = cell(1, nObjects);
             choices.insertedObjects.scales = cell(1, nObjects);
             choices.insertedObjects.matteMaterialSets = cell(1, nObjects);
             choices.insertedObjects.wardMaterialSets = cell(1, nObjects);
-            for oo = 1:numel(shapeIndices)
+            for oo = 1:nObjects
                 % object pose in scene
                 choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
                 choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
@@ -163,16 +177,6 @@ for targetLuminanceLevel = luminanceLevels
                 choices.insertedObjects.matteMaterialSets{oo} = matteMaterial;
                 choices.insertedObjects.wardMaterialSets{oo} = wardMaterial;
             end
-            
-            %% Choose a unique name for this recipe.
-            recipeName = sprintf('luminance-%0.2f-reflectance-%03d-%s-%s', ...
-                targetLuminanceLevel, ...
-                rr, ...
-                choices.insertedObjects.names{1}, ...
-                choices.baseSceneName);
-            recipeName('.' == recipeName) = '_';
-            hints.recipeName = recipeName;
-            
             
             %% Choose a standard, numbered reflectance for the target object.
             %   and scale it based on the target luminance
@@ -210,20 +214,15 @@ for targetLuminanceLevel = luminanceLevels
             rejected = CheckTargetObjectOcclusion(recipe, ...
                 'targetPixelThresholdMin', 0.1, 'targetPixelThresholdMax', 0.8, ...
                 'totalBoundingBoxPixels', 2601); % 2601 = 51* 51
-            if ~rejected
+            if rejected
+                % delete this recipe and try again
+                rejectedFolder = GetWorkingFolder('', false, hints);
+                [status, result] = rmdir(rejectedFolder, 's');
+                continue;
+            else
+                % move on to save this recipe
                 break;
             end
-%             recipeFolder = GetWorkingFolder('', false, hints);
-%             rmdir(recipeFolder,'s');
-        end
-        
-        if rejected
-            warning('%s rejected after %d attempts!', ...
-                hints.recipeName, attempt);
-            continue;
-        else
-            fprintf('%s accepted after %d attempts.\n', ...
-                hints.recipeName, attempt);
         end
         
         % keep track of attempts and rejections
@@ -231,10 +230,18 @@ for targetLuminanceLevel = luminanceLevels
         attemptRecord(sceneIndex).choices = choices;
         attemptRecord(sceneIndex).rejected = rejected;
         
-        % save the recipe to the recipesFolder
-        archiveFile = fullfile(recipeFolder, hints.recipeName);
-        excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
-        recipe.input.hints.whichConditions = [];
-        PackUpRecipe(recipe, archiveFile, excludeFolders);
+        if rejected
+            warning('%s rejected after %d attempts!', ...
+                hints.recipeName, attempt);
+        else
+            fprintf('%s accepted after %d attempts.\n', ...
+                hints.recipeName, attempt);
+            
+            % save the recipe to the recipesFolder
+            archiveFile = fullfile(originalFolder, hints.recipeName);
+            excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
+            recipe.input.hints.whichConditions = [];
+            PackUpRecipe(recipe, archiveFile, excludeFolders);
+        end
     end
 end

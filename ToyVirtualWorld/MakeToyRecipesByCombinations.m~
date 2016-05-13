@@ -87,7 +87,7 @@ nBaseScenes = numel(baseSceneSet);
 % The third loop may repeat the recipe generation for the same conditions,
 % in case the target object was occluded.
 
-luminanceLevels = [0.1:0.3:0.9];
+luminanceLevels = 0.1:0.1:0.9;
 nReflectances = 10;
 maxAttempts = 10;
 
@@ -182,6 +182,7 @@ for targetLuminanceLevel = luminanceLevels
                 rr, targetLuminanceLevel, hints);
             
             % force the target object to use this computed reflectance
+            choices.insertedObjects.scales{1} = 1 + rand();
             choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
@@ -206,21 +207,20 @@ for targetLuminanceLevel = luminanceLevels
             copyfile(commonResourceFolder, recipeResourceFolder, 'f');
             
             %% Do a mask rendering, reject if target object is occluded.
-            rejected = CheckTargetObjectOcclusion(recipe, ...
-                'targetPixelThresholdMin', 0.2, 'targetPixelThresholdMax', 0.8, ...
-                'totaBoundingBoxPixels', 51);
-            if ~rejected
+            %             rejected = CheckTargetObjectOcclusion(recipe, ...
+            %                 'targetPixelThresholdMin', 0.1, 'targetPixelThresholdMax', 0.8, ...
+            %                 'totalBoundingBoxPixels', 2601); % 2601 = 51* 51
+            
+            rejected = rand();
+            if rejected
+                % delete this recipe and try again
+                recipeFolder = GetWorkingFolder('', false, hints);
+                rmdir(recipeFolder, 's');
+                continue;
+            else
+                % move on to save this recipe
                 break;
             end
-        end
-        
-        if rejected
-            warning('%s rejected after %d attempts!', ...
-                hints.recipeName, attempt);
-            continue;
-        else
-            fprintf('%s accepted after %d attempts.\n', ...
-                hints.recipeName, attempt);
         end
         
         % keep track of attempts and rejections
@@ -228,10 +228,18 @@ for targetLuminanceLevel = luminanceLevels
         attemptRecord(sceneIndex).choices = choices;
         attemptRecord(sceneIndex).rejected = rejected;
         
-        % save the recipe to the recipesFolder
-        archiveFile = fullfile(recipeFolder, hints.recipeName);
-        excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
-        recipe.input.hints.whichConditions = [];
-        PackUpRecipe(recipe, archiveFile, excludeFolders);
+        if rejected
+            warning('%s rejected after %d attempts!', ...
+                hints.recipeName, attempt);
+        else
+            fprintf('%s accepted after %d attempts.\n', ...
+                hints.recipeName, attempt);
+            
+            % save the recipe to the recipesFolder
+            archiveFile = fullfile(recipeFolder, hints.recipeName);
+            excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
+            recipe.input.hints.whichConditions = [];
+            PackUpRecipe(recipe, archiveFile, excludeFolders);
+        end
     end
 end
