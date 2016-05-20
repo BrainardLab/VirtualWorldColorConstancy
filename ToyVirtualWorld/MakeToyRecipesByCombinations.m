@@ -12,6 +12,10 @@
 clear;
 clc;
 
+% add what we need to the path
+AddToMatlabPathDynamically(fullfile(pwd,'../ToyVirtualWorld',''));
+AddToMatlabPathDynamically(fullfile(pwd,'../Utilities',''));
+
 % batch renderer options
 projectName = 'ToyVirtualWorld';
 hints.renderer = 'Mitsuba';
