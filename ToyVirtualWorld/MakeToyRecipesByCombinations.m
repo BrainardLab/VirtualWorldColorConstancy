@@ -91,9 +91,9 @@ nBaseScenes = numel(baseSceneSet);
 % The third loop may repeat the recipe generation for the same conditions,
 % in case the target object was occluded.
 
-luminanceLevels = [0.1 0.9];
-nReflectances = 2;
-maxAttempts = 10;
+luminanceLevels = [0.1:0.1:1.0];
+nReflectances = 10;
+maxAttempts = 30;
 
 % keep track of how many attempts per scene
 nScenes = numel(luminanceLevels) * nReflectances;
