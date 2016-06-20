@@ -16,6 +16,10 @@ if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
 
+if ~exist(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'),'dir')
+    mkdir(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'));
+end
+
 % location of saved figures
 figureFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Figures');
 
@@ -32,12 +36,17 @@ isScale = true;
 filterWidth = 7;
 lmsSensitivities = 'T_cones_ss2';
 
+% How many annular regions for AMA
+nAnnularRegions = 10;
+
 % easier to read plots
 set(0, 'DefaultAxesFontSize', 14)
 
 %% Analyze each packed up recipe.
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
+allAverageResponses = zeros(nRecipes, 3*nAnnularRegions);
+luminanceLevel = zeros(nRecipes,1);
 
 for ii = 1:nRecipes
     % get the recipe
@@ -62,15 +71,42 @@ for ii = 1:nRecipes
             'lowPassFilter', lowPassFilter,...  % the low-pass filter type to use
             'randomSeed', randomSeed ...        % the random seed to use
     );
+
+%% Find average response for LMS cones in annular regions about the center pixel
+    % Distance from center pixel
+    coneDistance = sqrt(sum(coneResponse.conePositions.*coneResponse.conePositions,2));
+    
+    % Thickness of annular regions
+    dl =  max(coneDistance)/nAnnularRegions;
+
+    tempResponse = [];
+    for kk = 1 : nAnnularRegions
+        tempIndices = find(coneDistance >= (kk-1)*dl & coneDistance < kk*dl);
+        tempResponse= (coneResponse.isomerizationsVector(tempIndices)*[1,1,1]).*coneResponse.coneIndicator(tempIndices,:);
+        for jj = 1 : 3
+        averageResponse(kk,jj)= mean(tempResponse(tempResponse(:,jj)>0,jj));
+        end
+    end
+    averageResponse(isnan(averageResponse))=0;
+    coneResponse.averageResponse = averageResponse;
+    allAverageResponses(ii,:) = averageResponse(:);
+    strTokens = stringTokenizer(recipe.input.conditionsFile, '-');
+    luminanceLevel(ii) = str2double(strrep(strTokens{2},'_','.'));
+    
     recipe.processing.coneResponse = coneResponse;
     
     % save the results in a separate folder
     [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
     analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
     save(fullfile(getpref(projectName, 'workingFolder'),archiveBase,'ConeResponse.mat'),'coneResponse');
-    excludeFolders = {'temp'};
+    excludeFolders = {'temp','images','renderings','resources','scenes','textures'};
     PackUpRecipe(recipe, analysedArchiveFile, excludeFolders);
+
     
+    
+    
+    
+    %% Make figure for presentation   
     scene = coneResponse.visualizationInfo.scene;
     oi = coneResponse.visualizationInfo.oi;
     oiRGBnoFilter = coneResponse.visualizationInfo.oiRGBnoFilter;
@@ -200,3 +236,6 @@ for ii = 1:nRecipes
     NicePlot.exportFigToPDF(fullfile(pathtoAllRenderings,[archiveBase,'.pdf']), hFig, 300);
     close(hFig);
 end
+
+save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),'allAverageResponses','luminanceLevel');
+
