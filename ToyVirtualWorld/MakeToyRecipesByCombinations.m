@@ -97,6 +97,9 @@ luminanceLevels = [0.1  1.0];
 nReflectances = 2;
 maxAttempts = 30;
 
+targetPixelThresholdMin = 0.1;
+targetPixelThresholdMax = 0.6;
+
 % keep track of how many attempts per scene
 nScenes = numel(luminanceLevels) * nReflectances;
 attemptRecord = struct( ...
@@ -218,7 +221,8 @@ for targetLuminanceLevel = luminanceLevels
             
             %% Do a mask rendering, reject if target object is occluded.
             rejected = CheckTargetObjectOcclusion(recipe, ...
-                'targetPixelThresholdMin', 0.1, 'targetPixelThresholdMax', 0.8, ...
+                'targetPixelThresholdMin', targetPixelThresholdMin, ...
+                'targetPixelThresholdMax', targetPixelThresholdMax, ...
                 'totalBoundingBoxPixels', 2601); % 2601 = 51* 51
             if rejected
                 % delete this recipe and try again

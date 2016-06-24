@@ -14,7 +14,7 @@
 %   recipe = MakeToyShapeIndexFactoidImages(recipe)
 %
 % @ingroup WardLand
-function recipe = MakeToyShapeIndexFactoidImages(recipe)
+function recipe = MakeToyShapeIndexFactoidImages(recipe,cropImageHalfSize)
 
 %% Get the "normal" scene file.
 nScenes = numel(recipe.rendering.scenes);
@@ -69,8 +69,8 @@ if ~isempty(targetMask)
     targetRight = max(targetCols);
     tragetCenterR = targetTop + floor((targetBottom-targetTop)/2);
     tragetCenterC = targetLeft + floor((targetRight-targetLeft)/2);
-    cropLocationR = tragetCenterR - 25;
-    cropLocationC = tragetCenterC - 25;
+    cropLocationR = tragetCenterR - cropImageHalfSize;
+    cropLocationC = tragetCenterC - cropImageHalfSize;
     
     % color in the bounding box like the target shape
     shapeIndexMask(targetTop, targetLeft:targetRight) = targetShapeIndex;
@@ -89,7 +89,8 @@ if ~isempty(targetMask)
 
     % Crop the image for analysis
     targetNormal = LoadRecipeProcessingImageFile(recipe, 'radiance', 'normal');
-    croppedImage = targetNormal(cropLocationR:cropLocationR+50,cropLocationC:cropLocationC+50,:);
+    croppedImage = targetNormal(cropLocationR:cropLocationR+2*cropImageHalfSize, ...
+                            cropLocationC:cropLocationC+2*cropImageHalfSize,:);
     recipe.processing.target.croppedImage = croppedImage;
     
 end

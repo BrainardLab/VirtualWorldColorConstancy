@@ -31,13 +31,13 @@ hints.renderer = 'Mitsuba';
 hints.workingFolder = getpref(projectName, 'workingFolder');
 
 % analysis params
-toneMapFactor = 10;
+toneMapFactor = 25;
 isScale = true;
 filterWidth = 7;
 lmsSensitivities = 'T_cones_ss2';
 
 % How many annular regions for AMA
-nAnnularRegions = 10;
+nAnnularRegions = 25;
 
 % easier to read plots
 set(0, 'DefaultAxesFontSize', 14)
@@ -45,8 +45,11 @@ set(0, 'DefaultAxesFontSize', 14)
 %% Analyze each packed up recipe.
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
+
+% AMA outputs
 allAverageResponses = zeros(nRecipes, 3*nAnnularRegions);
 luminanceLevel = zeros(nRecipes,1);
+ctgInd = zeros(nRecipes,1);
 
 for ii = 1:nRecipes
     % get the recipe
@@ -66,8 +69,8 @@ for ii = 1:nRecipes
             'meanLuminance', 500, ...           % mean luminance in c/m2
             'horizFOV', 1, ...                  % horizontal field of view in degrees
             'distance', 1.0, ...                % distance to object in meters
-            'coneStride', 15, ...               % how to sub-sample the full mosaic: stride = 1: full mosaic
-            'mosaicHalfSize', 5, ...            % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+            'coneStride', 3, ...               % how to sub-sample the full mosaic: stride = 1: full mosaic
+            'mosaicHalfSize', 25, ...            % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
             'lowPassFilter', lowPassFilter,...  % the low-pass filter type to use
             'randomSeed', randomSeed ...        % the random seed to use
     );
@@ -77,7 +80,7 @@ for ii = 1:nRecipes
     coneDistance = sqrt(sum(coneResponse.conePositions.*coneResponse.conePositions,2));
     
     % Thickness of annular regions
-    dl =  max(coneDistance)/nAnnularRegions;
+    dl =  max(max(abs(coneResponse.conePositions)))/nAnnularRegions;
 
     tempResponse = [];
     for kk = 1 : nAnnularRegions
@@ -237,5 +240,11 @@ for ii = 1:nRecipes
     close(hFig);
 end
 
-save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),'allAverageResponses','luminanceLevel');
+uniqueLuminaceLevel = unique(luminanceLevel);
+for ii = 1: size(unique(luminanceLevel))
+for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),1)
+ctgInd((ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),1)+jj,1)=ii;end
+end
+
+save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),'allAverageResponses','luminanceLevel','ctgInd');
 
