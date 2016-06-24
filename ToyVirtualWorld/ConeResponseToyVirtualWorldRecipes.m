@@ -47,9 +47,9 @@ archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
 
 % AMA outputs
-allAverageResponses = zeros(nRecipes, 3*nAnnularRegions);
-luminanceLevel = zeros(nRecipes,1);
-ctgInd = zeros(nRecipes,1);
+allAverageResponses = zeros(3*nAnnularRegions, nRecipes);
+luminanceLevel = zeros(1,nRecipes);
+ctgInd = zeros(1,nRecipes);
 
 for ii = 1:nRecipes
     % get the recipe
@@ -92,9 +92,9 @@ for ii = 1:nRecipes
     end
     averageResponse(isnan(averageResponse))=0;
     coneResponse.averageResponse = averageResponse;
-    allAverageResponses(ii,:) = averageResponse(:);
+    allAverageResponses(:,ii) = averageResponse(:);
     strTokens = stringTokenizer(recipe.input.conditionsFile, '-');
-    luminanceLevel(ii) = str2double(strrep(strTokens{2},'_','.'));
+    luminanceLevel(1,ii) = str2double(strrep(strTokens{2},'_','.'));
     
     recipe.processing.coneResponse = coneResponse;
     
@@ -241,9 +241,9 @@ for ii = 1:nRecipes
 end
 
 uniqueLuminaceLevel = unique(luminanceLevel);
-for ii = 1: size(unique(luminanceLevel))
-for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),1)
-ctgInd((ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),1)+jj,1)=ii;end
+for ii = 1: size(unique(luminanceLevel),2)
+for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
+ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
 save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),'allAverageResponses','luminanceLevel','ctgInd');
