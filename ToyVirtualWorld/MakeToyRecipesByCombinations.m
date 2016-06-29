@@ -93,8 +93,8 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-luminanceLevels = [0.1  1.0];
-nReflectances = 2;
+luminanceLevels = [0.1 0.5 1.0];
+nReflectances = 3;
 maxAttempts = 30;
 
 targetPixelThresholdMin = 0.1;

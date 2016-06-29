@@ -46,10 +46,11 @@ set(0, 'DefaultAxesFontSize', 14)
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
 
-% AMA outputs
-allAverageResponses = zeros(3*nAnnularRegions, nRecipes);
+% Outputs for AMA
+allAverageAnnularResponses = zeros(3*nAnnularRegions, nRecipes);
 luminanceLevel = zeros(1,nRecipes);
 ctgInd = zeros(1,nRecipes);
+allLMSResponses = [];
 
 for ii = 1:nRecipes
     % get the recipe
@@ -59,7 +60,7 @@ for ii = 1:nRecipes
     radiance = recipe.processing.target.croppedImage;
     wave = 400:10:700;
     
-    randomSeed = nan;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
+    randomSeed = 1234;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
     lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
     
     coneResponse = [];
@@ -92,11 +93,20 @@ for ii = 1:nRecipes
     end
     averageResponse(isnan(averageResponse))=0;
     coneResponse.averageResponse = averageResponse;
-    allAverageResponses(:,ii) = averageResponse(:);
+    allAverageAnnularResponses(:,ii) = averageResponse(:);
+    
+%% Represent the LMS response as a vector and save it for AMA    
+    numLMSCones = sum(coneResponse.coneIndicator);
+    [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
+    allLMSResponses(:,ii) = LMSResponseVector;
+    allLMSPositions(:,:,ii) = LMSPositions;
+    
+%% Save modified recipe 
+    recipe.processing.coneResponse = coneResponse;
+
+%% Save the luminance levels for AMA
     strTokens = stringTokenizer(recipe.input.conditionsFile, '-');
     luminanceLevel(1,ii) = str2double(strrep(strTokens{2},'_','.'));
-    
-    recipe.processing.coneResponse = coneResponse;
     
     % save the results in a separate folder
     [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
@@ -246,5 +256,6 @@ for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
 ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
-save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),'allAverageResponses','luminanceLevel','ctgInd');
+save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
+    'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones','allLMSResponses','allLMSPositions');
 
