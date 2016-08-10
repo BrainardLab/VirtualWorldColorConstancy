@@ -8,12 +8,9 @@
 %
 % 2/10/16  vs, dhb   Wrote it.
 
-%% Clear
-clear; close all;
-
 %% Set up some parameters for portability
 projectName = 'ToyVirtualWorld';
-dataDirRoot = fullfile(GetUserFolder(), 'VirtualWorldColorConstancy');
+dataDirRoot = fullfile(rtbGetUserFolder(), 'VirtualWorldColorConstancy');
 dataDirName = 'ToyVirtualWorld';
 dataDir = fullfile(dataDirRoot,projectName,'');
 if (~exist(dataDir,'dir'))
