@@ -13,8 +13,7 @@ clear; close all;
 
 %% Set up some parameters for portability
 projectName = 'ToyVirtualWorld';
-dataDirRoot = '/Users/vijaysingh/Dropbox (Aguirre-Brainard Lab)/IBIO_data/VirtualWorldColorConstancy';
-%dataDirRoot = '/Users/vijaysingh/test';
+dataDirRoot = fullfile(GetUserFolder(), 'VirtualWorldColorConstancy');
 dataDirName = 'ToyVirtualWorld';
 dataDir = fullfile(dataDirRoot,projectName,'');
 if (~exist(dataDir,'dir'))
