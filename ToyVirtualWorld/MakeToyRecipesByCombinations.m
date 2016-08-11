@@ -93,8 +93,8 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-luminanceLevels = [0.1 0.5 1.0];
-nReflectances = 3;
+luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6))));
+nReflectances = 10;
 maxAttempts = 30;
 
 targetPixelThresholdMin = 0.1;
@@ -125,7 +125,7 @@ for targetLuminanceLevel = luminanceLevels
             targetShapeName = shapeSet{targetShapeIndex};
             
             %% Choose a unique name for this recipe.
-            recipeName = sprintf('luminance-%0.2f-reflectance-%03d-%s-%s', ...
+            recipeName = sprintf('luminance-%0.4f-reflectance-%03d-%s-%s', ...
                 targetLuminanceLevel, ...
                 rr, ...
                 targetShapeName, ...
@@ -191,8 +191,12 @@ for targetLuminanceLevel = luminanceLevels
             %   and scale it based on the target luminance
             %   this writes a spectrum file to the working "resources" folder
             %   so we need to pass in the hints and hints.recipeName
-            [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminance( ...
-                rr, targetLuminanceLevel, hints);
+            
+            reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', targetLuminanceLevel, ...
+                rr);
+            
+            [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminanceByName( ...
+                reflectanceFileName, targetLuminanceLevel, hints);
             
             % force the target object to use this computed reflectance
             choices.insertedObjects.scales{1} = 1 + rand();
