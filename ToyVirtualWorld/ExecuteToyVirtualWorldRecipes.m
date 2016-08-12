@@ -39,7 +39,7 @@ archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nScenes = numel(archiveFiles);
 for ii = 1:nScenes
     % get the recipe
-    recipe = UnpackRecipe(archiveFiles{ii}, hints);
+    recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
     
     % modify rendering options
     recipe.input.hints.renderer = hints.renderer;
@@ -49,7 +49,7 @@ for ii = 1:nScenes
     
     % render and proceed after errors
     try
-        recipe = ExecuteRecipe(recipe, [], true);
+        recipe = rtbExecuteRecipe(recipe, 'throwException', true);
     catch err
         disp(err.message)
         continue;
@@ -59,7 +59,7 @@ for ii = 1:nScenes
     [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
     renderedArchiveFile = fullfile(renderingFolder, [archiveBase archiveExt]);
     excludeFolders = {'temp'};
-    PackUpRecipe(recipe, renderedArchiveFile, excludeFolders);
+    rtbPackUpRecipe(recipe, renderedArchiveFile, 'ignoreFolders', excludeFolders);
 end
 
 toc(timer);

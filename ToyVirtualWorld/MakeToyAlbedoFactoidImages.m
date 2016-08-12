@@ -30,11 +30,11 @@ end
 %% Get the "normal" and "mask" scene files.
 nScenes = numel(recipe.rendering.scenes);
 for ii = 1:nScenes
-    scene = recipe.rendering.scenes{ii};
+    scene = recipe.rendering.scenes{ii}.scene;
     if strcmp('normal', scene.imageName)
-        normalSceneFile = GetWorkingAbsolutePath(scene.mitsubaFile, recipe.input.hints);
+        normalSceneFile = rtbWorkingAbsolutePath(scene.mitsubaFile, 'hints', recipe.input.hints);
     elseif strcmp('mask', scene.imageName)
-        maskSceneFile = GetWorkingAbsolutePath(scene.mitsubaFile, recipe.input.hints);
+        maskSceneFile = rtbWorkingAbsolutePath(scene.mitsubaFile, 'hints', recipe.input.hints);
     end
 end
 
@@ -46,14 +46,14 @@ factoids = {'albedo'};
 [~, ~, ~, ~, normalFactoids] = ...
     RenderMitsubaFactoids(normalSceneFile, [], [], [], ...
     factoids, 'spectrum', recipe.input.hints, mitsuba);
-[~, S, order] = GetWlsFromSliceNames(normalFactoids.albedo.channels);
+[~, S, order] = rtbWlsFromSliceNames(normalFactoids.albedo.channels);
 normalAlbedo = normalFactoids.albedo.data(:,:,order);
 
 % the mask rendering
 [~, ~, ~, ~, maskFactoids] = ...
     RenderMitsubaFactoids(maskSceneFile, [], [], [], ...
     factoids, 'spectrum', recipe.input.hints, mitsuba);
-[~, ~, order] = GetWlsFromSliceNames(maskFactoids.albedo.channels);
+[~, ~, order] = rtbWlsFromSliceNames(maskFactoids.albedo.channels);
 maskAlbedo = maskFactoids.albedo.data(:,:,order);
 
 

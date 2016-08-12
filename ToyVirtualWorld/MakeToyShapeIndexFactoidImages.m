@@ -19,9 +19,9 @@ function recipe = MakeToyShapeIndexFactoidImages(recipe,cropImageHalfSize)
 %% Get the "normal" scene file.
 nScenes = numel(recipe.rendering.scenes);
 for ii = 1:nScenes
-    scene = recipe.rendering.scenes{ii};
+    scene = recipe.rendering.scenes{ii}.scene;
     if strcmp('normal', scene.imageName)
-        normalSceneFile = GetWorkingAbsolutePath(scene.mitsubaFile, recipe.input.hints);
+        normalSceneFile = rtbWorkingAbsolutePath(scene.mitsubaFile, 'hints', recipe.input.hints);
     end
 end
 

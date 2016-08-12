@@ -251,7 +251,7 @@ for targetLuminanceLevel = luminanceLevels
             archiveFile = fullfile(originalFolder, hints.recipeName);
             excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
             recipe.input.hints.whichConditions = [];
-            PackUpRecipe(recipe, archiveFile, excludeFolders);
+            rtbPackUpRecipe(recipe, archiveFile, 'ignoreFolders', excludeFolders);
         end
     end
 end

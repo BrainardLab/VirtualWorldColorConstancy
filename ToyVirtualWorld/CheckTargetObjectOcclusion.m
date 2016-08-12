@@ -36,7 +36,7 @@ recipe.input.hints.renderer = 'Mitsuba';
 recipe.input.hints.imageWidth = imageWidth;
 recipe.input.hints.imageHeight = imageHeight;
 recipe.input.hints.whichConditions = 2;
-recipe = ExecuteRecipe(recipe);
+recipe = rtbExecuteRecipe(recipe);
 recipe = MakeToyRGBImages(recipe);
 
 %% Check if we can see enough target pixels.

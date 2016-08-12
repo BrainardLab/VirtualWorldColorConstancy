@@ -44,7 +44,7 @@ nRecipes = numel(archiveFiles);
 
 for ii = 1:nRecipes
     % get the recipe
-    recipe = UnpackRecipe(archiveFiles{ii}, hints);
+    recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
     ChangeToWorkingFolder(recipe.input.hints);
     
     % run basic recipe analysis functions
@@ -52,10 +52,10 @@ for ii = 1:nRecipes
     recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
     recipe = MakeToyShapeIndexFactoidImages(recipe,cropImageHalfSize);
     
-        % save the results in a separate folder
+    % save the results in a separate folder
     [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
     analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
     excludeFolders = {'temp'};
-    PackUpRecipe(recipe, analysedArchiveFile, excludeFolders);
-
+    rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
+    
 end
