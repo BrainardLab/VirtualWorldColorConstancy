@@ -37,7 +37,7 @@ timer = tic();
 
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nScenes = numel(archiveFiles);
-for ii = 1:nScenes
+parfor ii = 1:nScenes
     % get the recipe
     recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
     

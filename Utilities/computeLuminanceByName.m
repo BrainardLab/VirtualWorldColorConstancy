@@ -1,5 +1,5 @@
-function [theWavelengths, theReflectance, whichMaterial, matteMaterial, wardMaterial] = ...
-    computeLuminanceByName(whichMaterial, theLuminanceTarget, hints)
+function [theWavelengths, theReflectance, materialName, matteMaterial, wardMaterial] = ...
+    computeLuminanceByName(materialNumber, materialName, theLuminanceTarget, hints)
 %
 % This function takes the material number and target luminanace level and
 % returns the scaled reflectance for the given material based on the target
@@ -16,23 +16,23 @@ function [theWavelengths, theReflectance, whichMaterial, matteMaterial, wardMate
 % 3/23/16 vs  wrote it.
 
 % Load in the surface reflectance function associated with whichMaterial
-[theWavelengths, theReflectance] = LoadReflectance(whichMaterial,theLuminanceTarget);
+[theWavelengths, theReflectance] = LoadReflectance(materialNumber,theLuminanceTarget);
 
 %% Write a new spectrum file with the scaled reflectance.
 resourceFolder = GetWorkingFolder('resources', false, hints);
-spectrumFullPath = fullfile(resourceFolder, whichMaterial);
+spectrumFullPath = fullfile(resourceFolder, materialName);
 WriteSpectrumFile(theWavelengths, theReflectance, spectrumFullPath);
 
 %% Pack up material descriptions that work with WardLand.
 matteMaterial = BuildDesription('material', 'matte', ...
     {'diffuseReflectance'}, ...
-    whichMaterial, ...
+    materialName, ...
     {'spectrum'});
 
 % ward material with arbitrary fixed specular component
 specularSpectrum = '300:0.5 800:0.5';
 wardMaterial = BuildDesription('material', 'anisoward', ...
     {'diffuseReflectance', 'specularReflectance'}, ...
-    {whichMaterial, specularSpectrum}, ...
+    {materialName, specularSpectrum}, ...
     {'spectrum', 'spectrum'});
 

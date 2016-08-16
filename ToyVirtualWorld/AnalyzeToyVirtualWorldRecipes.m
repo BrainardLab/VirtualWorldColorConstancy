@@ -42,7 +42,7 @@ cropImageHalfSize = 25;
 archiveFiles = FindFiles(recipeFolder, '\.zip$');
 nRecipes = numel(archiveFiles);
 
-for ii = 1:nRecipes
+parfor ii = 1:nRecipes
     % get the recipe
     recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
     ChangeToWorkingFolder(recipe.input.hints);
