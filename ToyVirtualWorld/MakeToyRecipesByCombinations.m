@@ -48,6 +48,8 @@ for bb = 1:nIlluminantSpectra
         hints);
 end
 
+nOtherObjectSurfaceReflectance = 10000;
+
 % flat reflectance for illuminants
 matteIlluminant = BuildDesription('material', 'matte', ...
     {'diffuseReflectance'}, ...
@@ -93,7 +95,7 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6))));
+luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),20));
 nReflectances = 10;
 maxAttempts = 30;
 
@@ -138,9 +140,10 @@ for targetLuminanceLevel = luminanceLevels
             nBaseMaterials = numel(sceneData.materialIds);
             choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
             choices.baseSceneWardMaterials = cell(1, nBaseMaterials);
+            pwd
             for mm = 1:nBaseMaterials
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    randi(nReflectances), [], hints);
+                    randi(nOtherObjectSurfaceReflectance), [], hints);
                 choices.baseSceneMatteMaterials{mm} = matteMaterial;
                 choices.baseSceneWardMaterials{mm} = wardMaterial;
             end
@@ -182,7 +185,7 @@ for targetLuminanceLevel = luminanceLevels
                 
                 % object reflectance
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    randi(nReflectances), [], hints);
+                    randi(nOtherObjectSurfaceReflectance), [], hints);
                 choices.insertedObjects.matteMaterialSets{oo} = matteMaterial;
                 choices.insertedObjects.wardMaterialSets{oo} = wardMaterial;
             end

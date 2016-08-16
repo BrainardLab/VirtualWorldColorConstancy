@@ -16,7 +16,7 @@ function [theWavelengths, theReflectance, whichMaterial, matteMaterial, wardMate
 % 3/23/16 vs  wrote it.
 
 % Load in the surface reflectance function associated with whichMaterial
-[theWavelengths, theReflectance] = LoadReflectanceByName(whichMaterial);
+[theWavelengths, theReflectance] = LoadReflectance(whichMaterial,theLuminanceTarget);
 
 %% Write a new spectrum file with the scaled reflectance.
 resourceFolder = GetWorkingFolder('resources', false, hints);

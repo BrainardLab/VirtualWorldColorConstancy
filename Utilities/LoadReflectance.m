@@ -1,4 +1,4 @@
-function [wavelengths, magnitudes, fileName] = LoadReflectance(whichOne)
+function [wavelengths, magnitudes, fileName] = LoadReflectance(whichOne,theLuminanceTarget)
 %% Load a standard reflectance from the Reflectances/ folder.
 %
 % [wavelengths, magnitudes, fileName] = LoadReflectance(whichOne) loads one
@@ -20,7 +20,11 @@ function [wavelengths, magnitudes, fileName] = LoadReflectance(whichOne)
 %% Locate the Reflectances folder.
 pathHere = fileparts(which('LoadReflectance'));
 parentPath = fileparts(pathHere);
-reflectancesPath = fullfile(parentPath, 'Reflectances');
+if isempty(theLuminanceTarget)
+    reflectancesPath = fullfile(parentPath, 'Reflectances/OtherObjects');
+else
+    reflectancesPath = fullfile(parentPath, 'Reflectances/TargetObjects');
+end
 
 %% Identify and sort all the spectrum files.
 folderListing = dir(reflectancesPath);

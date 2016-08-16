@@ -5,6 +5,7 @@ clear; close all;
 
 % Desired wl sampling
 S = [400 5 61];
+nSurfaces = 10000;
 
 %% Munsell surfaces
 load sur_nickerson
@@ -28,7 +29,7 @@ mean_wgts = mean(sur_all_wgts,2);
 cov_wgts = cov(sur_all_wgts');
 
 %% Generate some new surfaces
-nNewSurfaces = 1000;
+nNewSurfaces = nSurfaces;
 newSurfaces = zeros(S(3),nNewSurfaces);
 newIndex = 1;
 for i = 1:nNewSurfaces
@@ -49,8 +50,8 @@ plot(SToWls(S),newSurfaces);
 
 %% 
 theWavelengths = SToWls(S);
-for ii = 1 : 500
-filename = ['reflectance_' num2str(ii) '.spd'];
+for ii = 1 : nSurfaces
+filename = ['reflectance_' num2str(ii)  '.spd'];
 fid = fopen(filename,'w');
 fprintf(fid,'%3d %3.6f\n',[theWavelengths,newSurfaces(:,ii)]');
 fclose(fid);
