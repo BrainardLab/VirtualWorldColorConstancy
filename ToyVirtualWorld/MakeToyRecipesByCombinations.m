@@ -79,7 +79,7 @@ nBaseScenes = numel(baseSceneSet);
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
 nLuminanceLevels =10;
-luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),nLuminanceLevels));
+luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
 nReflectances = 10;
 maxAttempts = 30;
 
