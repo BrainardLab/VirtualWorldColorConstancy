@@ -78,7 +78,8 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),20));
+nLuminanceLevels =10;
+luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),nLuminanceLevels));
 nReflectances = 10;
 maxAttempts = 30;
 
@@ -86,7 +87,7 @@ targetPixelThresholdMin = 0.1;
 targetPixelThresholdMax = 0.6;
 
 % keep track of scenes generated for each condition
-nLuminanceLevels = numel(luminanceLevels);
+
 nScenes = nLuminanceLevels * nReflectances;
 sceneRecord = struct( ...
     'targetLuminanceLevel', [], ...
@@ -259,5 +260,5 @@ parfor sceneIndex = 1:nScenes
     
     sceneRecord(sceneIndex) = workingRecord;
     
-    error('stop after one for testing')
+%     error('stop after one for testing')
 end

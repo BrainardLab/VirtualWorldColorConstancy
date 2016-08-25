@@ -8,9 +8,9 @@
 %% Clear
 clear; close all;
 
-nLuminanceLevels=10;
-nSurfaceAtEachLuminace = 30;
-luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),nLuminanceLevels));
+nLuminanceLevels=20;
+nSurfaceAtEachLuminace = 500;
+luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
 
 % Desired wl sampling
 S = [400 5 61];
