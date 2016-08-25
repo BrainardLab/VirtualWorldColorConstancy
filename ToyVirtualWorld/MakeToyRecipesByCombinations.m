@@ -27,22 +27,9 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% Choose various CIE-LAB temperature-correlated daylight spectra.
-
-% CIE-LAB tempterature-correlated daylight spectra
-lowTemp = 4000;
-highTemp = 12000;
-nIlluminantSpectra = 20;
-temps = round(linspace(lowTemp, highTemp, nIlluminantSpectra));
-lightSpectra = cell(1, nIlluminantSpectra);
-for bb = 1:nIlluminantSpectra
-    lightSpectra(bb) = GetWardLandIlluminantSpectra( ...
-        temps(bb), ...
-        0, ...
-        [lowTemp highTemp], ...
-        1, ...
-        hints);
-end
+%% Choose illuminant spectra from the Illuminants folder.
+lightSpectra = getIlluminantSpectra(hints);
+nLightSpectra = numel(lightSpectra);
 
 nOtherObjectSurfaceReflectance = 10000;
 
@@ -162,7 +149,7 @@ parfor sceneIndex = 1:nScenes
         
         %% Assign a random illuminant to each light in the base scene.
         nBaseLights = numel(sceneData.lightIds);
-        whichLights = randi(nIlluminantSpectra, [1, nBaseLights]);
+        whichLights = randi(nLightSpectra, [1, nBaseLights]);
         workingRecord.choices.baseSceneLights = lightSpectra(whichLights);
         
         %% Pick a light shape to insert.
@@ -174,7 +161,7 @@ parfor sceneIndex = 1:nScenes
         workingRecord.choices.insertedLights.scales = {.5 + rand()};
         workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
         workingRecord.choices.insertedLights.wardMaterialSets = {wardIlluminant};
-        workingRecord.choices.insertedLights.lightSpectra = lightSpectra(randi(nIlluminantSpectra));
+        workingRecord.choices.insertedLights.lightSpectra = lightSpectra(randi(nLightSpectra));
         
         %% Pick a target object and random number of "others" to insert.
         %   the "target" object is always number 1.
@@ -271,4 +258,6 @@ parfor sceneIndex = 1:nScenes
     end
     
     sceneRecord(sceneIndex) = workingRecord;
+    
+    error('stop after one for testing')
 end
