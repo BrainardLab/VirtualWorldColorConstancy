@@ -70,11 +70,11 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
             OK = true;
         end
     end
-%     reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
-%                 rem(i,nSurfaceAtEachLuminace)+1);
-%     fid = fopen(reflectanceName ,'w');
-%     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
-%     fclose(fid);
+    reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
+                rem(i,nSurfaceAtEachLuminace)+1);
+    fid = fopen(reflectanceName ,'w');
+    fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
+    fclose(fid);
 
 end
 %%
