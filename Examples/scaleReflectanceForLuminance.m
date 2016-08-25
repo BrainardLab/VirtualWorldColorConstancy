@@ -8,8 +8,9 @@
 %% Clear
 clear; close all;
 
-luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),20));
-nSurfaceAtEachLuminace = 100;
+nLuminanceLevels=10;
+nSurfaceAtEachLuminace = 30;
+luminanceLevels = log10(logspace(log10(10^(0.2)),log10(10^(0.6)),nLuminanceLevels));
 
 % Desired wl sampling
 S = [400 5 61];
@@ -27,9 +28,12 @@ sur_vrhel = SplineSrf(S_vrhel,sur_vrhel,S);
 % Put them together
 sur_all = [sur_nickerson sur_vrhel];
 
+sur_mean=mean(sur_all,2);
+sur_all_mean_centered = bsxfun(@minus,sur_all,sur_mean);
+
 %% Analyze with respect to a linear model
-B = FindLinMod(sur_all,6);
-sur_all_wgts = B\sur_all;
+B = FindLinMod(sur_all_mean_centered,6);
+sur_all_wgts = B\sur_all_mean_centered;
 mean_wgts = mean(sur_all_wgts,2);
 cov_wgts = cov(sur_all_wgts');
 
@@ -54,7 +58,7 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
     OK = false;
     while (~OK)
         ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-        theReflectance = B*ran_wgts;
+        theReflectance = B*ran_wgts+sur_mean;
         theLightToEye = theIlluminant.*theReflectance;
         theLuminance = theLuminanceSensitivity*theLightToEye;
         theLuminanceTarget = luminanceLevels(ceil(i/nSurfaceAtEachLuminace));
@@ -66,10 +70,18 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
             OK = true;
         end
     end
-    reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
-                rem(i,nSurfaceAtEachLuminace)+1);
-    fid = fopen(reflectanceName ,'w');
-    fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
-    fclose(fid);
+%     reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
+%                 rem(i,nSurfaceAtEachLuminace)+1);
+%     fid = fopen(reflectanceName ,'w');
+%     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
+%     fclose(fid);
 
 end
+%%
+% figure; clf;
+% for i = 1:nLuminanceLevels
+%     plot(SToWls(S),newSurfaces(:,(i-1)*nSurfaceAtEachLuminace+1:i*nSurfaceAtEachLuminace));
+%     title(['Luminance Level is = ',num2str(luminanceLevels(i))]);
+%     print(gcf,['ReflectanceSpectra_LuminanceLevel',num2str(i)],'-dpng');
+% end
+ 

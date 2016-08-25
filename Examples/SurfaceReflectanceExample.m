@@ -5,7 +5,7 @@ clear; close all;
 
 % Desired wl sampling
 S = [400 5 61];
-nSurfaces = 100;
+nSurfaces = 10000;
 
 %% Munsell surfaces
 load sur_nickerson
@@ -20,11 +20,13 @@ figure; clf;
 plot(SToWls(S),sur_vrhel);
 
 %% Put them together
-sur_all = [sur_nickerson sur_vrhel];
+sur_all = [sur_vrhel];
+sur_mean=mean(sur_all,2);
+sur_all_mean_centered = bsxfun(@minus,sur_all,sur_mean);
 
 %% Analyze with respect to a linear model
-B = FindLinMod(sur_all,6);
-sur_all_wgts = B\sur_all;
+B = FindLinMod(sur_all_mean_centered,6);
+sur_all_wgts = B\sur_all_mean_centered;
 mean_wgts = mean(sur_all_wgts,2);
 cov_wgts = cov(sur_all_wgts');
 
@@ -36,7 +38,7 @@ for i = 1:nNewSurfaces
     OK = false;
     while (~OK)
         ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-        ran_sur = B*ran_wgts;
+        ran_sur = B*ran_wgts+sur_mean;
         if (all(ran_sur >= 0) & all(ran_sur <= 1))
             newSurfaces(:,newIndex) = ran_sur;
             newIndex = newIndex+1;
