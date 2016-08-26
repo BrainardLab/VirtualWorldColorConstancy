@@ -123,6 +123,7 @@ plot(wgts_New(1,:),wgts_New(2,:),'*');
 title('Projection along first two PCs');
 xlabel('PC1')
 ylabel('PC2')
+legend('Granda Rescaled','New Illuminaces','Location', 'northwest');
 
 subplot(2,3,6)
 image(theIlluminationImage);
