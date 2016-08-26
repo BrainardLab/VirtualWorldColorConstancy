@@ -54,7 +54,8 @@ for i = 1:nNewIlluminaces
         end
     end
 end
-
+%%
+wgts_New=B'*bsxfun(@minus,newIlluminance,meandaylightGranadaRescaled);
 %% Load in the T_xyz1931 data for luminance sensitivity
 theXYZData = load('T_xyz1931');
 theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931,theWavelengths);
@@ -85,24 +86,47 @@ fig=figure;
 set(fig,'Position', [100, 100, 1200, 800]);
 subplot(2,3,1)
 plot(SToWls(S),daylightGranadaOriginal);
-title('Daylight Granada Original Spectra');
+title('Daylight Granada Spectra');
+xlabel('Wavelength (nm)')
+ylabel('Spectral Power Distribution')
+ylimit=get(gca,'ylim');
 
 subplot(2,3,2)
 plot(SToWls(S),daylightGranadaRescaled);
 title('Daylight Granada Rescaled');
+xlabel('Wavelength (nm)')
+ylabel('Rescaled Spectral Power Distribution')
+ylim(ylimit);
 
 subplot(2,3,3)
 plot(SToWls(S),newIlluminance);
+ylim(ylimit);
 title('New Randomly Generated Illuminance Spectra');
+xlabel('Wavelength (nm)')
+ylabel('Rescaled Spectral Power Distribution')
 
 subplot(2,3,4)
 hold on;
 plot(IlluminantxyYGranada(1,:),IlluminantxyYGranada(2,:),'r.');
 plot(IlluminantxyY(1,:),IlluminantxyY(2,:),'b*');
 legend('Randomly generated','Granada','Location', 'southeast');
+title('xy chromaticity diagram');
+xlabel('x')
+ylabel('y')
+legend('Granda Rescaled','New Illuminaces','Location', 'northwest');
+
 
 subplot(2,3,5)
-image(theIlluminationImage)
+hold on;
+plot(ill_granada_wgts(1,:),ill_granada_wgts(2,:),'.');
+plot(wgts_New(1,:),wgts_New(2,:),'*');
+title('Projection along first two PCs');
+xlabel('PC1')
+ylabel('PC2')
+
+subplot(2,3,6)
+image(theIlluminationImage);
+axis off;
 
 %% This part saves the new Illuminants
 % theWavelengths = SToWls(S);
