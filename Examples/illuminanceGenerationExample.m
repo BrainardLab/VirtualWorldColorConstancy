@@ -130,10 +130,10 @@ image(theIlluminationImage);
 axis off;
 
 %% This part saves the new Illuminants
-% theWavelengths = SToWls(S);
-% for ii = 1 : nIlluminances
-% filename = ['illuminance_' num2str(ii)  '.spd'];
-% fid = fopen(filename,'w');
-% fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,ii)]');
-% fclose(fid);
-% end
+theWavelengths = SToWls(S);
+for ii = 1 : nIlluminances
+filename = ['illuminance_' num2str(ii)  '.spd'];
+fid = fopen(filename,'w');
+fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,ii)]');
+fclose(fid);
+end
