@@ -258,7 +258,5 @@ parfor sceneIndex = 1:nScenes
         rtbPackUpRecipe(recipe, archiveFile, 'ignoreFolders', excludeFolders);
     end
     
-    sceneRecord(sceneIndex) = workingRecord;
-    
-%     error('stop after one for testing')
+    sceneRecord(sceneIndex) = workingRecord;    
 end
