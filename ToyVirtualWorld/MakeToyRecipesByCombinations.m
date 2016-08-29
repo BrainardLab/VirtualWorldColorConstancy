@@ -78,9 +78,9 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-nLuminanceLevels =10;
+nLuminanceLevels =2;
 luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
-nReflectances = 10;
+nReflectances = 2;
 maxAttempts = 30;
 
 targetPixelThresholdMin = 0.1;
@@ -199,7 +199,7 @@ parfor sceneIndex = 1:nScenes
             targetLuminanceLevel, rr);
         
         [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminanceByName( ...
-            rr, reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
+             reflectanceFileName, workingRecord.hints);
         
         % force the target object to use this computed reflectance
         workingRecord.choices.insertedObjects.scales{1} = 1 + rand();
