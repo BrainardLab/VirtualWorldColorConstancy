@@ -1,5 +1,5 @@
 function [theWavelengths, theReflectance, materialName, matteMaterial, wardMaterial] = ...
-    computeLuminanceByName( materialName, hints)
+    computeLuminanceByName(materialNumber, materialName, theLuminanceTarget, hints)
 %
 % This function takes the material number and target luminanace level and
 % returns the scaled reflectance for the given material based on the target
@@ -16,7 +16,7 @@ function [theWavelengths, theReflectance, materialName, matteMaterial, wardMater
 % 3/23/16 vs  wrote it.
 
 % Load in the surface reflectance function associated with whichMaterial
-[theWavelengths, theReflectance] = LoadReflectanceByName(materialName);
+[theWavelengths, theReflectance] = LoadReflectance(materialNumber,theLuminanceTarget);
 
 %% Write a new spectrum file with the scaled reflectance.
 resourceFolder = GetWorkingFolder('resources', false, hints);
