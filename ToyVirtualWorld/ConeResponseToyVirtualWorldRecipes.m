@@ -39,6 +39,7 @@ lmsSensitivities = 'T_cones_ss2';
 % How many annular regions for AMA
 nAnnularRegions = 25;
 
+averageResponse=zeros(nAnnularRegions,3);
 % easier to read plots
 set(0, 'DefaultAxesFontSize', 14)
 
@@ -51,10 +52,11 @@ allAverageAnnularResponses = zeros(3*nAnnularRegions, nRecipes);
 luminanceLevel = zeros(1,nRecipes);
 ctgInd = zeros(1,nRecipes);
 allLMSResponses = [];
+numLMSCones = [];
 
-for ii = 1:nRecipes
+parfor ii = 1:nRecipes
     % get the recipe
-    recipe = UnpackRecipe(archiveFiles{ii}, hints);
+    recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
     ChangeToWorkingFolder(recipe.input.hints);
     
     radiance = recipe.processing.target.croppedImage;
@@ -77,26 +79,12 @@ for ii = 1:nRecipes
     );
 
 %% Find average response for LMS cones in annular regions about the center pixel
-    % Distance from center pixel
-    coneDistance = sqrt(sum(coneResponse.conePositions.*coneResponse.conePositions,2));
-    
-    % Thickness of annular regions
-    dl =  max(max(abs(coneResponse.conePositions)))/nAnnularRegions;
-
-    tempResponse = [];
-    for kk = 1 : nAnnularRegions
-        tempIndices = find(coneDistance >= (kk-1)*dl & coneDistance < kk*dl);
-        tempResponse= (coneResponse.isomerizationsVector(tempIndices)*[1,1,1]).*coneResponse.coneIndicator(tempIndices,:);
-        for jj = 1 : 3
-        averageResponse(kk,jj)= mean(tempResponse(tempResponse(:,jj)>0,jj));
-        end
-    end
-    averageResponse(isnan(averageResponse))=0;
+    averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
     coneResponse.averageResponse = averageResponse;
     allAverageAnnularResponses(:,ii) = averageResponse(:);
     
 %% Represent the LMS response as a vector and save it for AMA    
-    numLMSCones = sum(coneResponse.coneIndicator);
+    numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
     [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
     allLMSResponses(:,ii) = LMSResponseVector;
     allLMSPositions(:,:,ii) = LMSPositions;
@@ -111,9 +99,10 @@ for ii = 1:nRecipes
     % save the results in a separate folder
     [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
     analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-    save(fullfile(getpref(projectName, 'workingFolder'),archiveBase,'ConeResponse.mat'),'coneResponse');
-    excludeFolders = {'temp','images','renderings','resources','scenes','textures'};
-    PackUpRecipe(recipe, analysedArchiveFile, excludeFolders);
+    tempName=matfile(fullfile(getpref(projectName, 'workingFolder'),archiveBase,'ConeResponse.mat'),'Writable',true);
+    tempName.coneResponse=coneResponse;
+    excludeFolders = {'temp','images','renderings','resources','scenes'};
+    rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
 
     
     
@@ -134,8 +123,8 @@ for ii = 1:nRecipes
     
     subplot(3,2,1);
     pathtoImage = fullfile(getpref(projectName, 'workingFolder'),archiveBase,'images','Mitsuba','radiance','normal.mat');
-    load(pathtoImage);
-    [sRGBImage, XYZImage, rawRGBImage] = MultispectralToSRGB(imageData,[400,10,31],toneMapFactor, isScale);
+    imageData = parload(pathtoImage);
+    [sRGBImage, ~, ~] = MultispectralToSRGB(imageData,[400,10,31],toneMapFactor, isScale);
     srgbUint = uint8(sRGBImage);
     image(srgbUint);
     set(gca,'XTickLabel','');
@@ -143,8 +132,8 @@ for ii = 1:nRecipes
 
     subplot(3,2,2);
     pathtoImage = fullfile(getpref(projectName, 'workingFolder'),archiveBase,'images','Mitsuba','radiance','mask.mat');
-    load(pathtoImage);
-    [sRGBImage, XYZImage, rawRGBImage] = MultispectralToSRGB(imageData,[400,10,31],toneMapFactor, isScale);
+    imageData = parload(pathtoImage);
+    [sRGBImage, ~, ~] = MultispectralToSRGB(imageData,[400,10,31],toneMapFactor, isScale);
     image(sRGBImage);
     set(gca,'XTickLabel','');
     set(gca,'YTickLabel','');    
@@ -258,4 +247,3 @@ end
 
 save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
     'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones','allLMSResponses','allLMSPositions');
-
