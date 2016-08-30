@@ -78,7 +78,8 @@ nBaseScenes = numel(baseSceneSet);
 
 % luminanceLevels = [0.1:0.1:1.0];
 % nReflectances = 10;
-nLuminanceLevels =2;
+
+nLuminanceLevels = 2;
 luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
 nReflectances = 2;
 maxAttempts = 30;
@@ -110,7 +111,7 @@ end
 
 % iterate scene records with one parfor loop
 % Matlab does not support nested parfor loops
-parfor sceneIndex = 1:nScenes
+for sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
     targetLuminanceLevel = workingRecord.targetLuminanceLevel;
     rr = workingRecord.reflectanceNumber;
@@ -199,7 +200,7 @@ parfor sceneIndex = 1:nScenes
             targetLuminanceLevel, rr);
         
         [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminanceByName( ...
-             reflectanceFileName, workingRecord.hints);
+             reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
         
         % force the target object to use this computed reflectance
         workingRecord.choices.insertedObjects.scales{1} = 1 + rand();

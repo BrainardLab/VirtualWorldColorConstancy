@@ -16,7 +16,7 @@ function [theWavelengths, theReflectanceScaled, reflectanceName, matteMaterial, 
 % 3/23/16 vs  wrote it.
 
 % Load in the surface reflectance function associated with whichMaterial
-[theWavelengths, theReflectance] = LoadReflectance(whichMaterial,theLuminanceTarget);
+[theWavelengths, theReflectance] = LoadReflectanceByName(whichMaterial,theLuminanceTarget);
 
 if isempty(theLuminanceTarget)
     %% Use the reflectance as-is.

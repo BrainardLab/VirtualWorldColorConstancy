@@ -1,4 +1,4 @@
-function [wavelengths, magnitudes, fileName] = LoadReflectanceByName(whichOne)
+function [wavelengths, magnitudes, fileName] = LoadReflectanceByName(whichOne,theLuminanceTarget)
 %% Load a standard reflectance from the Reflectances/ folder.
 %
 % [wavelengths, magnitudes, fileName] = LoadReflectance(whichOne) loads one
@@ -20,7 +20,11 @@ function [wavelengths, magnitudes, fileName] = LoadReflectanceByName(whichOne)
 %% Locate the Reflectances folder.
 pathHere = fileparts(which('LoadReflectanceByName'));
 parentPath = fileparts(pathHere);
-reflectancesPath = fullfile(parentPath, 'Reflectances/TargetObjects');
+if isempty(theLuminanceTarget)
+    reflectancesPath = fullfile(parentPath, 'Reflectances/OtherObjects');
+else
+    reflectancesPath = fullfile(parentPath, 'Reflectances/TargetObjects');
+end
 
 %% Choose one spectru file.
 fileName = fullfile(reflectancesPath, whichOne);
