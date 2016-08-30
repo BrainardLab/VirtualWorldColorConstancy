@@ -1,7 +1,7 @@
 function [theWavelengths, theReflectanceScaled, reflectanceName, matteMaterial, wardMaterial] = ...
     computeLuminance(whichMaterial, theLuminanceTarget, hints)
 %
-% This function takes the material number and target luminanace level and
+% This function takes the material name and target luminanace level and
 % returns the scaled reflectance for the given material based on the target
 % luminance.
 %
@@ -16,12 +16,13 @@ function [theWavelengths, theReflectanceScaled, reflectanceName, matteMaterial, 
 % 3/23/16 vs  wrote it.
 
 % Load in the surface reflectance function associated with whichMaterial
-[theWavelengths, theReflectance] = LoadReflectanceByName(whichMaterial,theLuminanceTarget);
+
 
 if isempty(theLuminanceTarget)
-    %% Use the reflectance as-is.
+    %% Use the reflectance as-is.    
+    reflectanceName = sprintf('reflectance_%d.spd', whichMaterial);
+    [theWavelengths, theReflectance] = LoadReflectanceByName(reflectanceName,theLuminanceTarget);
     theReflectanceScaled = theReflectance;
-    reflectanceName = sprintf('reflectance-%d', whichMaterial);
 else
     %% Scale the reflectance for target luminance.
     
@@ -50,11 +51,11 @@ else
     % scale the reflectance
     scaleFactor = theLuminanceTarget / theLuminance;
     theReflectanceScaled = scaleFactor * theReflectance;
-    reflectanceName = sprintf('reflectance-%d-luminance-%.2f', whichMaterial, theLuminanceTarget);
+    reflectanceName = sprintf('reflectance-%d-luminance-%.2f.spd', whichMaterial, theLuminanceTarget);
 end
 
 %% Write a new spectrum file with the scaled reflectance.
-spectrumFile = [reflectanceName '.spd'];
+spectrumFile = reflectanceName;
 resourceFolder = GetWorkingFolder('resources', false, hints);
 spectrumFullPath = fullfile(resourceFolder, spectrumFile);
 WriteSpectrumFile(theWavelengths, theReflectanceScaled, spectrumFullPath);
