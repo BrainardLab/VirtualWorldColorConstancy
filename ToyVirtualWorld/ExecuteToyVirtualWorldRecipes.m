@@ -1,17 +1,18 @@
+function ExecuteToyVirtualWorldRecipes(varargin)
 %% Locate, unpack, and execute many WardLand recipes created earlier.
 %
 % Use this script to render many archived recipes created earlier.
 %
-% You can configure a few recipe parameters at the top of this script.
-% The values will apply to all generated recipes.  For example, you can
-% change the output image size here, when you execute the recipes.  You
-% don't have to generate new recipes to change the image size.
-%
-% @ingroup WardLand
+
+%% Get inputs and defaults.
+parser = inputParser();
+parser.addParameter('luminanceLevels', [], @isnumeric);
+parser.addParameter('reflectanceNumbers', [], @isnumeric);
+parser.parse(varargin{:});
+luminanceLevels = parser.Results.luminanceLevels;
+reflectanceNumbers = parser.Results.reflectanceNumbers;
 
 %% Overall Setup.
-clear;
-clc;
 
 % location of packed-up recipes
 % where to save new recipes
@@ -30,36 +31,34 @@ hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.imageWidth = 640 / 2;
 hints.imageHeight = 480 / 2;
 
-
-%% Locate and render each packed-up recipe.
+%% Locate and render packed-up recipes.
+archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflectanceNumbers);
+nScenes = numel(archiveFiles);
 
 timer = tic();
-
-archiveFiles = FindFiles(recipeFolder, '\.zip$');
-nScenes = numel(archiveFiles);
 parfor ii = 1:nScenes
-    % get the recipe
-    recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
-    
-    % modify rendering options
-    recipe.input.hints.renderer = hints.renderer;
-    recipe.input.hints.workingFolder = hints.workingFolder;
-    recipe.input.hints.imageWidth = hints.imageWidth;
-    recipe.input.hints.imageHeight = hints.imageHeight;
-    
-    % render and proceed after errors
     try
+        % get the recipe
+        recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
+        
+        % modify rendering options
+        recipe.input.hints.renderer = hints.renderer;
+        recipe.input.hints.workingFolder = hints.workingFolder;
+        recipe.input.hints.imageWidth = hints.imageWidth;
+        recipe.input.hints.imageHeight = hints.imageHeight;
+        
+        % render
         recipe = rtbExecuteRecipe(recipe, 'throwException', true);
+        
+        % save the results in a separate folder
+        [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
+        renderedArchiveFile = fullfile(renderingFolder, [archiveBase archiveExt]);
+        excludeFolders = {'temp'};
+        rtbPackUpRecipe(recipe, renderedArchiveFile, 'ignoreFolders', excludeFolders);
+        
     catch err
-        disp(err.message)
-        continue;
+        SaveToyVirutalWorldError(renderingFolder, err, recipe, varargin);
     end
-    
-    % save the results in a separate folder
-    [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
-    renderedArchiveFile = fullfile(renderingFolder, [archiveBase archiveExt]);
-    excludeFolders = {'temp'};
-    rtbPackUpRecipe(recipe, renderedArchiveFile, 'ignoreFolders', excludeFolders);
 end
 
 toc(timer);
