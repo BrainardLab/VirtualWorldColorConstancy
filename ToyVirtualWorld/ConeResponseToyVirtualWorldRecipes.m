@@ -127,6 +127,7 @@ parfor ii = 1:nRecipes
     [sRGBImage, ~, ~] = MultispectralToSRGB(imageData,[400,10,31],toneMapFactor, isScale);
     srgbUint = uint8(sRGBImage);
     image(srgbUint);
+    title(archiveBase);
     set(gca,'XTickLabel','');
     set(gca,'YTickLabel','');    
 
