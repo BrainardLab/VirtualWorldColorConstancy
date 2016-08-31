@@ -11,6 +11,8 @@ function MakeToyRecipesByCombinations(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('imageWidth', 320, @isnumeric);
+parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 10000, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
@@ -22,6 +24,8 @@ parser.addParameter('shapeSet', ...
 parser.addParameter('baseSceneSet', ...
     {'CheckerBoard', 'IndoorPlant', 'Library', 'Mill', 'TableChairs', 'Warehouse'}, @iscellstr);
 parser.parse(varargin{:});
+imageWidth = parser.Results.imageWidth;
+imageHeight = parser.Results.imageHeight;
 nOtherObjectSurfaceReflectance = parser.Results.nOtherObjectSurfaceReflectance;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
@@ -209,6 +213,8 @@ parfor sceneIndex = 1:nScenes
             
             %% Do a mask rendering, reject if target object is occluded.
             workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
+                'imageWidth', imageWidth, ...
+                'imageHeight', imageHeight, ...
                 'targetPixelThresholdMin', targetPixelThresholdMin, ...
                 'targetPixelThresholdMax', targetPixelThresholdMax, ...
                 'totalBoundingBoxPixels', 2601); % 2601 = 51* 51

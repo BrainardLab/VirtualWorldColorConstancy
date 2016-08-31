@@ -6,11 +6,15 @@ function ExecuteToyVirtualWorldRecipes(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('imageWidth', 320, @isnumeric);
+parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('luminanceLevels', [], @isnumeric);
 parser.addParameter('reflectanceNumbers', [], @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
+imageWidth = parser.Results.imageWidth;
+imageHeight = parser.Results.imageHeight;
 
 %% Overall Setup.
 
@@ -28,8 +32,8 @@ renderingFolder = fullfile(getpref(projectName, 'recipesFolder'),'Rendered');
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
 hints.workingFolder = getpref(projectName, 'workingFolder');
-hints.imageWidth = 640 / 2;
-hints.imageHeight = 480 / 2;
+hints.imageWidth = imageWidth;
+hints.imageHeight = imageHeight;
 
 %% Locate and render packed-up recipes.
 archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflectanceNumbers);

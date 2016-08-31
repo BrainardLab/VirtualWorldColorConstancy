@@ -6,11 +6,15 @@ function AnalyzeToyVirtualWorldRecipes(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('imageWidth', 320, @isnumeric);
+parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('luminanceLevels', [], @isnumeric);
 parser.addParameter('reflectanceNumbers', [], @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
+imageWidth = parser.Results.imageWidth;
+imageHeight = parser.Results.imageHeight;
 
 %% Overall Setup.
 
@@ -30,6 +34,8 @@ analysedFolder = fullfile(getpref(projectName, 'recipesFolder'),'Analysed');
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
 hints.workingFolder = getpref(projectName, 'workingFolder');
+hints.imageWidth = imageWidth;
+hints.imageHeight = imageHeight;
 
 % analysis params
 toneMapFactor = 10;
@@ -51,6 +57,8 @@ parfor ii = 1:nRecipes
     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
+        recipe.input.hints.imageWidth = hints.imageWidth;
+        recipe.input.hints.imageHeight = hints.imageHeight;
         ChangeToWorkingFolder(recipe.input.hints);
         
         % run basic recipe analysis functions
