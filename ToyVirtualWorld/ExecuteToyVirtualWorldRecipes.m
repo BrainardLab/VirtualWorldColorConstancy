@@ -37,6 +37,7 @@ nScenes = numel(archiveFiles);
 
 timer = tic();
 parfor ii = 1:nScenes
+    recipe = [];
     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);

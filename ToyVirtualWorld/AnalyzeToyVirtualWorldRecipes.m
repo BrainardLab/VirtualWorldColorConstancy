@@ -47,6 +47,7 @@ archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflect
 nRecipes = numel(archiveFiles);
 
 parfor ii = 1:nRecipes
+    recipe = [];
     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);

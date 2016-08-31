@@ -34,7 +34,8 @@ else
         for rr = 1:nReflectances
             reflectanceNumber = reflectanceNumbers(rr);
             
-            recipePattern = FormatRecipeName(targetLuminanceLevel, reflectanceNumber, '\w+', '\w+');
+            recipeName = FormatRecipeName(targetLuminanceLevel, reflectanceNumber, '\w+', '\w+');
+            recipePattern = [recipeName '\.zip$'];
             archiveMatches = FindFiles(recipeFolder, recipePattern);
             
             if isempty(archiveMatches)
