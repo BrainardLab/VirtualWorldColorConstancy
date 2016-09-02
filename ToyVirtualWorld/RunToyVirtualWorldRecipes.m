@@ -13,11 +13,11 @@ function RunToyVirtualWorldRecipes(varargin)
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('makeWidth', 320, @isnumeric);
-parser.addParameter('makeHeight', 320, @isnumeric);
+parser.addParameter('makeHeight', 240, @isnumeric);
 parser.addParameter('executeWidth', 320, @isnumeric);
-parser.addParameter('executeHeight', 320, @isnumeric);
+parser.addParameter('executeHeight', 240, @isnumeric);
 parser.addParameter('analyzeWidth', 320, @isnumeric);
-parser.addParameter('analyzeHeight', 320, @isnumeric);
+parser.addParameter('analyzeHeight', 240, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.parse(varargin{:});
