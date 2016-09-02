@@ -30,6 +30,12 @@ analyzeHeight = parser.Results.analyzeHeight;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 
+%% Set up ful-sized parpool if available.
+if exist('parpool', 'file')
+    nCores = feature('numCores');
+    parpool('local', nCores);
+end
+
 %% Go through the steps for this combination of parameters.
 MakeToyRecipesByCombinations( ...
     'imageWidth', makeWidth, ...
