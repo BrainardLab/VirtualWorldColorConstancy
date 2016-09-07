@@ -1,7 +1,7 @@
 % Illuminance Generation example
 
 % Clear
-clear; close all;
+clear; %close all;
 
 % Desired wl sampling
 nIlluminances = 100;
@@ -17,17 +17,18 @@ daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
 % daylightGranadaRescaled = daylightGranadaOriginal./repmat(meanDaylightGranada,[size(daylightGranadaOriginal,1),1]);
 
 % From each spectra subtract its mean value
-meanDaylightGranada = mean(daylightGranadaOriginal);  
-daylightGranadaMeanCentered = bsxfun(@minus,daylightGranadaOriginal,meanDaylightGranada);
+% meanDaylightGranada = mean(daylightGranadaOriginal);  
+% daylightGranadaMeanCentered = bsxfun(@minus,daylightGranadaOriginal,meanDaylightGranada);
 
 % Normalize the mean values by their L2 norm
-lengthDaylightGranada = sqrt(sum(daylightGranadaMeanCentered.*daylightGranadaMeanCentered));  
-daylightGranadaRescaled = daylightGranadaMeanCentered./repmat(lengthDaylightGranada,[size(daylightGranadaOriginal,1),1]);
+lengthDaylightGranada = sqrt(sum(daylightGranadaOriginal.*daylightGranadaOriginal));  
+daylightGranadaRescaled = daylightGranadaOriginal./repmat(lengthDaylightGranada,[size(daylightGranadaOriginal,1),1]);
 
 % Add the mean value rescaled by the L2 norm
-daylightGranadaRescaled = bsxfun(@plus,daylightGranadaRescaled,meanDaylightGranada./lengthDaylightGranada);
+% daylightGranadaRescaled = bsxfun(@plus,daylightGranadaRescaled,meanDaylightGranada./lengthDaylightGranada);
 
 % Center the data for PCA
+% daylightGranadaRescaled = daylightGranadaOriginal;
 meandaylightGranadaRescaled = mean(daylightGranadaRescaled,2);
 daylightGranadaRescaledMeanSubtracted = bsxfun(@minus,daylightGranadaRescaled,meandaylightGranadaRescaled);
 
@@ -96,11 +97,11 @@ plot(SToWls(S),daylightGranadaRescaled);
 title('Daylight Granada Rescaled');
 xlabel('Wavelength (nm)')
 ylabel('Rescaled Spectral Power Distribution')
-ylim(ylimit);
+% ylim(ylimit);
 
 subplot(2,3,3)
 plot(SToWls(S),newIlluminance);
-ylim(ylimit);
+% ylim(ylimit);
 title('New Randomly Generated Illuminance Spectra');
 xlabel('Wavelength (nm)')
 ylabel('Rescaled Spectral Power Distribution')
@@ -130,10 +131,10 @@ image(theIlluminationImage);
 axis off;
 
 %% This part saves the new Illuminants
-theWavelengths = SToWls(S);
-for ii = 1 : nIlluminances
-filename = ['illuminance_' num2str(ii)  '.spd'];
-fid = fopen(filename,'w');
-fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,ii)]');
-fclose(fid);
-end
+% theWavelengths = SToWls(S);
+% for ii = 1 : nIlluminances
+% filename = ['illuminance_' num2str(ii)  '.spd'];
+% fid = fopen(filename,'w');
+% fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,ii)]');
+% fclose(fid);
+% end

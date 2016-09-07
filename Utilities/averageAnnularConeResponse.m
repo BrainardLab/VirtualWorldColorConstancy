@@ -1,6 +1,6 @@
 function [ averageResponse ] = averageAnnularConeResponse(nAnnularRegions, coneResponse)
-%UNTITLED2 Summary of this function goes here
-%   Detailed explanation goes here
+% This function calcuates the LMS cone responses in concentric annular
+% regions wiht the center at the center pixel of the cone mosaic.
 
     averageResponse=zeros(nAnnularRegions,3);
     

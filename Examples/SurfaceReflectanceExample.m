@@ -20,7 +20,7 @@ figure; clf;
 plot(SToWls(S),sur_vrhel);
 
 %% Put them together
-sur_all = [sur_vrhel];
+sur_all = [sur_nickerson sur_vrhel];
 sur_mean=mean(sur_all,2);
 sur_all_mean_centered = bsxfun(@minus,sur_all,sur_mean);
 
