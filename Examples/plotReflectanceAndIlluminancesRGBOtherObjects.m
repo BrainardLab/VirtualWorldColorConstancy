@@ -13,15 +13,27 @@ daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
 % daylightGranadaRescaled = daylightGranadaOriginal./repmat(maxDaylightGranada,[size(daylightGranadaOriginal,1),1]);
 % meanDaylightGranada = mean(daylightGranadaOriginal);  
 % daylightGranadaRescaled = daylightGranadaOriginal./repmat(meanDaylightGranada,[size(daylightGranadaOriginal,1),1]);
+
+% From each spectra subtract its mean value
+% meanDaylightGranada = mean(daylightGranadaOriginal);  
+% daylightGranadaMeanCentered = bsxfun(@minus,daylightGranadaOriginal,meanDaylightGranada);
+
+% Normalize the mean values by their L2 norm
 lengthDaylightGranada = sqrt(sum(daylightGranadaOriginal.*daylightGranadaOriginal));  
 daylightGranadaRescaled = daylightGranadaOriginal./repmat(lengthDaylightGranada,[size(daylightGranadaOriginal,1),1]);
+
+% Add the mean value rescaled by the L2 norm
+% daylightGranadaRescaled = bsxfun(@plus,daylightGranadaRescaled,meanDaylightGranada./lengthDaylightGranada);
+
+% Center the data for PCA
+% daylightGranadaRescaled = daylightGranadaOriginal;
 meandaylightGranadaRescaled = mean(daylightGranadaRescaled,2);
 daylightGranadaRescaledMeanSubtracted = bsxfun(@minus,daylightGranadaRescaled,meandaylightGranadaRescaled);
 
 
 %% Analyze with respect to a linear model
-B = FindLinMod(daylightGranadaRescaled,6);
-ill_granada_wgts = B\daylightGranadaRescaled;
+B = FindLinMod(daylightGranadaRescaledMeanSubtracted,6);
+ill_granada_wgts = B\daylightGranadaRescaledMeanSubtracted;
 mean_wgts = mean(ill_granada_wgts,2);
 cov_wgts = cov(ill_granada_wgts');
 

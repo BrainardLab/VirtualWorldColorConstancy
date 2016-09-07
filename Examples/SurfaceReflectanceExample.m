@@ -10,14 +10,20 @@ nSurfaces = 10000;
 %% Munsell surfaces
 load sur_nickerson
 sur_nickerson = SplineSrf(S_nickerson,sur_nickerson,S);
-figure; clf;
-plot(SToWls(S),sur_nickerson);
+% figure; clf;
+% plot(SToWls(S),sur_nickerson);
+% title('Munsell Surface Reflectance Sepectra');
+% xlabel('wavelengths (nm)');
+% ylabel('reflectance');
 
 %% Vhrel surfaces
 load sur_vrhel 
 sur_vrhel = SplineSrf(S_vrhel,sur_vrhel,S);
-figure; clf;
-plot(SToWls(S),sur_vrhel);
+% figure; clf;
+% plot(SToWls(S),sur_vrhel);
+% title('vrhel Surface Reflectance Sepectra');
+% xlabel('wavelengths (nm)');
+% ylabel('reflectance');
 
 %% Put them together
 sur_all = [sur_nickerson sur_vrhel];
