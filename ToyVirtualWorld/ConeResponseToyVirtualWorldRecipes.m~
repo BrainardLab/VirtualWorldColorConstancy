@@ -5,12 +5,16 @@ function ConeResponseToyVirtualWorldRecipes(varargin)
 %
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('imageWidth', 320, @isnumeric);
+parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('luminanceLevels', [], @isnumeric);
 parser.addParameter('reflectanceNumbers', [], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
+imageWidth = parser.Results.imageWidth;
+imageHeight = parser.Results.imageHeight;
 nAnnularRegions = parser.Results.nAnnularRegions;
 %% Overall Setup.
 
@@ -121,11 +125,6 @@ for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
 ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
-numLMSCones=numLMSCones(1,:);
-allLMSPositions=allLMSPositions(:,:,1);
-
-allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
-
 save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
-                'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
-            'allNNLMS','allLMSResponses','allLMSPositions');
+    'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones','allLMSResponses','allLMSPositions');
+                     

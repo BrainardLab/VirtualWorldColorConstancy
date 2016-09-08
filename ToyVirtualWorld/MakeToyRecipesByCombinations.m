@@ -13,6 +13,7 @@ function MakeToyRecipesByCombinations(varargin)
 parser = inputParser();
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
+parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 10000, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
@@ -26,6 +27,7 @@ parser.addParameter('baseSceneSet', ...
 parser.parse(varargin{:});
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
+cropImageHalfSize = parser.Results.cropImageHalfSize;
 nOtherObjectSurfaceReflectance = parser.Results.nOtherObjectSurfaceReflectance;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
@@ -217,7 +219,7 @@ parfor sceneIndex = 1:nScenes
                 'imageHeight', imageHeight, ...
                 'targetPixelThresholdMin', targetPixelThresholdMin, ...
                 'targetPixelThresholdMax', targetPixelThresholdMax, ...
-                'totalBoundingBoxPixels', 2601); % 2601 = 51* 51
+                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2); 
             if workingRecord.rejected
                 % delete this recipe and try again
                 rejectedFolder = GetWorkingFolder('', false, workingRecord.hints);
