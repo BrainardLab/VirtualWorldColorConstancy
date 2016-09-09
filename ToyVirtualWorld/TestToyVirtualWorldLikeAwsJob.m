@@ -61,10 +61,12 @@ nConeResponse = numel(d) - 2;
 
 
 %% Plot timing info.
-timing = 24 * diff([makeStart makeEnd executeEnd analyseEnd coneResponseEnd]);
+timing = 60 * 24 * diff([makeStart makeEnd executeEnd analyseEnd coneResponseEnd]);
 bar([timing; zeros(size(timing))], 'stacked');
 legend( ...
     sprintf('Make %d', nOriginals), ...
     sprintf('Execute %d', nRendered), ...
     sprintf('Analyse %d', nAnalysed), ...
     sprintf('ConeResponse %d', nConeResponse))
+set(gca(), 'XTick', 1, 'XTickLabel', {'local'});
+ylabel('processing time (minutes)')
