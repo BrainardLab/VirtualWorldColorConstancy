@@ -4,7 +4,9 @@
 clear; %close all;
 
 % Desired wl sampling
-nIlluminances = 100;
+nIlluminances = 1000;
+rescaling = 0;  % O no rescaling
+                % 1 rescaling
 
 S = [400 5 61];
 theWavelengths = SToWls(S);
@@ -28,7 +30,9 @@ daylightGranadaRescaled = daylightGranadaOriginal./repmat(lengthDaylightGranada,
 % daylightGranadaRescaled = bsxfun(@plus,daylightGranadaRescaled,meanDaylightGranada./lengthDaylightGranada);
 
 % Center the data for PCA
-% daylightGranadaRescaled = daylightGranadaOriginal;
+if ~ rescaling 
+    daylightGranadaRescaled = daylightGranadaOriginal;
+end
 meandaylightGranadaRescaled = mean(daylightGranadaRescaled,2);
 daylightGranadaRescaledMeanSubtracted = bsxfun(@minus,daylightGranadaRescaled,meandaylightGranadaRescaled);
 
@@ -97,11 +101,12 @@ plot(SToWls(S),daylightGranadaRescaled);
 title('Daylight Granada Rescaled');
 xlabel('Wavelength (nm)')
 ylabel('Rescaled Spectral Power Distribution')
-% ylim(ylimit);
+ylimit=get(gca,'ylim');
+ylim(ylimit);
 
 subplot(2,3,3)
 plot(SToWls(S),newIlluminance);
-% ylim(ylimit);
+ylim(ylimit);
 title('New Randomly Generated Illuminance Spectra');
 xlabel('Wavelength (nm)')
 ylabel('Rescaled Spectral Power Distribution')
