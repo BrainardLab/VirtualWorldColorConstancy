@@ -44,20 +44,15 @@ targetMask = LoadRecipeProcessingImageFile(recipe, 'radiance', 'mask');
 isTarget = 0 < sum(targetMask, 3);
 targetPixelCount = sum(isTarget(:));
 
-targetInds = find(isTarget) - 1;
-    nRows = size(isTarget, 1);
-    targetRows = 1 + mod(targetInds, nRows);
-    targetCols = 1 + floor(targetInds / nRows);
-    targetTop = min(targetRows);
-    targetBottom = max(targetRows);
-    targetLeft = min(targetCols);
-    targetRight = max(targetCols);
-    targetCenterR = targetTop + floor((targetBottom-targetTop)/2);
-    targetCenterC = targetLeft + floor((targetRight-targetLeft)/2);
+if ((targetPixelCount/totalBoundingBoxPixels < targetPixelThresholdMin || ...
+    targetPixelCount/totalBoundingBoxPixels > targetPixelThresholdMax))
     
-rejected = ( (targetPixelCount/totalBoundingBoxPixels < targetPixelThresholdMin || ...
-    targetPixelCount/totalBoundingBoxPixels > targetPixelThresholdMax) ...
-    || ~(isTarget(targetCenterR,targetCenterC)) );
-    
-fprintf('target pixels %d, %d -> rejected %d\n', ...
+    rejected =1;
+    fprintf('target pixels %d -> rejected %d\n',targetPixelCount ,rejected);
+else
+    [targetCenterR, targetCenterC] = findTargetCenter(isTarget);
+    rejected =  ~(isTarget(targetCenterR,targetCenterC)) ;    
+    fprintf('target pixels %d, center pixel %d -> rejected %d\n', ...
     targetPixelCount , isTarget(targetCenterR,targetCenterC),rejected);
+end
+    

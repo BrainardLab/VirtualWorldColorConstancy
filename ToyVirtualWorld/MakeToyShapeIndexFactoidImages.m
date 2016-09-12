@@ -67,10 +67,9 @@ if ~isempty(targetMask)
     targetBottom = max(targetRows);
     targetLeft = min(targetCols);
     targetRight = max(targetCols);
-    tragetCenterR = targetTop + floor((targetBottom-targetTop)/2);
-    tragetCenterC = targetLeft + floor((targetRight-targetLeft)/2);
-    cropLocationR = tragetCenterR - cropImageHalfSize;
-    cropLocationC = tragetCenterC - cropImageHalfSize;
+    [targetCenterR, targetCenterC] = findTargetCenter(isTarget);
+    cropLocationR = targetCenterR - cropImageHalfSize;
+    cropLocationC = targetCenterC - cropImageHalfSize;
     
     % color in the bounding box like the target shape
     shapeIndexMask(targetTop, targetLeft:targetRight) = targetShapeIndex;
