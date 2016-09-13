@@ -29,10 +29,17 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
         
         % find the points that have rank = 25
         [row, col] = find(isTargetRank==25);
-        row = unique(row);
-        col = unique(col);
-        targetCenterR = row(find((row-tempCenterR)==min(abs(row-tempCenterR))));
-        targetCenterC = col(find((col-tempCenterC)==min(abs(col-tempCenterC))));
+        
+        % pick the ones that are closest to center
+        distanceFromCenter = (row-tempCenterR).^2+(col-tempCenterC).^2;
+        [rowD, colD] = find(distanceFromCenter==min(distanceFromCenter));        
+        
+        % choose one of these randomly
+        indexChosen = rowD(randi(size(rowD)));
+
+        % Assign it as the center point for cropping
+        targetCenterR = row(indexChosen);
+        targetCenterC = col(indexChosen);
     end
         
 end
