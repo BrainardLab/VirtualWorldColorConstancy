@@ -1,4 +1,4 @@
-function RunToyVirtualWorldRecipes(varargin)
+function folderInfo = RunToyVirtualWorldRecipes(varargin)
 % Make, Execute, and Analyze Toy Virtual World Recipes.
 %
 % The idea of this function is to take a parameter set and carry it through
@@ -65,3 +65,48 @@ ConeResponseToyVirtualWorldRecipes(...
     'luminanceLevels', luminanceLevels, ...
     'reflectanceNumbers', reflectanceNumbers, ...
     'nAnnularRegions', 25);
+
+
+%% Collect and save some file and timing info.
+projectName = 'ToyVirtualWorld';
+workingFolder = fullfile(getpref(projectName, 'recipesFolder'));
+subfolderNames = { ...
+    fullfile('Working', 'resources'), ...
+    'Originals', ...
+    'Rendered', ...
+    'Analysed', ...
+    'ConeResponse', ...
+    };
+
+folderInfo = struct( ...
+    'subfolder', subfolderNames, ...
+    'fullPath', [], ...
+    'dir', [], ...
+    'lastModified', [], ...
+    'nFiles', [], ...
+    'label', []);
+nFolders = numel(folderInfo);
+for ff = 1:nFolders
+    folderInfo(ff).fullPath = fullfile(workingFolder, folderInfo(ff).subfolder);
+    d = dir(folderInfo(ff).fullPath);
+    folderInfo(ff).dir = d;
+    folderInfo(ff).lastModified = datenum(d(1).date);
+    folderInfo(ff).nFiles = numel(d) - 2;
+    folderInfo(ff).label = sprintf('%s %d', folderInfo(ff).subfolder, folderInfo(ff).nFiles);
+end
+
+folderInfoFile = fullfile(workingFolder, 'RunToyVirtualWorldRecipes_FolderInfo');
+save(folderInfoFile);
+
+
+%% Plot timing info.
+timing = 60 * 24 * diff([folderInfo.lastModified]);
+bar([timing; zeros(size(timing))], 'stacked');
+legend({folderInfo(2:end).label});
+set(gca(), 'XTick', 1, 'XTickLabel', {});
+ylabel('processing time (minutes)');
+title('RunToyVirtualWorldRecipes');
+
+figureFile = fullfile(workingFolder, 'RunToyVirtualWorldRecipes_Timing');
+savefig(figureFile);
+
