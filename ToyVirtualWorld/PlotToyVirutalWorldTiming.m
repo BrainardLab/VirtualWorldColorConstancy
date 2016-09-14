@@ -1,4 +1,4 @@
-function folderInfo = PlotToyVirutalWorldTiming()
+function folderInfo = PlotToyVirutalWorldTiming(varargin)
 %% Plot ToyVirtualWorld execution times based on folder timestamps.
 %
 % folderInfo = PlotToyVirutalWorldTiming() examines several subfolders of
@@ -12,10 +12,12 @@ function folderInfo = PlotToyVirutalWorldTiming()
 % Also returns a struct of folder information.  Also saves a mat-file with
 % the same folder information in the project folder.
 
+parser = inputParser();
+parser.addParameter('workingFolder', fullfile(getpref('ToyVirtualWorld', 'recipesFolder')), @ischar);
+parser.parse(varargin{:});
+workingFolder = parser.Results.workingFolder;
 
 %% Collect and save some file and timing info.
-projectName = 'ToyVirtualWorld';
-workingFolder = fullfile(getpref(projectName, 'recipesFolder'));
 subfolderNames = { ...
     fullfile('Working', 'resources'), ...
     'Originals', ...
@@ -36,8 +38,13 @@ for ff = 1:nFolders
     folderInfo(ff).fullPath = fullfile(workingFolder, folderInfo(ff).subfolder);
     d = dir(folderInfo(ff).fullPath);
     folderInfo(ff).dir = d;
-    folderInfo(ff).lastModified = datenum(d(1).date);
-    folderInfo(ff).nFiles = numel(d) - 2;
+    if isempty(d)
+        folderInfo(ff).lastModified = nan;
+        folderInfo(ff).nFiles = 0;
+    else
+        folderInfo(ff).lastModified = datenum(d(1).date);
+        folderInfo(ff).nFiles = numel(d) - 2;
+    end
     folderInfo(ff).label = sprintf('%s %d', folderInfo(ff).subfolder, folderInfo(ff).nFiles);
 end
 
