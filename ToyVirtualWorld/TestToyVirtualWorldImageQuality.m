@@ -113,5 +113,6 @@ end
 %% Plot the timing results.
 % at each condition, a cluster of bars -- one for each recipe
 bar(executeTimes / 60);
-set(gca(), 'XTickLabel', {conditions.name})
+legend({conditions.name})
 ylabel('execute time (minutes)')
+xlabel('recipe number')
