@@ -98,7 +98,7 @@ parfor ii = 1:nScenes
             
             % save the results in a separate folder
             [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
-            qualityArchiveFile = fullfile(qualityFolder, [archiveBase archiveExt]);
+            qualityArchiveFile = fullfile(qualityFolder, [archiveBase '-' condition.name archiveExt]);
             excludeFolders = {'temp', 'resources', 'scenes'};
             rtbPackUpRecipe(recipe, qualityArchiveFile, 'ignoreFolders', excludeFolders);
             
@@ -111,7 +111,7 @@ parfor ii = 1:nScenes
 end
 
 %% Plot the timing results.
-% at each condition, a cluster of bars -- one for each recipe
+% for each recipe, a cluster of bars -- one for each condition
 bar(executeTimes / 60);
 legend({conditions.name})
 ylabel('execute time (minutes)')
