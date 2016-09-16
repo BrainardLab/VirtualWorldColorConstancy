@@ -55,6 +55,7 @@ ctgInd = zeros(1,nRecipes);
 allLMSResponses = [];
 numLMSCones = [];
 coneRescalingFactors = [];
+allLMSIndicator = [];
 
 parfor ii = 1:nRecipes
     recipe = [];
@@ -96,6 +97,7 @@ parfor ii = 1:nRecipes
         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
         allLMSResponses(:,ii) = LMSResponseVector;
         allLMSPositions(:,:,ii) = LMSPositions;
+        allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
     
 %% Save modified recipe 
         recipe.processing.coneResponse = coneResponse;
@@ -129,9 +131,9 @@ end
 numLMSCones=numLMSCones(1,:);
 allLMSPositions=allLMSPositions(:,:,1);
 coneRescalingFactors=coneRescalingFactors(:,1);
-
+allLMSIndicator = allLMSIndicator(:,:,1);
 allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
 
 save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
                 'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
-            'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors');
+            'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors','allLMSIndicator');
