@@ -44,7 +44,7 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
             targetCenterC = [];
         else
             % choose one of these randomly
-            indexChosen = rowD(randi(size(rowD)));
+            indexChosen = rowD(randi(size(rowD,1)));
 
             % Assign it as the center point for cropping
             targetCenterR = row(indexChosen);

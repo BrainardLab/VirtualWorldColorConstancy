@@ -67,7 +67,7 @@ parfor ii = 1:nRecipes
         radiance = recipe.processing.target.croppedImage;
         wave = 400:10:700;
     
-        randomSeed = 1234;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
+        randomSeed = 4343;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
     
         coneResponse = [];
