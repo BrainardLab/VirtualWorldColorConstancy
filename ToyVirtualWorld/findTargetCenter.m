@@ -18,14 +18,16 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
     tempCenterR = targetTop + floor((targetBottom-targetTop)/2);
     tempCenterC = targetLeft + floor((targetRight-targetLeft)/2);
 
-    if (sum(sum(isTarget(tempCenterR-2:tempCenterR+2,tempCenterC-2:tempCenterC+2)))==centerPixelArea)
+    if (sum(sum(isTarget(tempCenterR-centerPixelNN:tempCenterR+centerPixelNN,...
+            tempCenterC-centerPixelNN:tempCenterC+centerPixelNN)))==centerPixelArea)
         targetCenterR = tempCenterR;
         targetCenterC = tempCenterC;
     else
         % find rank of each point on the target
-        for ii = 3: (size(isTarget,1)-2)
-            for jj = 3: (size(isTarget,2)-2)
-                isTargetRank(ii,jj) = sum(sum(isTarget(ii-2:ii+2,jj-2:jj+2)));
+        for ii = (centerPixelNN+1): (size(isTarget,1)-centerPixelNN)
+            for jj = (centerPixelNN+1): (size(isTarget,2)-centerPixelNN)
+                isTargetRank(ii,jj) = sum(sum(isTarget(ii-centerPixelNN:ii+centerPixelNN,...
+                    jj-centerPixelNN:jj+centerPixelNN)));
             end
         end
         
@@ -34,7 +36,7 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
         
         % pick the ones that are closest to center
         distanceFromCenter = (row-tempCenterR).^2+(col-tempCenterC).^2;
-%         [rowD, colD] = find(distanceFromCenter==min(distanceFromCenter));        
+%         [rowD, colD] = find(distanceFromCenter == min(distanceFromCenter));        
         [rowD, colD] = find(distanceFromCenter);        
         
         % choose one of these randomly
