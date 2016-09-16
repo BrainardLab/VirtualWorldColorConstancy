@@ -68,7 +68,7 @@ parfor ii = 1:nRecipes
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-        excludeFolders = {'temp', 'resources', 'scenes', 'textures'};
+        excludeFolders = {'temp', 'resources', 'scenes'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
         
         % clean up temp files we don't need going forward

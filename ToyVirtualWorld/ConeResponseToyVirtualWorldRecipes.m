@@ -8,10 +8,13 @@ parser = inputParser();
 parser.addParameter('luminanceLevels', [], @isnumeric);
 parser.addParameter('reflectanceNumbers', [], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
+parser.addParameter('mosaicHalfSize', 25, @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 nAnnularRegions = parser.Results.nAnnularRegions;
+mosaicHalfSize = parser.Results.mosaicHalfSize;
+
 %% Overall Setup.
 
 % location of packed-up recipes
@@ -79,9 +82,9 @@ parfor ii = 1:nRecipes
             'distance', 1.0, ...                            % distance to object in meters
             'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
             'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
-            'isomerizationNoise', false, ...                % whether to add isomerization noise or not
+            'isomerizationNoise', true, ...                 % whether to add isomerization noise or not
             'responseInstances', 100, ...                   % number of response instances to compute (only when isomerizationNoise = true)
-            'mosaicHalfSize', 25, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+            'mosaicHalfSize', mosaicHalfSize, ...           % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
             'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
             'randomSeed', randomSeed, ...                   % the random seed to use
             'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics

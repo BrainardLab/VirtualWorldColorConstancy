@@ -15,13 +15,14 @@ parser = inputParser();
 parser.addParameter('makeWidth', 320, @isnumeric);
 parser.addParameter('makeHeight', 240, @isnumeric);
 parser.addParameter('makeCropImageHalfSize', 25, @isnumeric);
-parser.addParameter('executeWidth', 320, @isnumeric);
-parser.addParameter('executeHeight', 240, @isnumeric);
-parser.addParameter('analyzeWidth', 320, @isnumeric);
-parser.addParameter('analyzeHeight', 240, @isnumeric);
-parser.addParameter('analyzeCropImageHalfSize', 25, @isnumeric);
+parser.addParameter('executeWidth', 640, @isnumeric);
+parser.addParameter('executeHeight', 480, @isnumeric);
+parser.addParameter('analyzeWidth', 640, @isnumeric);
+parser.addParameter('analyzeHeight', 480, @isnumeric);
+parser.addParameter('analyzeCropImageHalfSize', 50, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
+parser.addParameter('mosaicHalfSize', 50, @isnumeric);
 parser.parse(varargin{:});
 makeWidth = parser.Results.makeWidth;
 makeHeight = parser.Results.makeHeight;
@@ -33,9 +34,12 @@ analyzeHeight = parser.Results.analyzeHeight;
 analyzeCropImageHalfSize = parser.Results.analyzeCropImageHalfSize;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
+mosaicHalfSize = parser.Results.mosaicHalfSize;
+
 
 %% Set up ful-sized parpool if available.
 if exist('parpool', 'file')
+    delete(gcp('nocreate'));
     nCores = feature('numCores');
     parpool('local', nCores);
 end
@@ -65,12 +69,14 @@ try
     ConeResponseToyVirtualWorldRecipes(...
         'luminanceLevels', luminanceLevels, ...
         'reflectanceNumbers', reflectanceNumbers, ...
-        'nAnnularRegions', 25);
+        'nAnnularRegions', 25, ...
+        'mosaicHalfSize', mosaicHalfSize);
     
 catch err
     workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
     SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipes', varargin);
 end
+
 
 %% Save timing info.
 PlotToyVirutalWorldTiming();
