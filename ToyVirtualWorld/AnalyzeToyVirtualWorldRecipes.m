@@ -68,8 +68,14 @@ parfor ii = 1:nRecipes
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-        excludeFolders = {'temp'};
+        excludeFolders = {'temp', 'resources', 'scenes', 'textures'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
+        
+        % clean up temp files we don't need going forward
+        tempFolder = rtbWorkingFolder('folderName', 'temp', 'hints', hints);
+        if exist(tempFolder, 'dir')
+            rmdir(tempFolder, 's');
+        end
         
     catch err
         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);

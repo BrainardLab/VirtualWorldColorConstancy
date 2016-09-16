@@ -72,6 +72,5 @@ catch err
     SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipes', varargin);
 end
 
+%% Save timing info.
 PlotToyVirutalWorldTiming();
-
-

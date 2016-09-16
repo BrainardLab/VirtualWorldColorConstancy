@@ -58,7 +58,7 @@ parfor ii = 1:nScenes
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         renderedArchiveFile = fullfile(renderingFolder, [archiveBase archiveExt]);
-        excludeFolders = {'temp'};
+        excludeFolders = {'temp', 'resources', 'scenes', 'textures'};
         rtbPackUpRecipe(recipe, renderedArchiveFile, 'ignoreFolders', excludeFolders);
         
     catch err
