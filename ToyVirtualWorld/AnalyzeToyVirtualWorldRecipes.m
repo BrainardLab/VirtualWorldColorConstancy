@@ -72,7 +72,7 @@ parfor ii = 1:nRecipes
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
         
         % clean up temp files we don't need going forward
-        tempFolder = rtbWorkingFolder('folderName', 'temp', 'hints', hints);
+        tempFolder = rtbWorkingFolder('folderName', 'temp', 'hints', recipe.input.hints);
         if exist(tempFolder, 'dir')
             rmdir(tempFolder, 's');
         end
