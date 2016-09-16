@@ -8,7 +8,13 @@ function SaveToyVirutalWorldError(recipeFolder, error, recipe, extra)
 % Virutal World runs, since save() is not allowed from directly inside
 % parfor loops.
 
-recipeName = recipe.input.hints.recipeName;
+if isstruct(recipe)
+    recipeName = recipe.input.hints.recipeName;
+elseif ischar(recipe)
+    recipeName = recipe;
+else
+    recipeName = 'recipe';
+end
 fprintf('Error for recipe "%s":\n%s', ...
     recipeName, ...
     error.message);

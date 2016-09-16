@@ -68,7 +68,7 @@ try
         'nAnnularRegions', 25);
 catch err
     workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
-    SaveToyVirutalWorldError(workingFolder, err, [], varargin);
+    SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipesFor', varargin);
 end
 
 PlotToyVirutalWorldTiming();

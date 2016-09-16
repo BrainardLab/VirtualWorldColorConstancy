@@ -41,7 +41,7 @@ if exist('parpool', 'file')
 end
 
 %% Go through the steps for this combination of parameters.
-try
+try    
     MakeToyRecipesByCombinations( ...
         'imageWidth', makeWidth, ...
         'imageHeight', makeHeight, ...
@@ -69,7 +69,7 @@ try
     
 catch err
     workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
-    SaveToyVirutalWorldError(workingFolder, err, [], varargin);
+    SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipes', varargin);
 end
 
 PlotToyVirutalWorldTiming();
