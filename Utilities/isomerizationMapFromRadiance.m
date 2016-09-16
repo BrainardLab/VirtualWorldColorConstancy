@@ -1,4 +1,4 @@
-function [isomerizationsVector, coneIndicator, conePositions, processingOptions, visualizationInfo] = ...
+function [isomerizationsVector, coneIndicator, conePositions, processingOptions, visualizationInfo, varargout] = ...
     isomerizationMapFromRadiance(radiance, wave, varargin)
  
     % default parameters
@@ -7,6 +7,9 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     defaultDistance = 1.0;
     
     defaultConeLMSdensities = [0.6 0.3 0.1];
+    defaultConeEfficiencyBasedReponseScaling = 'none';
+    defaultIsomerizationNoise = false;
+    defaultResponseInstances = 1;
     defaultMosaicHalfSize = 5; 
     defaultConeStride = 15;
     defaultLowPassFilter = 'none';
@@ -15,15 +18,18 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     
     % parse the input for parameter modifiers
     parser = inputParser;
-    parser.addParamValue('meanLuminance',   defaultMeanLuminance,   @isnumeric);
-    parser.addParamValue('horizFOV',        defaultHorizFOV,        @isnumeric);
-    parser.addParamValue('distance',        defaultDistance,        @isnumeric);
-    parser.addParamValue('mosaicHalfSize',  defaultMosaicHalfSize,  @isnumeric);
-    parser.addParamValue('coneLMSdensities', defaultConeLMSdensities, @isvector);
-    parser.addParamValue('coneStride',      defaultConeStride,      @isnumeric);
-    parser.addParamValue('lowPassFilter',   defaultLowPassFilter,   @ischar);
-    parser.addParamValue('randomSeed',      defaultRandomSeed,      @isnumeric);
-    parser.addParamValue('skipOTF',         defaultSkipOTF,         @islogical);
+    parser.addParamValue('meanLuminance',                       defaultMeanLuminance,                       @isnumeric);
+    parser.addParamValue('horizFOV',                            defaultHorizFOV,                            @isnumeric);
+    parser.addParamValue('distance',                            defaultDistance,                            @isnumeric);
+    parser.addParamValue('mosaicHalfSize',                      defaultMosaicHalfSize,                      @isnumeric);
+    parser.addParamValue('coneLMSdensities',                    defaultConeLMSdensities,                    @isvector);
+    parser.addParamValue('coneEfficiencyBasedReponseScaling',   defaultConeEfficiencyBasedReponseScaling,   @ischar);
+    parser.addParamValue('isomerizationNoise',                  defaultIsomerizationNoise,                  @islogical);
+    parser.addParamValue('responseInstances',                   defaultResponseInstances,                   @isnumeric);
+    parser.addParamValue('coneStride',                          defaultConeStride,                          @isnumeric);
+    parser.addParamValue('lowPassFilter',                       defaultLowPassFilter,                       @ischar);
+    parser.addParamValue('randomSeed',                          defaultRandomSeed,                          @isnumeric);
+    parser.addParamValue('skipOTF',                             defaultSkipOTF,                             @islogical);
     
     % Execute the parser to make sure input is good
     parser.parse(varargin{:});
@@ -35,6 +41,10 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
        end
     end
  
+    if (p.isomerizationNoise == false)
+        p.responseInstances = 1;
+    end
+    
     % Take care of randomness
     if (isnan(p.randomSeed))
        rng('shuffle');   % produce different random numbers
@@ -42,6 +52,10 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
        rng(p.randomSeed);
     end
     
+    % Check that the coneEfficiencyBasedReponseScaling has a valid value
+    if (~ismember(p.coneEfficiencyBasedReponseScaling, {'none', 'peak', 'area'}))
+        error('''coneEfficiencyBasedReponseScaling'' must be one of the following: ''none'', ''peak'', ''area'' \n');
+    end
     
     % Create scene object
     scene = sceneCreate('multispectral');
@@ -107,41 +121,82 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     end
     
     
-    % Create human sensor
-    sensor = sensorCreate('human');
+    % Create human cone mosaic
+    humanConeMosaic = coneMosaic;
+    desiredMosaicFOVinMeters = ((2*p.mosaicHalfSize)* p.coneStride+1) * humanConeMosaic.pigment.width;
+    desiredMosaicFOVinDeg = desiredMosaicFOVinMeters * humanConeMosaic.fov(1)/humanConeMosaic.width;
+    humanConeMosaic.setSizeToFOV(desiredMosaicFOVinDeg);
+    humanConeMosaic.noiseFlag = p.isomerizationNoise;
     
-    % Set sensor size
-    sensor = sensorSet(sensor, 'size', (p.coneStride*(2*p.mosaicHalfSize)+1)*[1 1]);
-    
-    % Set LMS densities
-    sensor = sensorSet(sensor, 'densities', cat(2, 0, p.coneLMSdensities));
-    
-    % Subsample the mosaic
-    coneTypes = sensorGet(sensor, 'cone type');
-    % make all cones null
-    subSampledMosaic = ones(2*p.mosaicHalfSize+1,2*p.mosaicHalfSize+1);
+    % Subsample the mosaic pattern
+    subSampledPattern = ones(2*p.mosaicHalfSize+1,2*p.mosaicHalfSize+1);
     coneIndex = 0;
     for row = -p.mosaicHalfSize:p.mosaicHalfSize
         for col = -p.mosaicHalfSize:p.mosaicHalfSize
             coneIndex = coneIndex + 1;
-            subSampledMosaic((p.mosaicHalfSize+row)*p.coneStride+1, (p.mosaicHalfSize+col)*p.coneStride+1) = coneTypes(coneIndex);
+            subSampledPattern((p.mosaicHalfSize+row)*p.coneStride+1, (p.mosaicHalfSize+col)*p.coneStride+1) = humanConeMosaic.pattern(coneIndex);
         end
     end
-    sensor = sensorSet(sensor, 'cone type', subSampledMosaic);
+    humanConeMosaic.pattern = subSampledPattern;
     
-    % Compute cone isomerizations
-    sensor = coneAbsorptions(sensor, oi);
     
-    % Extract the isomerization map
-    fullIsomerizationMap = sensorGet(sensor, 'photon rate');
+    % Compute the isomerization maps
+    if (p.isomerizationNoise) && (p.responseInstances > 1)
+        for responseInstanceIndex = 1:p.responseInstances
+            if (responseInstanceIndex == 1)
+                tmp = humanConeMosaic.compute(oi,'currentFlag',false);
+                fullIsomerizationMap = zeros(p.responseInstances, size(tmp,1), size(tmp,2));
+                fullIsomerizationMap(1,:,:) = tmp;
+            else
+                fullIsomerizationMap(responseInstanceIndex,:,:) = humanConeMosaic.compute(oi,'currentFlag',false);
+            end
+        end
+    else
+        fullIsomerizationMap(1,:,:) = humanConeMosaic.compute(oi,'currentFlag',false);
+    end
+    
+    % Check whether the user asked to scale the isomerization responses
+    if (~strcmp(p.coneEfficiencyBasedReponseScaling, 'none'))
+        fprintf('Scaling responses to simulate equal quantal efficiencies for L,M and S cones.\n');
+        
+        % Compute the quantal cone efficiency for each cone at the cornea (i.e., after adding the lens filter, macular filter already included in humanConeMosaic.qe).
+        lensTransmittance = lensGet(Lens(),'transmittance');
+        cornealQuantalEfficiencies = bsxfun(@times, humanConeMosaic.qe, lensTransmittance);
+
+        % Compute the response scalars
+        if strcmp(p.coneEfficiencyBasedReponseScaling, 'peak')
+            % normalize for amplitude of quantal efficiency curves
+            scalarsToEqualizeCornealQuantalEfficiencies = 1./max(cornealQuantalEfficiencies, [], 1);
+        elseif strcmp(p.coneEfficiencyBasedReponseScaling, 'area')
+            % normalize for area of quantal efficiency curves
+            scalarsToEqualizeCornealQuantalEfficiencies = 1./sum(cornealQuantalEfficiencies, 1);
+        end
+        
+        scalarsToEqualizeCornealQuantalEfficiencies = scalarsToEqualizeCornealQuantalEfficiencies / scalarsToEqualizeCornealQuantalEfficiencies(1);
+        varargout{1} = scalarsToEqualizeCornealQuantalEfficiencies;
+        
+        
+        % Compute cone indices in the mosaic
+        for coneType = 1:3
+            coneIndices{coneType} = find(humanConeMosaic.pattern == coneType+1);
+        end
+        
+        % Apply the response scalars
+        for k = 1:p.responseInstances
+            frame = squeeze(fullIsomerizationMap(k,:,:));
+            for coneType = 1:3
+                frame(coneIndices{coneType}) = frame(coneIndices{coneType}) * scalarsToEqualizeCornealQuantalEfficiencies(coneType);
+            end
+            fullIsomerizationMap(k,:,:) = frame;
+        end
+    else
+        varargout{1} = [];
+    end
     
     
     % Compute returned parameters
-    sensorSpatialSupport = sensorGet(sensor, 'spatial support', 'microns');
-    coneTypes = sensorGet(sensor, 'cone type');
     keptConesNum = (2*p.mosaicHalfSize+1)^2;
-    
-    isomerizationsVector = zeros(keptConesNum,1);
+    isomerizationsVector = zeros(keptConesNum,p.responseInstances);
     coneIndicator = zeros(keptConesNum,3);
     conePositions = zeros(keptConesNum,2);
     
@@ -151,10 +206,14 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
         for col = -p.mosaicHalfSize:p.mosaicHalfSize
             coneIndex = coneIndex + 1;
             colNo = (p.mosaicHalfSize+col)*p.coneStride+1;
-            isomerizationsVector(coneIndex) = fullIsomerizationMap(rowNo, colNo);
-            conePositions(coneIndex,1) = sensorSpatialSupport.x(1, colNo);
-            conePositions(coneIndex,2) = sensorSpatialSupport.y(1, rowNo);
-            switch (coneTypes(rowNo, colNo))
+            
+            for responseInstanceIndex = 1:p.responseInstances
+                isomerizationsVector(coneIndex, responseInstanceIndex) = fullIsomerizationMap(responseInstanceIndex,rowNo, colNo);
+            end
+            
+            conePositions(coneIndex,1) = humanConeMosaic.patternSupport(rowNo, colNo, 1)*1e6;
+            conePositions(coneIndex,2) = humanConeMosaic.patternSupport(rowNo, colNo, 2)*1e6;
+            switch (humanConeMosaic.pattern(rowNo, colNo))
                 case 2 
                     coneIndicator(coneIndex,1) = 1;
                 case 3 
@@ -164,6 +223,7 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
             end
         end
     end
+    
     
     % The processing options
     processingOptions = p; 
