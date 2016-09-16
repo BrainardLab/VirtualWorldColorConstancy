@@ -4,7 +4,7 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
 % pixel has all neighbors and nearest neighbors on the target, then the
 % center is chosen. Otherwise, the center 
     
-    centerPixelNN = 5;
+    centerPixelNN = 4;
     centerPixelArea = (2*centerPixelNN+1)^2;
 
     targetInds = find(isTarget) - 1;
@@ -39,12 +39,17 @@ function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
 %         [rowD, colD] = find(distanceFromCenter == min(distanceFromCenter));        
         [rowD, colD] = find(distanceFromCenter);        
         
-        % choose one of these randomly
-        indexChosen = rowD(randi(size(rowD)));
+        if (size(rowD,1)==0)
+            targetCenterR = [];
+            targetCenterC = [];
+        else
+            % choose one of these randomly
+            indexChosen = rowD(randi(size(rowD)));
 
-        % Assign it as the center point for cropping
-        targetCenterR = row(indexChosen);
-        targetCenterC = col(indexChosen);
+            % Assign it as the center point for cropping
+            targetCenterR = row(indexChosen);
+            targetCenterC = col(indexChosen);
+        end
     end
         
 end

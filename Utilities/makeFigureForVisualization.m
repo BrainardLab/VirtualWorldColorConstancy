@@ -136,11 +136,11 @@ lmsSensitivities = 'T_cones_ss2';
         
 
         subplot(3,2,6);
-        normConeResponse = bsxfun(@rdivide,coneResponse.averageResponse,max(coneResponse.averageResponse));
+%         normConeResponse = bsxfun(@rdivide,coneResponse.averageResponse,max(coneResponse.averageResponse));
         hold on;
-        plot(normConeResponse(:,1),'r');
-        plot(normConeResponse(:,2),'g');
-        plot(normConeResponse(:,3),'b');
+        plot(coneResponse.averageResponse(:,1),'r');
+        plot(coneResponse.averageResponse(:,2),'g');
+        plot(coneResponse.averageResponse(:,3),'b');
         title('Normalised Average Annular Cone Response', 'FontSize', 12, 'FontName', 'Menlo');
         xlabel('Annular region Number', 'FontSize', 14); ylabel('Normalised Response', 'FontSize', 14);
         
