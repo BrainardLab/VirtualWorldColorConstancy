@@ -74,7 +74,7 @@ parfor ii = 1:nRecipes
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
     
         coneResponse = [];
-        [coneResponse.isomerizationsVector, coneResponse.coneIndicator, coneResponse.conePositions,...
+        [coneResponse.isomerizationsVector, coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
         coneResponse.processingOptions, coneResponse.visualizationInfo, coneEfficiencyBasedResponseScalars] = ...
         isomerizationMapFromRadiance(radiance, wave, ...
             'meanLuminance', 500, ...                       % mean luminance in c/m2
@@ -82,19 +82,26 @@ parfor ii = 1:nRecipes
             'distance', 1.0, ...                            % distance to object in meters
             'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
             'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
-            'isomerizationNoise', true, ...                 % whether to add isomerization noise or not
-            'responseInstances', 100, ...                   % number of response instances to compute (only when isomerizationNoise = true)
-            'mosaicHalfSize', mosaicHalfSize, ...           % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+            'isomerizationNoise', true, ...                % whether to add isomerization noise or not
+            'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
+            'mosaicHalfSize', 25, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
             'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
             'randomSeed', randomSeed, ...                   % the random seed to use
             'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics
             );
 
+%% Save Demosaiced response
+        allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
 %% Find average response for LMS cones in annular regions about the center pixel
         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
         coneResponse.averageResponse = averageResponse;
         allAverageAnnularResponses(:,ii) = averageResponse(:);
         coneRescalingFactors(:,ii) = coneEfficiencyBasedResponseScalars;
+%% Find average response in annular regions about the center pixel using demosaiced responses
+        averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
+        coneResponse.averageResponseDemosaic = averageResponseDemosaic;
+        allAverageAnnularResponsesDemosaic(:,:,ii) = averageResponseDemosaic(:);
+
 %% Represent the LMS response as a vector and save it for AMA    
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
@@ -139,4 +146,5 @@ allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSRespons
 
 save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
                 'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
-            'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors','allLMSIndicator');
+            'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
+            'allDemosaicResponse','allAverageAnnularResponsesDemosaic','allLMSIndicator');

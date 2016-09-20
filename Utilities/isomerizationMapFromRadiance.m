@@ -1,4 +1,4 @@
-function [isomerizationsVector, coneIndicator, conePositions, processingOptions, visualizationInfo, varargout] = ...
+function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, processingOptions, visualizationInfo, varargout] = ...
     isomerizationMapFromRadiance(radiance, wave, varargin)
  
     % default parameters
@@ -69,6 +69,9 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     % Set the scene's illuminant (assume D65 daylight illuminant)
     scene = sceneSet(scene,'illuminant',illuminantCreate('d65', wave));
     
+    % Return an RGB of the scene
+    sceneRGBrendition = sceneGet(scene, 'RGB');
+    
     % Adjust scene parameters
     % 1. Set the mean luminance
     scene = sceneAdjustLuminance(scene, p.meanLuminance);
@@ -94,6 +97,9 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     
     % Compute the optical image
     oi = oiCompute(oi, scene);
+    
+    % Return an RGB of the optical image
+    oiRGBrendition = sceneGet(oi, 'RGB');
     
     % Low pass the optical image (if so specified)
     oiRGBnoFilter = oiGet(oi, 'RGB image');
@@ -128,6 +134,7 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     humanConeMosaic.setSizeToFOV(desiredMosaicFOVinDeg);
     humanConeMosaic.noiseFlag = p.isomerizationNoise;
     
+    
     % Subsample the mosaic pattern
     subSampledPattern = ones(2*p.mosaicHalfSize+1,2*p.mosaicHalfSize+1);
     coneIndex = 0;
@@ -139,6 +146,8 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
     end
     humanConeMosaic.pattern = subSampledPattern;
     
+    uData = humanConeMosaic.plot('cone mosaic', 'hf', 'none');
+    coneMosaicImage = uData.mosaicImage;
     
     % Compute the isomerization maps
     if (p.isomerizationNoise) && (p.responseInstances > 1)
@@ -147,12 +156,18 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
                 tmp = humanConeMosaic.compute(oi,'currentFlag',false);
                 fullIsomerizationMap = zeros(p.responseInstances, size(tmp,1), size(tmp,2));
                 fullIsomerizationMap(1,:,:) = tmp;
+                % Compute demosaiced isomerization maps
+                [demosaicedIsomerizationsMaps(1,:,:,:), isomerizationSRGBrendition(1,:,:,:)] = humanConeMosaic.demosaicedIsomerizationMaps();
             else
                 fullIsomerizationMap(responseInstanceIndex,:,:) = humanConeMosaic.compute(oi,'currentFlag',false);
+                % Compute demosaiced isomerization maps
+                [demosaicedIsomerizationsMaps(responseInstanceIndex,:,:,:), isomerizationSRGBrendition(responseInstanceIndex,:,:,:)] = humanConeMosaic.demosaicedIsomerizationMaps();
             end
         end
     else
         fullIsomerizationMap(1,:,:) = humanConeMosaic.compute(oi,'currentFlag',false);
+        % Compute demosaiced isomerization maps
+        [demosaicedIsomerizationsMaps(1,:,:,:), isomerizationSRGBrendition(1,:,:,:)] = humanConeMosaic.demosaicedIsomerizationMaps();
     end
     
     % Check whether the user asked to scale the isomerization responses
@@ -186,12 +201,14 @@ function [isomerizationsVector, coneIndicator, conePositions, processingOptions,
             frame = squeeze(fullIsomerizationMap(k,:,:));
             for coneType = 1:3
                 frame(coneIndices{coneType}) = frame(coneIndices{coneType}) * scalarsToEqualizeCornealQuantalEfficiencies(coneType);
+                demosaicedIsomerizationsMaps(k,:,:, coneType) = demosaicedIsomerizationsMaps(k,:,:, coneType) * scalarsToEqualizeCornealQuantalEfficiencies(coneType);
             end
-            fullIsomerizationMap(k,:,:) = frame;
+            fullIsomerizationMap(k,:,:) = frame;   
         end
     else
         varargout{1} = [];
     end
+    
     
     
     % Compute returned parameters

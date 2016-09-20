@@ -3,7 +3,7 @@ function [ averageResponse ] = averageAnnularConeResponse(nAnnularRegions, coneR
 % regions wiht the center at the center pixel of the cone mosaic.
 
     averageResponse=zeros(nAnnularRegions,3);
-    
+%     coneResponse(isnan(coneResponse)) = 0;
     % Distance from center pixel
     coneDistance = sqrt(sum(coneResponse.conePositions.*coneResponse.conePositions,2));
     
