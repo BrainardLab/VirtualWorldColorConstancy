@@ -100,7 +100,7 @@ parfor ii = 1:nRecipes
 %% Find average response in annular regions about the center pixel using demosaiced responses
         averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
         coneResponse.averageResponseDemosaic = averageResponseDemosaic;
-        allAverageAnnularResponsesDemosaic(:,:,ii) = averageResponseDemosaic(:);
+        allAverageAnnularResponsesDemosaic(:,ii) = averageResponseDemosaic(:);
 
 %% Represent the LMS response as a vector and save it for AMA    
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);

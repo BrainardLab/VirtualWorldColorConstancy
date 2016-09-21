@@ -51,7 +51,11 @@ if ((targetPixelCount/totalBoundingBoxPixels < targetPixelThresholdMin || ...
     fprintf('target pixels %d -> rejected %d\n',targetPixelCount ,rejected);
 else
     [targetCenterR, targetCenterC] = findTargetCenter(isTarget);
-    rejected =  ~(isTarget(targetCenterR,targetCenterC)) ;    
+    if isempty((isTarget(targetCenterR,targetCenterC)))
+        rejected = 1;
+    else
+        rejected =  ~(isTarget(targetCenterR,targetCenterC)) ;
+    end
     fprintf('target pixels %d, center pixel %d -> rejected %d\n', ...
     targetPixelCount , isTarget(targetCenterR,targetCenterC),rejected);
 end
