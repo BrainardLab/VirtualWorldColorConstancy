@@ -1,4 +1,4 @@
-function summary = SummarizeToyVirtualWorldJobs(varargin)
+function [summary, allErrors] = SummarizeToyVirtualWorldJobs(varargin)
 % Plot timing and file counts for jobs, like jobs from AWS.
 %
 % summary = SummarizeToyVirtualWorldJobs() looks in the jobRoot folder (see
@@ -11,6 +11,7 @@ function summary = SummarizeToyVirtualWorldJobs(varargin)
 %   recipes.
 %
 % Returns a struct array with the same kind of information for each job.
+% Also returns a struct array that summarizes all detected errors.
 %
 % SummarizeToyVirtualWorldJobs( ... 'jobRoot', jobRoot) specifies the root
 % folder where to look for job folders.  The default is
@@ -56,58 +57,101 @@ jobFolders = jobFolders(jobOrder);
 summary = struct( ...
     'jobName', jobFolders, ...
     'jobNumber', num2cell(jobNumbers), ...
-    'timingInfo', []);
+    'timingInfo', [], ...
+    'errorInfo', []);
 nJobFolders = numel(jobFolders);
-hasTimingInfo = false(1, nJobFolders);
 for jj = 1:nJobFolders
-    timingInfo = fullfile(jobRoot, jobFolders{jj}, ...
+    % timing info
+    timingFile = fullfile(jobRoot, jobFolders{jj}, ...
         'VirtualWorldColorConstancy', 'ToyVirtualWorld', 'ToyVirtualWorldTiming.mat');
-    hasTimingInfo(jj) = 2 == exist(timingInfo, 'file');
-    
-    if ~hasTimingInfo(jj)
-        continue;
+    if 2 == exist(timingFile, 'file')
+        summary(jj).timingInfo = load(timingFile);
     end
-    summary(jj).timingInfo = load(timingInfo);
+    
+    % error info
+    subfolders = {'Originals', 'Rendered', 'Analysed', 'ConeResponse'};
+    for ss = 1:numel(subfolders)
+        errorFolder = fullfile(jobRoot, jobFolders{jj}, ...
+            'VirtualWorldColorConstancy', 'ToyVirtualWorld', subfolders{ss}, 'Errors');
+        if 7 ~= exist(errorFolder, 'dir')
+            continue;
+        end
+        
+        errorDir = dir(errorFolder);
+        errorFiles = errorDir(~[errorDir.isdir]);
+        nErrors = numel(errorFiles);
+        errorInfo = struct( ...
+            'jobName', summary(jj).jobName, ...
+            'jobNumber', summary(jj).jobNumber, ...
+            'subfolder', subfolders{ss}, ...
+            'errorFile', {errorFiles.name}, ...
+            'errorFullPath', [], ...
+            'errorData', [], ...
+            'luminance', '?', ...
+            'reflectance', '?');
+        for ee = 1:nErrors
+            errorInfo(ee).errorFullPath = fullfile(errorFolder, errorFiles(ee).name);
+            errorInfo(ee).errorData = load(errorInfo(ee).errorFullPath);
+            nameNumbers = sscanf(errorFiles(ee).name, 'luminance-%d_%d-reflectance-%d');
+            if 3 == numel(nameNumbers)
+                errorInfo(ee).luminance = sprintf('%d.%d', nameNumbers(1), nameNumbers(2));
+                errorInfo(ee).reflectance = sprintf('%d', nameNumbers(3));
+            end
+        end
+        summary(jj).errorInfo = errorInfo;
+    end
 end
-summary = summary(hasTimingInfo);
 
 
 %% Plot info about each job.
 nSummary = numel(summary);
 timing = zeros(nSummary, 4);
 counts = zeros(nSummary, 4);
+errorCounts = zeros(nSummary, 1);
 for ss = 1:nSummary
+    if isempty(summary(ss).timingInfo)
+        continue;
+    end
     info = summary(ss).timingInfo.folderInfo;
     jobCounts = [info(2:end).nFiles];
     jobTiming = 24 * 60 * diff([info.lastModified]);
     
     timing(ss, :) = jobTiming ./ jobCounts;
     counts(ss, :) = jobCounts;
+    errorCounts(ss) = numel(summary(ss).errorInfo);
     legendLabels = {info(2:end).subfolder};
 end
 
 figure();
 xAxis = 1:nSummary;
 
-subplot(3, 1, 1);
+subplot(4, 1, 1);
 bar(timing, 'stacked');
-legend(legendLabels);
+legend(legendLabels, 'Location', 'southeast');
 set(gca(), ...
     'XTick', xAxis, ...
     'XTickLabels', [summary.jobNumber]);
 ylabel('mean time per recipe (minutes)');
 commonXLim = get(gca(), 'XLim');
 
-subplot(3, 1, 2);
+subplot(4, 1, 2);
 bar(counts, 'stacked');
-legend(legendLabels);
+legend(legendLabels, 'Location', 'southeast');
 set(gca(), ...
     'XTick', xAxis, ...
     'XTickLabels', [summary.jobNumber], ...
     'XLim', commonXLim);
 ylabel('recipe counts');
 
-subplot(3, 1, 3);
+subplot(4, 1, 3);
+bar(errorCounts, 'stacked');
+set(gca(), ...
+    'XTick', xAxis, ...
+    'XTickLabels', [summary.jobNumber], ...
+    'XLim', commonXLim);
+ylabel('error counts');
+
+subplot(4, 1, 4);
 line(xAxis, cumsum(counts(:, end)), ...
     'Color', [.8 0 0], ...
     'LineStyle', 'none', ...
@@ -122,3 +166,18 @@ set(gca(), ...
     'YGrid', 'on', ...
     'YLim', [0 10000]);
 ylabel('cumulative recipes');
+
+
+%% Print information about errors.
+allErrors = [summary.errorInfo];
+nErrors = numel(allErrors);
+fprintf('Found %d errors:\n', nErrors);
+for ee = 1:nErrors
+    info = allErrors(ee);
+    fprintf('  %15s\t%s\t%s\t%s\t%s\n', ...
+        info.jobName, ...
+        info.subfolder, ...
+        info.luminance, ...
+        info.reflectance, ...
+        regexprep(info.errorData.error.message, '[\r\n]+', ' '));
+end
