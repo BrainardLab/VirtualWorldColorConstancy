@@ -12,6 +12,7 @@ function RunToyVirtualWorldRecipes(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.KeepUnmatched = true;
 parser.addParameter('makeWidth', 320, @isnumeric);
 parser.addParameter('makeHeight', 240, @isnumeric);
 parser.addParameter('makeCropImageHalfSize', 25, @isnumeric);
