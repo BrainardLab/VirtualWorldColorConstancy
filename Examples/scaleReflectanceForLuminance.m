@@ -1,7 +1,8 @@
 % scaleReflectanceForLuminance
 %
-% Generate reflectances at particluar luminances, making sure that the
-% reflectance at every wavelength is lower than 1.
+% This script generates reflectances at particluar luminances, making sure
+% that that the reflectance at every wavelength is lower than 1 (for energy
+% conservation).
 %
 % 8/10/16  vs, vs  Wrote it.
 
@@ -9,8 +10,15 @@
 clear; close all;
 
 nLuminanceLevels=20;
+luminanceLevelStart = 0.2;
+luminanceLevelEnd = 0.6;
 nSurfaceAtEachLuminace = 500;
-luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
+
+% % Logarithmic Scaling
+% luminanceLevels = logspace(log10(0.2),log10(0.6),nLuminanceLevels);
+
+% % Linear Scaling
+luminanceLevels = [luminanceLevelStart:(luminanceLevelEnd-luminanceLevelStart)/(nLuminanceLevels-1):luminanceLevelEnd];
 
 % Desired wl sampling
 S = [400 5 61];

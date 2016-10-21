@@ -2,8 +2,8 @@ function [theWavelengths, theReflectance, materialName, matteMaterial, wardMater
     computeLuminanceByName( materialName, theLuminanceTarget, hints)
 %
 % This function takes the material number and target luminanace level and
-% returns the scaled reflectance for the given material based on the target
-% luminance.
+% read the file with these parameters saved in the Reflectances/TargetObjects
+% folder.
 %
 % This function takes a RenderToolbox3 "hints" struct which allows it to
 % save a scaled spectrum file in the resources folder for the working

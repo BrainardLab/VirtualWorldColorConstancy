@@ -1,5 +1,9 @@
 % Illuminance Generation example
-
+%
+% This script generates the Illumiance for the base scenes. The
+% illuminace spectra are generated using the library obtained from the
+% granada daylight spectra.
+%
 % Clear
 clear; %close all;
 
@@ -13,6 +17,7 @@ theWavelengths = SToWls(S);
 %% Load Granada Illumimace data
 load daylightGranadaLong
 daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
+
 % maxDaylightGranada = max(daylightGranadaOriginal);  
 % daylightGranadaRescaled = daylightGranadaOriginal./repmat(maxDaylightGranada,[size(daylightGranadaOriginal,1),1]);
 % meanDaylightGranada = mean(daylightGranadaOriginal);  
@@ -22,7 +27,7 @@ daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
 % meanDaylightGranada = mean(daylightGranadaOriginal);  
 % daylightGranadaMeanCentered = bsxfun(@minus,daylightGranadaOriginal,meanDaylightGranada);
 
-% Normalize the mean values by their L2 norm
+% Normalize the spectra by their L2 norm
 lengthDaylightGranada = sqrt(sum(daylightGranadaOriginal.*daylightGranadaOriginal));  
 daylightGranadaRescaled = daylightGranadaOriginal./repmat(lengthDaylightGranada,[size(daylightGranadaOriginal,1),1]);
 
