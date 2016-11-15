@@ -9,7 +9,7 @@ function RunToyVirtualWorldRecipes(varargin)
 % this function.  We could pass these from the command line.  That means we
 % have a way to divide up work without editing our Matlab scripts.
 %
-
+rng('shuffle');
 %% Get inputs and defaults.
 parser = inputParser();
 parser.KeepUnmatched = true;
