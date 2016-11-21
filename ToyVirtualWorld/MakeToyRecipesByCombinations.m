@@ -126,14 +126,18 @@ parfor sceneIndex = 1:nScenes
             workingRecord.hints.recipeName = recipeName;
             
             
-            %% Assign a random reflectance to each object in the base scene.
+            %% Assign a reflectance to each object in the base scene.
             nBaseMaterials = numel(sceneData.materialIds);
             workingRecord.choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
             workingRecord.choices.baseSceneWardMaterials = cell(1, nBaseMaterials);
             pwd
             for mm = 1:nBaseMaterials
+                % use arbitrary but consistent reflectances
+                %reflectanceNumber = randi(nOtherObjectSurfaceReflectance);
+                reflectanceNumber = mm;
+                
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    randi(nOtherObjectSurfaceReflectance), [], workingRecord.hints);
+                    reflectanceNumber, [], workingRecord.hints);
                 workingRecord.choices.baseSceneMatteMaterials{mm} = matteMaterial;
                 workingRecord.choices.baseSceneWardMaterials{mm} = wardMaterial;
             end
@@ -169,9 +173,13 @@ parfor sceneIndex = 1:nScenes
             workingRecord.choices.insertedObjects.wardMaterialSets = cell(1, nObjects);
             for oo = 1:nObjects
                 % object pose in scene
-                workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+                
+                % using fixed object position that works for the Library base scene
+                %workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+                workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
+                
                 workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
-                workingRecord.choices.insertedObjects.scales{oo} = .5 + rand();
+                workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
                 
                 % object reflectance
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
@@ -219,7 +227,7 @@ parfor sceneIndex = 1:nScenes
                 'imageHeight', imageHeight, ...
                 'targetPixelThresholdMin', targetPixelThresholdMin, ...
                 'targetPixelThresholdMax', targetPixelThresholdMax, ...
-                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2); 
+                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
             if workingRecord.rejected
                 % delete this recipe and try again
                 rejectedFolder = GetWorkingFolder('', false, workingRecord.hints);

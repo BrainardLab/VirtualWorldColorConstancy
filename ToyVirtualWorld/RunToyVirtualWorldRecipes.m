@@ -9,7 +9,11 @@ function RunToyVirtualWorldRecipes(varargin)
 % this function.  We could pass these from the command line.  That means we
 % have a way to divide up work without editing our Matlab scripts.
 %
+
+% want each run to start with its own random seed
 rng('shuffle');
+
+
 %% Get inputs and defaults.
 parser = inputParser();
 parser.KeepUnmatched = true;
@@ -47,7 +51,12 @@ end
 
 %% Go through the steps for this combination of parameters.
 try
+    % using one base scene and one object at a time
+    shapeSet = {'BigBall'};
+    baseSceneSet = {'Library'};
     MakeToyRecipesByCombinations( ...
+        'shapeSet', shapeSet, ...
+        'baseSceneSet', baseSceneSet, ...
         'imageWidth', makeWidth, ...
         'imageHeight', makeHeight, ...
         'luminanceLevels', luminanceLevels, ...
