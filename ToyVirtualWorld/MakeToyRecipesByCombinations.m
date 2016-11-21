@@ -133,11 +133,11 @@ parfor sceneIndex = 1:nScenes
             pwd
             for mm = 1:nBaseMaterials
                 % use arbitrary but consistent reflectances
-                %reflectanceNumber = randi(nOtherObjectSurfaceReflectance);
-                reflectanceNumber = mm;
+                %materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
+                materialReflectanceNumber = mm;
                 
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    reflectanceNumber, [], workingRecord.hints);
+                    materialReflectanceNumber, [], workingRecord.hints);
                 workingRecord.choices.baseSceneMatteMaterials{mm} = matteMaterial;
                 workingRecord.choices.baseSceneWardMaterials{mm} = wardMaterial;
             end
