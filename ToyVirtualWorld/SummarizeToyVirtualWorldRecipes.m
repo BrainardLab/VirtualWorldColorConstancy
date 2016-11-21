@@ -49,7 +49,7 @@ for rr = 1:nReflectances
     for ll = 1:nLuminances
         luminance = luminanceLevels(ll);
         
-        info = AwsRecipeForCondition(luminance, reflectance, 'bucketFolder', bucketFolder);
+        info = AwsRecipeForCondition2(luminance, reflectance, 'bucketFolder', bucketFolder);
         infoFields = fieldnames(info);
         nFields = numel(infoFields);
         
