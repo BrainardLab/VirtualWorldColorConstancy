@@ -4,7 +4,7 @@ function [allInfo, allRaster] = SummarizeToyVirtualWorldRecipes(varargin)
 % This is a utility to make sure we have full coverage of recipes over
 % luminances and reflectances, as we expect.
 %
-% You'd need to mount our S3 bucket named "render-toolbox-vwcc".  Here are
+% You'd need to mount our S3 bucket named "render-toolbox-vwcc2".  Here are
 % some instructions for mounting on OS X:
 %   https://github.com/RenderToolbox3/rtb-support/wiki/Mounting-S3-on-OS-X
 %
@@ -20,23 +20,17 @@ function [allInfo, allRaster] = SummarizeToyVirtualWorldRecipes(varargin)
 %
 % SummarizeToyVirtualWorldRecipes( ... 'bucketFolder', bucketFolder)
 % specify the folder where our S3 bucket was mounted.  The default is
-% '~/Desktop/render-toolbox-vwcc'.
+% '~/Desktop/render-toolbox-vwccs'.
 %
 % Returns a struct array of info about the recipes that were found.  This
 % includes the paths to the recipe Working folder, as well as Originals,
 % Rendered, Analysed, ConeResponse, and AllRenderings files.
 %
 
-defaultLuminanceLevels = [ ...
-    0.2000 0.2119 0.2245 0.2379 0.2520 ...
-    0.2670 0.2829 0.2998 0.3176 0.3365 ...
-    0.3566 0.3778 0.4003 0.4241 0.4494 ...
-    0.4761 0.5044 0.5345 0.5663 0.6000];
-
 parser = inputParser();
-parser.addParameter('luminanceLevels', defaultLuminanceLevels, @isnumeric);
-parser.addParameter('reflectanceNumbers', 1:500, @isnumeric);
-parser.addParameter('bucketFolder', '~/Desktop/render-toolbox-vwcc', @ischar);
+parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
+parser.addParameter('reflectanceNumbers', 1:2, @isnumeric);
+parser.addParameter('bucketFolder', '~/Desktop/render-toolbox-vwcc2', @ischar);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
