@@ -200,7 +200,7 @@ parfor sceneIndex = 1:nScenes
                 reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
             
             % force the target object to use this computed reflectance
-            workingRecord.choices.insertedObjects.scales{1} = 0.5 + rand();
+%             workingRecord.choices.insertedObjects.scales{1} = 0.5 + rand();
             workingRecord.choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             workingRecord.choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
