@@ -92,6 +92,7 @@ parfor ii = 1:nRecipes
 
 %% Save Demosaiced response
         allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
+        coneResponse.demosaicedIsomerizationsMaps = squeeze(demosaicedIsomerizationsMaps(1,:,:,:))
 %% Find average response for LMS cones in annular regions about the center pixel
         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
         coneResponse.averageResponse = averageResponse;
