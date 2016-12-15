@@ -82,7 +82,7 @@ parfor ii = 1:nRecipes
             'distance', 1.0, ...                            % distance to object in meters
             'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
             'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
-            'isomerizationNoise', true, ...                % whether to add isomerization noise or not
+            'isomerizationNoise', 'frozen', ...                % whether to add isomerization noise or not
             'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
             'mosaicHalfSize', 25, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
             'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
@@ -121,6 +121,7 @@ parfor ii = 1:nRecipes
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
         tempName=matfile(fullfile(getpref(projectName, 'workingFolder'),archiveBase,'ConeResponse.mat'),'Writable',true);
         tempName.coneResponse=coneResponse;
+        tempName.recipe=recipe;
         excludeFolders = {'temp','images','renderings','resources','scenes'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
     

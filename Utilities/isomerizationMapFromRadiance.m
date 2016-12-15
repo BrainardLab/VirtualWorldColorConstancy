@@ -8,7 +8,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     
     defaultConeLMSdensities = [0.6 0.3 0.1];
     defaultConeEfficiencyBasedReponseScaling = 'none';
-    defaultIsomerizationNoise = false;
+    defaultIsomerizationNoise = 'none';
     defaultResponseInstances = 1;
     defaultMosaicHalfSize = 5; 
     defaultConeStride = 15;
@@ -24,7 +24,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     parser.addParamValue('mosaicHalfSize',                      defaultMosaicHalfSize,                      @isnumeric);
     parser.addParamValue('coneLMSdensities',                    defaultConeLMSdensities,                    @isvector);
     parser.addParamValue('coneEfficiencyBasedReponseScaling',   defaultConeEfficiencyBasedReponseScaling,   @ischar);
-    parser.addParamValue('isomerizationNoise',                  defaultIsomerizationNoise,                  @islogical);
+    parser.addParamValue('isomerizationNoise',                  defaultIsomerizationNoise,                  @ischar);
     parser.addParamValue('responseInstances',                   defaultResponseInstances,                   @isnumeric);
     parser.addParamValue('coneStride',                          defaultConeStride,                          @isnumeric);
     parser.addParamValue('lowPassFilter',                       defaultLowPassFilter,                       @ischar);
@@ -150,7 +150,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     coneMosaicImage = uData.mosaicImage;
     
     % Compute the isomerization maps
-    if (p.isomerizationNoise) && (p.responseInstances > 1)
+    if (strcmp(p.isomerizationNoise,'frozen') || strcmp(p.isomerizationNoise,'random')) && (p.responseInstances > 1)
         for responseInstanceIndex = 1:p.responseInstances
             if (responseInstanceIndex == 1)
                 tmp = humanConeMosaic.compute(oi,'currentFlag',false);
@@ -175,7 +175,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
         fprintf('Scaling responses to simulate equal quantal efficiencies for L,M and S cones.\n');
         
         % Compute the quantal cone efficiency for each cone at the cornea (i.e., after adding the lens filter, macular filter already included in humanConeMosaic.qe).
-        lensTransmittance = lensGet(Lens(),'transmittance');
+        lensTransmittance = Lens().transmittance;
         cornealQuantalEfficiencies = bsxfun(@times, humanConeMosaic.qe, lensTransmittance);
 
         % Compute the response scalars
