@@ -28,4 +28,4 @@ end
 
 %% Choose one spectru file.
 fileName = fullfile(reflectancesPath, whichOne);
-[wavelengths, magnitudes] = ReadSpectrum(fileName);
+[wavelengths, magnitudes] = rtbReadSpectrum(fileName);
