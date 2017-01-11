@@ -10,7 +10,7 @@
 % @details
 % Writes any necessary spectrum definition spm-files to the working
 % "resources" folder as indicated by hints.workingFolder. See
-% GetWorkingFolder().
+% rtbGetWorkingFolder().
 %
 % @details
 % Returns a cell array of area light descriptions, as from
@@ -31,7 +31,7 @@ end
 if nargin < 2 || isempty (hints)
     resources = '';
 else
-    resources = GetWorkingFolder('resources', false, hints);
+    resources = rtbGetWorkingFolder('resources', false, hints);
 end
 
 S = [400 5 61];

@@ -69,7 +69,7 @@ parfor ii = 1:nScenes
         try
             % get the recipe
             recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
-            recipePath = GetWorkingFolder('', false, recipe.input.hints);
+            recipePath = rtbGetWorkingFolder('', false, recipe.input.hints);
             
             % modify the mappings file for the new ray sample depth
             [~, mappingsBase, mappingsExt] = fileparts(recipe.input.mappingsFile);

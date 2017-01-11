@@ -17,7 +17,7 @@ parser.addRequired('hints', @isstruct);
 parser.parse(hints);
 hints = GetDefaultHints(parser.Results.hints);
 
-resources = GetWorkingFolder('resources', false, hints);
+resources = rtbGetWorkingFolder('resources', false, hints);
 
 %% Locate the original spectrum files.
 parentPath = fileparts(fileparts(mfilename('fullpath')));

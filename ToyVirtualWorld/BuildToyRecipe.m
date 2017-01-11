@@ -65,7 +65,7 @@ prefName = 'VirtualScenes';
 modelAbsPath = GetVirtualScenesRepositoryPath(sceneMetadata.relativePath);
 [~, modelFile, modelExt] = fileparts(modelAbsPath);
 
-resources = GetWorkingFolder('resources', false, hints);
+resources = rtbGetWorkingFolder('resources', false, hints);
 parentSceneAbsPath = fullfile(resources, [modelFile, modelExt]);
 
 if exist(parentSceneAbsPath, 'file')

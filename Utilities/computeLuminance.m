@@ -56,7 +56,7 @@ end
 
 %% Write a new spectrum file with the scaled reflectance.
 spectrumFile = reflectanceName;
-resourceFolder = GetWorkingFolder('resources', false, hints);
+resourceFolder = rtbGetWorkingFolder('resources', false, hints);
 spectrumFullPath = fullfile(resourceFolder, spectrumFile);
 WriteSpectrumFile(theWavelengths, theReflectanceScaled, spectrumFullPath);
 

@@ -19,7 +19,7 @@ function [theWavelengths, theReflectance, materialName, matteMaterial, wardMater
 [theWavelengths, theReflectance] = LoadReflectanceByName(materialName, theLuminanceTarget);
 
 %% Write a new spectrum file with the scaled reflectance.
-resourceFolder = GetWorkingFolder('resources', false, hints);
+resourceFolder = rtbGetWorkingFolder('resources', false, hints);
 spectrumFullPath = fullfile(resourceFolder, materialName);
 WriteSpectrumFile(theWavelengths, theReflectance, spectrumFullPath);
 
