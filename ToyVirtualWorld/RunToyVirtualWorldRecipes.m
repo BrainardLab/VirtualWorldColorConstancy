@@ -83,7 +83,7 @@ try
         'mosaicHalfSize', mosaicHalfSize);
     
 catch err
-    workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
+    workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'recipesFolder'));
     SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipes', varargin);
 end
 

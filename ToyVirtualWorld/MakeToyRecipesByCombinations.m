@@ -43,7 +43,7 @@ nShapes = numel(shapeSet);
 
 
 %% Basic setup we don't want to expose as parameters.
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
 hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.isPlot = false;

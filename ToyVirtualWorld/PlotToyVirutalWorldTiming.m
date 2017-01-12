@@ -13,7 +13,7 @@ function folderInfo = PlotToyVirutalWorldTiming(varargin)
 % the same folder information in the project folder.
 
 parser = inputParser();
-parser.addParameter('workingFolder', fullfile(getpref('ToyVirtualWorld', 'recipesFolder')), @ischar);
+parser.addParameter('workingFolder', fullfile(getpref('VirtualWorldColorConstancy', 'recipesFolder')), @ischar);
 parser.parse(varargin{:});
 workingFolder = parser.Results.workingFolder;
 
@@ -48,7 +48,7 @@ for ff = 1:nFolders
     folderInfo(ff).label = sprintf('%s %d', folderInfo(ff).subfolder, folderInfo(ff).nFiles);
 end
 
-folderInfoFile = fullfile(workingFolder, 'ToyVirtualWorldTiming');
+folderInfoFile = fullfile(workingFolder, 'VirtualWorldColorConstancyTiming');
 save(folderInfoFile);
 
 
@@ -58,8 +58,8 @@ bar([timing; zeros(size(timing))], 'stacked');
 legend({folderInfo(2:end).label});
 set(gca(), 'XTick', 1, 'XTickLabel', {});
 ylabel('processing time (minutes)');
-title('ToyVirtualWorld Timing');
+title('VirtualWorldColorConstancy Timing');
 
-figureFile = fullfile(workingFolder, 'ToyVirtualWorldTiming');
+figureFile = fullfile(workingFolder, 'VirtualWorldColorConstancyTiming');
 savefig(figureFile);
 
