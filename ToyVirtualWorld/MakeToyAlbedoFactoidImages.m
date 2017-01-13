@@ -58,8 +58,8 @@ maskAlbedo = maskFactoids.albedo.data(:,:,order);
 
 
 %% Make sRGB representations.
-normalAlbedoSrgb = uint8(MultispectralToSRGB(normalAlbedo, S, toneMapFactor, isScale));
-maskAlbedoSrgb = uint8(MultispectralToSRGB(maskAlbedo, S, toneMapFactor, isScale));
+normalAlbedoSrgb = uint8(rtbMultispectralToSRGB(normalAlbedo, S, 'toneMapFactor', toneMapFactor, 'isScale', isScale));
+maskAlbedoSrgb = uint8(rtbMultispectralToSRGB(maskAlbedo, S, 'toneMapFactor', toneMapFactor, 'isScale', isScale));
 
 %% Save images.
 group = 'albedo';

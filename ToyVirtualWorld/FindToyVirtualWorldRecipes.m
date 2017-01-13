@@ -19,7 +19,7 @@ reflectanceNumbers = parser.Results.reflectanceNumbers;
 %% Locate packed-up recipes.
 if isempty(luminanceLevels) || isempty(reflectanceNumbers)
     % find all recipes available
-    archiveFiles = FindFiles(recipeFolder, '\.zip$');
+    archiveFiles = rtbFindFiles('root', recipeFolder, 'filter', '\.zip$');
     
 else
     % look for recipes by name
@@ -36,7 +36,7 @@ else
             
             recipeName = FormatRecipeName(targetLuminanceLevel, reflectanceNumber, '\w+', '\w+');
             recipePattern = [recipeName '\.zip$'];
-            archiveMatches = FindFiles(recipeFolder, recipePattern);
+            archiveMatches = rtbFindFiles('root', recipeFolder, 'filter', recipePattern);
             
             if isempty(archiveMatches)
                 continue;

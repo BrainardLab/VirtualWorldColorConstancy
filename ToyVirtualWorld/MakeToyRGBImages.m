@@ -64,5 +64,5 @@ recipe = SaveRecipeProcessingImageFile(recipe, group, name, 'mat', namedRadiance
 
 %% Get uint8 versions of sRGB and XYZ images.
 function [srgbUint, xyz] = toRgbAndXyz(radiance, S, toneMapFactor, isScale)
-[srgb, xyz] = MultispectralToSRGB(radiance, S, toneMapFactor, isScale);
+[srgb, xyz] = rtbMultispectralToSRGB(radiance, S, 'toneMapFactor', toneMapFactor, 'isScale', isScale);
 srgbUint = uint8(srgb);

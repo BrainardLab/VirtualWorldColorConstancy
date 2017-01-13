@@ -19,9 +19,9 @@ function [theWavelengths, theReflectance, materialName, matteMaterial, wardMater
 [theWavelengths, theReflectance] = LoadReflectanceByName(materialName, theLuminanceTarget);
 
 %% Write a new spectrum file with the scaled reflectance.
-resourceFolder = rtbGetWorkingFolder('resources', false, hints);
+resourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
 spectrumFullPath = fullfile(resourceFolder, materialName);
-WriteSpectrumFile(theWavelengths, theReflectance, spectrumFullPath);
+rtbWriteSpectrumFile(theWavelengths, theReflectance, spectrumFullPath);
 
 %% Pack up material descriptions that work with WardLand.
 matteMaterial = BuildDesription('material', 'matte', ...

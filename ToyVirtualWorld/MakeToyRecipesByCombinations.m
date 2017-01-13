@@ -70,7 +70,7 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'spectrum', 'spectrum'});
 
 % remember where these raw materials are so we can copy them, below
-commonResourceFolder = rtbGetWorkingFolder('resources', false, hints);
+commonResourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
 
 
 %% Assemble recipies by combinations of target luminances reflectances.
@@ -218,7 +218,7 @@ parfor sceneIndex = 1:nScenes
                 defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
             
             % copy common resources into this recipe folder
-            recipeResourceFolder = rtbGetWorkingFolder('resources', false, workingRecord.hints);
+            recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
             copyfile(commonResourceFolder, recipeResourceFolder, 'f');
             
             %% Do a mask rendering, reject if target object is occluded.
@@ -230,7 +230,7 @@ parfor sceneIndex = 1:nScenes
                 'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
             if workingRecord.rejected
                 % delete this recipe and try again
-                rejectedFolder = rtbGetWorkingFolder('', false, workingRecord.hints);
+                rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
                 [~, ~] = rmdir(rejectedFolder, 's');
                 continue;
             else
