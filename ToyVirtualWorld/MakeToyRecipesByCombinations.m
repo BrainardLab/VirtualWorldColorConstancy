@@ -20,6 +20,7 @@ parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
+parser.addParameter('otherObjectReflectanceRandom', 1, @logical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -36,6 +37,7 @@ targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
+otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
 
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
@@ -133,8 +135,11 @@ parfor sceneIndex = 1:nScenes
             pwd
             for mm = 1:nBaseMaterials
                 % use arbitrary but consistent reflectances
-                %materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
-                materialReflectanceNumber = mm;
+                if otherObjectReflectanceRandom
+                    materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
+                else
+                    materialReflectanceNumber = mm;
+                end
                 
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
                     materialReflectanceNumber, [], workingRecord.hints);

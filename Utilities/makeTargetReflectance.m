@@ -1,8 +1,6 @@
-function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace)
+function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
 
-% scaleReflectanceForLuminance
-%
-% Generate reflectances at particluar luminances, making sure that the
+% Generate reflectances at particluar luminance levels, making sure that the
 % reflectance at every wavelength is lower than 1.
 %
 % 8/10/16  vs, vs  Wrote it.
@@ -67,7 +65,7 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
     end
     reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
                 rem(i,nSurfaceAtEachLuminace)+1);
-    fid = fopen(reflectanceName ,'w');
+    fid = fopen(fullfile(folderToStore,reflectanceName),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
     fclose(fid);
 
