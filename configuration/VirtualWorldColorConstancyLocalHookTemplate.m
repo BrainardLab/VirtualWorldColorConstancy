@@ -35,7 +35,13 @@ switch (computerName)
             otherwise
                 dataDirRoot = fullfile(rtbGetUserFolder(), 'output');
         end
-        
+    case 'stingray.psych.upenn.edu'
+        switch userID
+            case{'vsin'}
+                dataDirRoot = ['/Users/vsin/' 'Dropbox (Aguirre-Brainard Lab)/IBIO_analysis'];
+            otherwise
+                dataDirRoot = fullfile(rtbGetUserFolder(), 'output');
+        end            
     otherwise
         dataDirRoot = fullfile(rtbGetUserFolder(), 'output');    
 end
