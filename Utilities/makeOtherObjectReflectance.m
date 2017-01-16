@@ -36,6 +36,11 @@ cov_wgts = cov(sur_all_wgts');
 %% Generate some new surfaces
 newSurfaces = zeros(S(3),nSurfaces);
 newIndex = 1;
+
+if ~exist(folderToStore)
+    mkdir(folderToStore);
+end
+
 for i = 1:nSurfaces
     OK = false;
     while (~OK)

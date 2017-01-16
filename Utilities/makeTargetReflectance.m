@@ -51,6 +51,11 @@ theIlluminant = theIlluminant/(theLuminanceSensitivity*theIlluminant);
 %% Generate new surfaces
 newSurfaces = zeros(S(3),size(luminanceLevels,2)*nSurfaceAtEachLuminace);
 newIndex = 1;
+
+if ~exist(folderToStore)
+    mkdir(folderToStore);
+end
+
 for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
     OK = false;
     while (~OK)
