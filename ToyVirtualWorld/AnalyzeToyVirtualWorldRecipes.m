@@ -58,7 +58,7 @@ parfor ii = 1:nRecipes
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
         recipe.input.hints.imageWidth = hints.imageWidth;
         recipe.input.hints.imageHeight = hints.imageHeight;
-        ChangeToWorkingFolder(recipe.input.hints);
+        rtbChangeToWorkingFolder('hints', recipe.input.hints);
         
         % run basic recipe analysis functions
         recipe = MakeToyRGBImages(recipe, toneMapFactor, isScale);

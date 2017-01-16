@@ -31,7 +31,7 @@ end
 if nargin < 2 || isempty (hints)
     resources = '';
 else
-    resources = rtbGetWorkingFolder('resources', false, hints);
+    resources = rtbWorkingFolder('folder','resources', 'hints', hints);
 end
 
 S = [400 5 61];

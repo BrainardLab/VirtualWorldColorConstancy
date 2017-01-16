@@ -20,6 +20,7 @@ parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
+parser.addParameter('otherObjectReflectanceRandom', 1, @logical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -36,6 +37,7 @@ targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
+otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
 
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
@@ -70,7 +72,7 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'spectrum', 'spectrum'});
 
 % remember where these raw materials are so we can copy them, below
-commonResourceFolder = rtbGetWorkingFolder('resources', false, hints);
+commonResourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
 
 
 %% Assemble recipies by combinations of target luminances reflectances.
@@ -133,8 +135,11 @@ parfor sceneIndex = 1:nScenes
             pwd
             for mm = 1:nBaseMaterials
                 % use arbitrary but consistent reflectances
-                %materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
-                materialReflectanceNumber = mm;
+                if otherObjectReflectanceRandom
+                    materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
+                else
+                    materialReflectanceNumber = mm;
+                end
                 
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
                     materialReflectanceNumber, [], workingRecord.hints);
@@ -218,7 +223,7 @@ parfor sceneIndex = 1:nScenes
                 defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
             
             % copy common resources into this recipe folder
-            recipeResourceFolder = rtbGetWorkingFolder('resources', false, workingRecord.hints);
+            recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
             copyfile(commonResourceFolder, recipeResourceFolder, 'f');
             
             %% Do a mask rendering, reject if target object is occluded.
@@ -230,7 +235,7 @@ parfor sceneIndex = 1:nScenes
                 'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
             if workingRecord.rejected
                 % delete this recipe and try again
-                rejectedFolder = rtbGetWorkingFolder('', false, workingRecord.hints);
+                rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
                 [~, ~] = rmdir(rejectedFolder, 's');
                 continue;
             else

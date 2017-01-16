@@ -55,7 +55,7 @@ end
 
 %% Augment batch renderer options.
 hints.remodeler = 'InsertObjectRemodeler';
-ChangeToWorkingFolder(hints);
+rtbChangeToWorkingFolder('hints', hints);
 conditionsFile = [hints.recipeName '-Conditions.txt'];
 mappingsFile = [hints.recipeName '-Mappings.txt'];
 sceneMetadata = ReadMetadata(choices.baseSceneName);
@@ -65,7 +65,7 @@ prefName = 'VirtualScenes';
 modelAbsPath = GetVirtualScenesRepositoryPath(sceneMetadata.relativePath);
 [~, modelFile, modelExt] = fileparts(modelAbsPath);
 
-resources = rtbGetWorkingFolder('resources', false, hints);
+resources = rtbWorkingFolder('folder','resources', 'hints', hints);
 parentSceneAbsPath = fullfile(resources, [modelFile, modelExt]);
 
 if exist(parentSceneAbsPath, 'file')
@@ -298,7 +298,7 @@ for oo = 1:nInserted
 end
 
 % write out the conditions file
-WriteConditionsFile(conditionsFile, allNames, allValues);
+rtbWriteConditionsFile(conditionsFile, allNames, allValues);
 
 %% Pack it all up in a recipe.
 executive = { ...

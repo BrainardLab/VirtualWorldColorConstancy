@@ -60,7 +60,7 @@ for ii = 1:nRecipes
     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
-        ChangeToWorkingFolder(recipe.input.hints);
+        rtbChangeToWorkingFolder('hints', recipe.input.hints);
     
         radiance = recipe.processing.target.croppedImage;
         wave = 400:10:700;
