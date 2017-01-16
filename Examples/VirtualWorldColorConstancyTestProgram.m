@@ -56,8 +56,9 @@ if (~exist(originalFolder, 'dir'))
 end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
+nRandomIlluminants = 100; % How many random illuminants to choose from
 illuminantsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
-makeIlluminants(1,illuminantsFolder);
+makeIlluminants(nRandomIlluminants,illuminantsFolder);
 
 % Choose illuminant spectra from the Illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);

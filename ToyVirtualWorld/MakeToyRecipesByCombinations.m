@@ -14,7 +14,7 @@ parser = inputParser();
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
-parser.addParameter('nOtherObjectSurfaceReflectance', 10000, @isnumeric);
+parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
@@ -57,7 +57,11 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% Choose illuminant spectra from the Illuminants folder.
+%% Make some illuminants and store them in the Data/Illuminants folder.
+illuminantsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
+makeIlluminants(1,illuminantsFolder);
+
+% Choose illuminant spectra from the Illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);
 nLightSpectra = numel(lightSpectra);
 
@@ -74,6 +78,13 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
 % remember where these raw materials are so we can copy them, below
 commonResourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
 
+%% Make some reflectances and store them in the Data/Reflectance/OtherObject
+% and Data/Rflectance/TargetObject folders
+otherObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/OtherObjects');
+makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
+
+targetObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/TargetObjects');
+makeTargetReflectance(luminanceLevels, nReflectances, targetObjectFolder);
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;
