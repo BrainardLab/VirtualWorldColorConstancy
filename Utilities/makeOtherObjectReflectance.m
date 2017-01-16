@@ -1,5 +1,6 @@
 function makeOtherObjectReflectance(nSurfaces, folderToStore)
-
+% makeOtherObjectReflectance(nSurfaces, folderToStore)
+%
 % Generate reflectances for other objects, making sure that the
 % reflectance at every wavelength is lower than 1.
 %
@@ -7,9 +8,11 @@ function makeOtherObjectReflectance(nSurfaces, folderToStore)
 
 % Desired wl sampling
 S = [400 5 61];
-
 theWavelengths = SToWls(S);
-%% Load Natural Surfaces
+
+%% Load surface reflectances.
+%
+% These data files are in the Psychtoolbox, which we depend on.
 
 % Munsell surfaces
 load sur_nickerson

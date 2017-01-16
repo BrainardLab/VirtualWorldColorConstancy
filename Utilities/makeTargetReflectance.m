@@ -1,5 +1,6 @@
 function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
-
+% makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+%
 % Generate reflectances at particluar luminance levels, making sure that the
 % reflectance at every wavelength is lower than 1.
 %
@@ -8,7 +9,10 @@ function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToS
 % Desired wl sampling
 S = [400 5 61];
 theWavelengths = SToWls(S);
-%% Load Natural Surfaces
+
+%% Load surfaces
+%
+% These are in the Psychtoolbox.
 
 % Munsell surfaces
 load sur_nickerson
@@ -68,5 +72,4 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
     fid = fopen(fullfile(folderToStore,reflectanceName),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
     fclose(fid);
-
 end

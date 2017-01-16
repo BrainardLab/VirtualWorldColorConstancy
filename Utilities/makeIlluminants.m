@@ -1,9 +1,9 @@
 function makeIlluminants(nIlluminances, folderToStore)
-
-% This script generates the Illumiance for the base scenes. The
+% makeIlluminants(nIlluminances, folderToStore)
+%
+% This script generates the illuminants for the base scenes. The
 % illuminace spectra are generated using the library obtained from the
 % granada daylight spectra.
-%
 
 % Desired wl sampling
 rescaling = 1;  % O no rescaling
@@ -11,6 +11,7 @@ rescaling = 1;  % O no rescaling
 
 S = [400 5 61];
 theWavelengths = SToWls(S);
+
 %% Load Granada Illumimace data
 load daylightGranadaLong
 daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
@@ -26,14 +27,13 @@ end
 meandaylightGranadaRescaled = mean(daylightGranadaRescaled,2);
 daylightGranadaRescaledMeanSubtracted = bsxfun(@minus,daylightGranadaRescaled,meandaylightGranadaRescaled);
 
-
 %% Analyze with respect to a linear model
 B = FindLinMod(daylightGranadaRescaledMeanSubtracted,6);
 ill_granada_wgts = B\daylightGranadaRescaledMeanSubtracted;
 mean_wgts = mean(ill_granada_wgts,2);
 cov_wgts = cov(ill_granada_wgts');
 
-%% Generate some new surfaces
+%% Generate some new illuminants
 nNewIlluminaces = nIlluminances;
 newIlluminance = zeros(S(3),nNewIlluminaces);
 newIndex = 1;
