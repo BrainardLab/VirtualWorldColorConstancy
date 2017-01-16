@@ -14,7 +14,7 @@ parser = inputParser();
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
-parser.addParameter('nOtherObjectSurfaceReflectance', 10000, @isnumeric);
+parser.addParameter('nOtherObjectSurfaceReflectance', 1000, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
@@ -205,7 +205,6 @@ parfor sceneIndex = 1:nScenes
                 reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
             
             % force the target object to use this computed reflectance
-            workingRecord.choices.insertedObjects.scales{1} = 0.5 + rand();
             workingRecord.choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             workingRecord.choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
