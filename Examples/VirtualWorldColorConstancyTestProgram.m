@@ -231,5 +231,8 @@ for sceneIndex = 1:nScenes
     copyfile(commonResourceFolder, recipeResourceFolder, 'f');
     workingRecord.hints.imageWidth = imageWidth;
     workingRecord.hints.imageHeight = imageHeight;
+    
+    % execute the recipe
     workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe, 'throwException', true);
+    
 end
