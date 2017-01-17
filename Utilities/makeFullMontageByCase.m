@@ -1,4 +1,7 @@
 function makeFullMontageByCase(bucketFolder,luminanceLevels,reflectanceNumbers,cropImageHalfSize,RecipeConditions,varargin)
+%
+% makeFullMontageByCase(bucketFolder,luminanceLevels,reflectanceNumbers,cropImageHalfSize,RecipeConditions,varargin)
+%
 % This function returns the montage of full image, cropped image scaled and
 % the statistics of luminance, hue and saturation for the set of images
 % provided by the input
@@ -14,7 +17,7 @@ function makeFullMontageByCase(bucketFolder,luminanceLevels,reflectanceNumbers,c
 % ' Illuminant Spectra '}
 %
 % Example: 
-% makeFullMontageByCase('~/Documents/Matlab',['Case',num2str(30)],[0.2:0.4/9:0.6],[1:5],25,[])
+% makeFullMontageByCase('~/Documents/Matlab',[0.2:0.4/9:0.6],[1:5],25,[],'jobFolder','Case32');
 
 parser = inputParser();
 parser.addParameter('jobFolder', '', @ischar);
@@ -237,3 +240,8 @@ for ii = 1:size(whichLuminaceForMosaic,2)
         
     end
 end
+
+figFullMontage = fullfile(bucketFolder,jobFolder,['FullMontage.png']);
+print('-dpng', figFullMontage);
+
+
