@@ -11,28 +11,20 @@ function VirtualWorldColorConstancyTestProgram(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
-parser.addParameter('imageWidth', 320, @isnumeric);
-parser.addParameter('imageHeight', 240, @isnumeric);
-parser.addParameter('cropImageHalfSize', 25, @isnumeric);
+parser.addParameter('imageWidth', 160, @isnumeric);
+parser.addParameter('imageHeight', 120, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 10, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1], @isnumeric);
-parser.addParameter('maxAttempts', 30, @isnumeric);
-parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
-parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', 1, @logical);
 parser.addParameter('shapeSet', {'BigBall',}, @iscellstr);
 parser.addParameter('baseSceneSet', {'Library'}, @iscellstr);
 parser.parse(varargin{:});
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
-cropImageHalfSize = parser.Results.cropImageHalfSize;
 nOtherObjectSurfaceReflectance = parser.Results.nOtherObjectSurfaceReflectance;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
-maxAttempts = parser.Results.maxAttempts;
-targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
-targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
@@ -224,14 +216,15 @@ for sceneIndex = 1:nScenes
     lookAt = sprintf('%f %f %f ', eye, target, up);
     
     %% Build the recipe.
+    workingRecord.hints.imageWidth = imageWidth;
+    workingRecord.hints.imageHeight = imageHeight;
+
     workingRecord.recipe = BuildToyRecipe( ...
         defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
     
     % copy common resources into this recipe folder
     recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
     copyfile(commonResourceFolder, recipeResourceFolder, 'f');
-    workingRecord.hints.imageWidth = imageWidth;
-    workingRecord.hints.imageHeight = imageHeight;
     
     % execute the recipe
     workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe, 'throwException', true);
