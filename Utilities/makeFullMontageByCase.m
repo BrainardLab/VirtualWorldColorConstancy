@@ -88,7 +88,7 @@ for ii = 1:size(luminanceLevels,2)
             cropLocationC:cropLocationC+2*cropImageHalfSize,:);
         
         %% True Luminance, Saturation and Hue
-        trueColor = calculateTrueColor(luminanceLevels(ii), reflectanceNumbers(jj));
+        trueColor = calculateTrueColor(luminanceLevels(ii), reflectanceNumbers(jj),recipeConds);
         trueLuminance(ii,jj) = trueColor(1);
         trueSaturation(ii,jj) = trueColor(2);
         trueHue(ii,jj) = trueColor(3);
