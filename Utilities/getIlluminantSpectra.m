@@ -17,7 +17,7 @@ parser.addRequired('hints', @isstruct);
 parser.parse(hints);
 hints = GetDefaultHints(parser.Results.hints);
 
-resources = rtbWorkingFolder('folder','resources', 'hints', hints);
+% resources = rtbWorkingFolder('folder','resources', 'hints', hints);
 
 %% Locate the original spectrum files.
 parentPath = fileparts(hints.workingFolder);
@@ -39,9 +39,9 @@ spectra = cell(1, nSpectra);
 for ss = 1:nSpectra
     % copy to resource folder
     originalFile = fullfile(spectrumFolder, spectrumNames{ss});
-    resourceFile = fullfile(resources, spectrumNames{ss});
-    copyfile(originalFile, resourceFile, 'f');
-    spdFiles{ss} = resourceFile;
+%     resourceFile = fullfile(resources, spectrumNames{ss});
+%     copyfile(originalFile, resourceFile, 'f');
+    spdFiles{ss} = originalFile;
     
     % build illuminant description
     resourceRelativePath = fullfile('resources', spectrumNames{ss});

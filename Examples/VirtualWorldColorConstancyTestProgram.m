@@ -67,7 +67,7 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'spectrum', 'spectrum'});
 
 % remember where these raw materials are so we can copy them, below
-commonResourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
+commonResourceFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
 
 %% Make some reflectances and store them in the Data/Reflectance/OtherObject
 % and Data/Rflectance/TargetObject folders
