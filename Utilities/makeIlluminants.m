@@ -55,7 +55,7 @@ for i = 1:nNewIlluminaces
             OK = true;
         end        
     end
-    filename = ['illuminance_' num2str(i)  '.spd'];
+    filename = sprintf('illuminance_%03d.spd',i);
     fid = fopen(fullfile(folderToStore,filename),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,i)]');
     fclose(fid);

@@ -59,7 +59,7 @@ end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
 illuminantsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
-makeIlluminants(1,illuminantsFolder);
+makeIlluminants(10,illuminantsFolder);
 
 % Choose illuminant spectra from the Illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);

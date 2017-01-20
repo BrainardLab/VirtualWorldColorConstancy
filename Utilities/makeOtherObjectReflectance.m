@@ -52,7 +52,7 @@ for i = 1:nSurfaces
             OK = true;
         end
     end
-    filename = ['reflectance_' num2str(i)  '.spd'];
+    filename = sprintf('reflectance_%03d.spd',i);
     fid = fopen(fullfile(folderToStore,filename),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,newSurfaces(:,i)]');
     fclose(fid);
