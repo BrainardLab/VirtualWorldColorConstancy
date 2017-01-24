@@ -63,7 +63,7 @@ nJobFolders = numel(jobFolders);
 for jj = 1:nJobFolders
     % timing info
     timingFile = fullfile(jobRoot, jobFolders{jj}, ...
-        'VirtualWorldColorConstancy', 'ToyVirtualWorld', 'ToyVirtualWorldTiming.mat');
+        'VirtualWorldColorConstancy', 'ToyVirtualWorldTiming.mat');
     if 2 == exist(timingFile, 'file')
         summary(jj).timingInfo = load(timingFile);
     end
@@ -72,7 +72,7 @@ for jj = 1:nJobFolders
     subfolders = {'Originals', 'Rendered', 'Analysed', 'ConeResponse'};
     for ss = 1:numel(subfolders)
         errorFolder = fullfile(jobRoot, jobFolders{jj}, ...
-            'VirtualWorldColorConstancy', 'ToyVirtualWorld', subfolders{ss}, 'Errors');
+            'VirtualWorldColorConstancy', subfolders{ss}, 'Errors');
         if 7 ~= exist(errorFolder, 'dir')
             continue;
         end

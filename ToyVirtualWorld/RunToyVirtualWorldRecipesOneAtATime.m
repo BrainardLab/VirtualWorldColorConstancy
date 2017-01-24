@@ -29,7 +29,7 @@ try
     end
     
 catch err
-    workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
+    workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'recipesFolder'));
     SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipesOneAtATime', varargin);
 end
 

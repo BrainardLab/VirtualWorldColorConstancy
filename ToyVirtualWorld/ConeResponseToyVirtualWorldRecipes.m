@@ -18,15 +18,15 @@ mosaicHalfSize = parser.Results.mosaicHalfSize;
 %% Overall Setup.
 
 % location of packed-up recipes
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Analysed');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
 
-if ~exist(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'),'dir')
-    mkdir(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'));
-end
+% if ~exist(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'),'dir')
+%     mkdir(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'));
+% end
 
 % location of saved figures
 figureFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Figures');

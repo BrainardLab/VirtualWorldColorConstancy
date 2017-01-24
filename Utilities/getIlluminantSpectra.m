@@ -1,5 +1,5 @@
 function [spectra, spdFiles] = getIlluminantSpectra(hints)
-%% Get some illuminant spectra from VirtualWorldColorConstancy/Illuminants.
+%% Get some illuminant spectra from VirtualWorldColorConstancy/Data/Illuminants.
 %
 % [spectra, spdFiles] = getIlluminantSpectra(hints) reads various
 % illuminant spectral power distributions from the accompanying folder
@@ -17,11 +17,11 @@ parser.addRequired('hints', @isstruct);
 parser.parse(hints);
 hints = GetDefaultHints(parser.Results.hints);
 
-resources = rtbWorkingFolder('folder','resources', 'hints', hints);
+% resources = rtbWorkingFolder('folder','resources', 'hints', hints);
 
 %% Locate the original spectrum files.
-parentPath = fileparts(fileparts(mfilename('fullpath')));
-spectrumFolder = fullfile(parentPath, 'Illuminants');
+parentPath = fileparts(hints.workingFolder);
+spectrumFolder = fullfile(parentPath, 'Data/Illuminants');
 folderContents = dir(spectrumFolder);
 nContents = numel(folderContents);
 isSpectrum = false(1, nContents);
@@ -39,9 +39,9 @@ spectra = cell(1, nSpectra);
 for ss = 1:nSpectra
     % copy to resource folder
     originalFile = fullfile(spectrumFolder, spectrumNames{ss});
-    resourceFile = fullfile(resources, spectrumNames{ss});
-    copyfile(originalFile, resourceFile, 'f');
-    spdFiles{ss} = resourceFile;
+%     resourceFile = fullfile(resources, spectrumNames{ss});
+%     copyfile(originalFile, resourceFile, 'f');
+    spdFiles{ss} = originalFile;
     
     % build illuminant description
     resourceRelativePath = fullfile('resources', spectrumNames{ss});

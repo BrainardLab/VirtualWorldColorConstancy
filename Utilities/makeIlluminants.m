@@ -13,7 +13,8 @@ S = [400 5 61];
 theWavelengths = SToWls(S);
 
 %% Load Granada Illumimace data
-load daylightGranadaLong
+pathToIlluminanceData = fullfile(fileparts(fileparts(mfilename('fullpath'))),'Data/IlluminantSpectra');
+load(fullfile(pathToIlluminanceData,'daylightGranadaLong'));
 daylightGranadaOriginal = SplineSrf(S_granada,daylightGranada,S);
 
 % Rescale spectrum by its mean
@@ -37,6 +38,11 @@ cov_wgts = cov(ill_granada_wgts');
 nNewIlluminaces = nIlluminances;
 newIlluminance = zeros(S(3),nNewIlluminaces);
 newIndex = 1;
+
+if ~exist(folderToStore)
+    mkdir(folderToStore);
+end
+
 for i = 1:nNewIlluminaces
     OK = false;
     while (~OK)
@@ -49,7 +55,7 @@ for i = 1:nNewIlluminaces
             OK = true;
         end        
     end
-    filename = ['illuminance_' num2str(i)  '.spd'];
+    filename = sprintf('illuminance_%03d.spd',i);
     fid = fopen(fullfile(folderToStore,filename),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,i)]');
     fclose(fid);

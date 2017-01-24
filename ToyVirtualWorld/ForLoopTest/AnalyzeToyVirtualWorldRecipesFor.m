@@ -20,7 +20,7 @@ cropImageHalfSize = parser.Results.cropImageHalfSize;
 %% Overall Setup.
 
 % location of packed-up recipes
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Rendered');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);

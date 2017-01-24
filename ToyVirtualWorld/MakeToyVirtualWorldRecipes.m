@@ -33,7 +33,7 @@ rotMin = 0;
 rotMax = 359;
 
 % where to save new recipes
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'),'Originals');
 if (~exist(recipeFolder, 'dir'))
     mkdir(recipeFolder);

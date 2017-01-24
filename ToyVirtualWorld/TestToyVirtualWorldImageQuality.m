@@ -27,7 +27,7 @@ tbUse({'VirtualWorldColorConstancy', 'isetbio'});
 clear;
 clc;
 
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 originalsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
 qualityFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Quality');
 

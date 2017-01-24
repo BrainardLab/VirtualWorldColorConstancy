@@ -1,4 +1,4 @@
-function trueColor = calculateTrueColor(targetLuminanceLevel, reflectanceNumber)
+function trueColor = calculateTrueColor(targetLuminanceLevel, reflectanceNumber, recipeConds)
 
 % This function calcualtes the hue of the target material given the
 % luminance level and the reflectance number. The corresponding file is
@@ -13,7 +13,8 @@ function trueColor = calculateTrueColor(targetLuminanceLevel, reflectanceNumber)
 %% Load in the reflectance function for the given recipe conditions
 reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
                 targetLuminanceLevel, reflectanceNumber);
-[theWavelengths, theReflectance] = LoadReflectanceByName(reflectanceFileName , targetLuminanceLevel);
+pathtoReflectanceFile = fullfile(recipeConds.Working.fullPath,'resources',reflectanceFileName);
+[theWavelengths, theReflectance] = rtbReadSpectrum(pathtoReflectanceFile);
             
 % figure; clf; hold on
 % plot(theWavelengths,theReflectance,'r');

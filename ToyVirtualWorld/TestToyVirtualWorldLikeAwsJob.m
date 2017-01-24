@@ -22,7 +22,7 @@ clear;
 clc;
 
 % start with fresh recipes folder -- affects timing info below.
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 workingFolder = fullfile(getpref(projectName, 'recipesFolder'));
 
 %% Heads up!

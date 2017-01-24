@@ -15,7 +15,7 @@ nAnnularRegions = parser.Results.nAnnularRegions;
 %% Overall Setup.
 
 % location of packed-up recipes
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Analysed');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);

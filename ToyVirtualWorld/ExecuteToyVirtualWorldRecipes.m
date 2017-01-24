@@ -20,7 +20,7 @@ imageHeight = parser.Results.imageHeight;
 
 % location of packed-up recipes
 % where to save new recipes
-projectName = 'ToyVirtualWorld';
+projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'recipesFolder'),'Originals');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);

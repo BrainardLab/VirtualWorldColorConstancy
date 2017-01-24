@@ -67,7 +67,7 @@ try
         'reflectanceNumbers', reflectanceNumbers, ...
         'nAnnularRegions', 25);
 catch err
-    workingFolder = fullfile(getpref('ToyVirtualWorld', 'recipesFolder'));
+    workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'recipesFolder'));
     SaveToyVirutalWorldError(workingFolder, err, 'RunToyVirtualWorldRecipesFor', varargin);
 end
 
