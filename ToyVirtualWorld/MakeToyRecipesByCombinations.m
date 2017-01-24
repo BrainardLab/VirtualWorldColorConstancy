@@ -11,6 +11,7 @@ function MakeToyRecipesByCombinations(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
@@ -47,18 +48,19 @@ nShapes = numel(shapeSet);
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.isPlot = false;
 
 defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
-originalFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
+% Set up output
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
+originalFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
-illuminantsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
+illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
 makeIlluminants(10,illuminantsFolder);
 
 % Choose illuminant spectra from the Illuminants folder.
@@ -75,15 +77,12 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'300:0.5 800:0.5', '300:0.1 800:0.1'}, ...
     {'spectrum', 'spectrum'});
 
-% remember where these raw materials are so we can copy them, below
-commonResourceFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
 
-%% Make some reflectances and store them in the Data/Reflectance/OtherObject
-% and Data/Rflectance/TargetObject folders
-otherObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/OtherObjects');
+%% Make some reflectances and store them where they want to be
+otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','OtherObjects');
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
-targetObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/TargetObjects');
+targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
 makeTargetReflectance(luminanceLevels, nReflectances, targetObjectFolder);
 
 %% Assemble recipies by combinations of target luminances reflectances.
@@ -233,9 +232,12 @@ parfor sceneIndex = 1:nScenes
             workingRecord.recipe = BuildToyRecipe( ...
                 defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
             
-            % copy common resources into this recipe folder
+            %% Copy common resources into this recipe folder
+            %
+            % This just copies the illuminants, maybe should generalize for
+            % other resources at some point.
             recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
-            copyfile(commonResourceFolder, recipeResourceFolder, 'f');
+            copyfile(illuminantsFolder, recipeResourceFolder, 'f');
             
             %% Do a mask rendering, reject if target object is occluded.
             workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...

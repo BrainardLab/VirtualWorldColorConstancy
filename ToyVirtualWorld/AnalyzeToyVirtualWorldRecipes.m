@@ -6,6 +6,7 @@ function AnalyzeToyVirtualWorldRecipes(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('luminanceLevels', [], @isnumeric);

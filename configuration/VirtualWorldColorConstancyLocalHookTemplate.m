@@ -51,5 +51,4 @@ dataDir = fullfile(dataDirRoot,projectName,'');
 if (~exist(dataDir,'dir'))
     mkdir(dataDir);
 end
-setpref(projectName, 'recipesFolder',dataDir);
-setpref(projectName, 'workingFolder',fullfile(dataDir,'Working',''));
+setpref(projectName, 'baseFolder',dataDir);

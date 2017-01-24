@@ -5,6 +5,7 @@ function ConeResponseToyVirtualWorldRecipes(varargin)
 %
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('luminanceLevels', [], @isnumeric);
 parser.addParameter('reflectanceNumbers', [], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
