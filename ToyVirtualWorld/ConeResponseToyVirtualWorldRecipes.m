@@ -20,7 +20,7 @@ mosaicHalfSize = parser.Results.mosaicHalfSize;
 
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Analysed');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Analysed');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
@@ -30,14 +30,14 @@ end
 % end
 
 % location of saved figures
-figureFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Figures');
+figureFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Figures');
 
 % location of analysed folder
-analysedFolder = fullfile(getpref(projectName, 'recipesFolder'),'ConeResponse');
+analysedFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'ConeResponse');
 
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
 
 % analysis params
 toneMapFactor = 10;
@@ -121,14 +121,14 @@ parfor ii = 1:nRecipes
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-        tempName=matfile(fullfile(getpref(projectName, 'workingFolder'),archiveBase,'ConeResponse.mat'),'Writable',true);
+        tempName=matfile(fullfile(hints.workingFolder,archiveBase,'ConeResponse.mat'),'Writable',true);
         tempName.coneResponse=coneResponse;
         tempName.recipe=recipe;
         excludeFolders = {'temp','images','renderings','resources','scenes'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
     
 %% Make Figures for Visualization
-        makeFigureForVisualization(coneResponse,projectName,archiveBase);
+        makeFigureForVisualization(coneResponse,projectName,archiveBase,hints.workingFolder);
     catch err
         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
     end
@@ -147,7 +147,7 @@ coneRescalingFactors=coneRescalingFactors(:,1);
 allLMSIndicator = allLMSIndicator(:,:,1);
 allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
 
-save(fullfile(fileparts(getpref(projectName, 'workingFolder')),'stimulusAMA.mat'),...
+save(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'stimulusAMA.mat'),...
                 'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
             'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
             'allDemosaicResponse','allAverageAnnularResponsesDemosaic','allLMSIndicator');

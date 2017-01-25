@@ -21,7 +21,7 @@ parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
-parser.addParameter('otherObjectReflectanceRandom', 1, @logical);
+parser.addParameter('otherObjectReflectanceRandom', 1, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...

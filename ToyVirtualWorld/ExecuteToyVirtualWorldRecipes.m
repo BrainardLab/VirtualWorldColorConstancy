@@ -22,17 +22,17 @@ imageHeight = parser.Results.imageHeight;
 % location of packed-up recipes
 % where to save new recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'recipesFolder'),'Originals');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
 
 % location of renderings
-renderingFolder = fullfile(getpref(projectName, 'recipesFolder'),'Rendered');
+renderingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Rendered');
 
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
 hints.imageWidth = imageWidth;
 hints.imageHeight = imageHeight;
 

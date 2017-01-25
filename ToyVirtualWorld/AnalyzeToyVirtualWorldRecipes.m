@@ -22,20 +22,20 @@ cropImageHalfSize = parser.Results.cropImageHalfSize;
 
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Rendered');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Rendered');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
 
 % location of saved figures
-figureFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Figures');
+figureFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Figures');
 
 % location of analysed folder
-analysedFolder = fullfile(getpref(projectName, 'recipesFolder'),'Analysed');
+analysedFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Analysed');
 
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
 hints.imageWidth = imageWidth;
 hints.imageHeight = imageHeight;
 

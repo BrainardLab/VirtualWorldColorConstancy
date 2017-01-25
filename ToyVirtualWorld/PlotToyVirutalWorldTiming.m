@@ -13,9 +13,10 @@ function folderInfo = PlotToyVirutalWorldTiming(varargin)
 % the same folder information in the project folder.
 
 parser = inputParser();
-parser.addParameter('workingFolder', fullfile(getpref('VirtualWorldColorConstancy', 'recipesFolder')), @ischar);
+parser.addParameter('outputName','ExampleOutput',@ischar);
+% parser.addParameter('workingFolder', fullfile(getpref('VirtualWorldColorConstancy', 'baseFolder'),parser.Results.outputName), @ischar);
 parser.parse(varargin{:});
-workingFolder = parser.Results.workingFolder;
+workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'baseFolder'),parser.Results.outputName);
 
 %% Collect and save some file and timing info.
 subfolderNames = { ...

@@ -93,4 +93,4 @@ end
 
 
 %% Save timing info.
-PlotToyVirutalWorldTiming();
+PlotToyVirutalWorldTiming('outputName',parser.Results.outputName);
