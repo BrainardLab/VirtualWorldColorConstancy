@@ -22,6 +22,11 @@ parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', 1, @islogical);
+parser.addParameter('illuminantSpectraRandom', 1, @islogical);
+parser.addParameter('lightPositionFixed', 0, @islogical);
+parser.addParameter('lightScaleFixed', 0, @islogical);
+parser.addParameter('targetPositionFixed', 0, @islogical);
+parser.addParameter('targetScaleFixed', 0, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -60,8 +65,14 @@ if (~exist(originalFolder, 'dir'))
 end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
+if parser.Results.illuminantSpectraRandom
+    totalRandomLightSpectra = 100;
+else
+    totalRandomLightSpectra = 1;
+end
+
 illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
-makeIlluminants(10,illuminantsFolder);
+makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
 
 % Choose illuminant spectra from the Illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);
@@ -165,10 +176,24 @@ parfor sceneIndex = 1:nScenes
             %% Pick a light shape to insert.
             %   pack up the light in the format expected for Ward Land
             workingRecord.choices.insertedLights.names = shapeSet(randi(nShapes, 1));
-            workingRecord.choices.insertedLights.positions = ...
-                {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
-            workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};
-            workingRecord.choices.insertedLights.scales = {.5 + rand()};
+            
+            % Position of the illuminant
+            if parser.Results.lightPositionFixed
+                % using fixed light position that works for the Library base scene
+                workingRecord.choices.insertedLights.positions = ...
+                    {[-6.504209 18.729564 5.017080]};
+            else
+                workingRecord.choices.insertedLights.positions = ...
+                    {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
+            end
+            
+            % Size of the illuminant
+            if parser.Results.lightScaleFixed
+                workingRecord.choices.insertedLights.scales = {1};
+            else
+                workingRecord.choices.insertedLights.scales = {.5 + rand()};
+            end
+            workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};                        
             workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
             workingRecord.choices.insertedLights.wardMaterialSets = {wardIlluminant};
             workingRecord.choices.insertedLights.lightSpectra = lightSpectra(randi(nLightSpectra));
@@ -189,13 +214,21 @@ parfor sceneIndex = 1:nScenes
             for oo = 1:nObjects
                 % object pose in scene
                 
-                % using fixed object position that works for the Library base scene
-                %workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
-                workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
-                
                 workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
-                workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
                 
+                if parser.Results.targetPositionFixed
+                    % using fixed object position that works for the Library base scene
+                    workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
+                else
+                    workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+                end
+                
+                if parser.Results.targetScaleFixed
+                    workingRecord.choices.insertedObjects.scales{oo} =  0.5;
+                else
+                    workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
+                end
+                                
                 % object reflectance
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
                     randi(nOtherObjectSurfaceReflectance), [], workingRecord.hints);
@@ -215,7 +248,6 @@ parfor sceneIndex = 1:nScenes
                 reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
             
             % force the target object to use this computed reflectance
-            workingRecord.choices.insertedObjects.scales{1} = 0.5 + rand();
             workingRecord.choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             workingRecord.choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
