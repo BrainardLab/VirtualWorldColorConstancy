@@ -20,7 +20,7 @@ function [theWavelengths, theReflectanceScaled, reflectanceName, matteMaterial, 
 
 if isempty(theLuminanceTarget)
     %% Use the reflectance as-is.    
-    reflectanceName = sprintf('reflectance_%d.spd', whichMaterial);
+    reflectanceName = sprintf('reflectance_%03d.spd', whichMaterial);
     [theWavelengths, theReflectance] = LoadReflectanceByName(reflectanceName,theLuminanceTarget,hints);
     theReflectanceScaled = theReflectance;
 else
