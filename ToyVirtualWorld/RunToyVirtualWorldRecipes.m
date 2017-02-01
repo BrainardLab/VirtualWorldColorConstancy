@@ -44,12 +44,12 @@ parser.addParameter('analyzeCropImageHalfSize', 50, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('mosaicHalfSize', 50, @isnumeric);
-parser.addParameter('otherObjectReflectanceRandom', 1, @islogical);
-parser.addParameter('illuminantSpectraRandom', 1, @islogical);
-parser.addParameter('lightPositionFixed', 0, @islogical);
-parser.addParameter('lightScaleFixed', 0, @islogical);
-parser.addParameter('targetPositionFixed', 0, @islogical);
-parser.addParameter('targetScaleFixed', 0, @islogical);
+parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
+parser.addParameter('illuminantSpectraRandom', true, @islogical);
+parser.addParameter('lightPositionFixed', false, @islogical);
+parser.addParameter('lightScaleFixed', false, @islogical);
+parser.addParameter('targetPositionFixed', false, @islogical);
+parser.addParameter('targetScaleFixed', false, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
