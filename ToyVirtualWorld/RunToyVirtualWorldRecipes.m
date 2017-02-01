@@ -22,12 +22,11 @@ function RunToyVirtualWorldRecipes(varargin)
 % this function.  We could pass these from the command line.  That means we
 % have a way to divide up work without editing our Matlab scripts.
 %
+% Key/value pairs
+%   'outputName' - 
 
-
-
-% want each run to start with its own random seed
+%% Want each run to start with its own random seed
 rng('shuffle');
-
 
 %% Get inputs and defaults.
 parser = inputParser();
