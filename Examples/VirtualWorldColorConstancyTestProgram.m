@@ -11,6 +11,7 @@ function VirtualWorldColorConstancyTestProgram(varargin)
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('imageWidth', 160, @isnumeric);
 parser.addParameter('imageHeight', 120, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 10, @isnumeric);
@@ -37,19 +38,19 @@ nShapes = numel(shapeSet);
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.isPlot = false;
 
 defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
-originalFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
+originalFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
 nRandomIlluminants = 100; % How many random illuminants to choose from
-illuminantsFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
+illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Data', 'Illuminants');
 makeIlluminants(nRandomIlluminants,illuminantsFolder);
 
 % Choose illuminant spectra from the Illuminants folder.
@@ -67,14 +68,14 @@ wardIlluminant = BuildDesription('material', 'anisoward', ...
     {'spectrum', 'spectrum'});
 
 % remember where these raw materials are so we can copy them, below
-commonResourceFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Illuminants');
+commonResourceFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Data','Illuminants');
 
 %% Make some reflectances and store them in the Data/Reflectance/OtherObject
 % and Data/Rflectance/TargetObject folders
-otherObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/OtherObjects');
+otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Data','Reflectances','OtherObjects');
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
-targetObjectFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Data/Reflectances/TargetObjects');
+targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Data','Reflectances','TargetObjects');
 makeTargetReflectance(luminanceLevels, nReflectances, targetObjectFolder);
 
 %% Assemble recipies by combinations of target luminances reflectances.

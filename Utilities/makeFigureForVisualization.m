@@ -146,6 +146,6 @@ lmsSensitivities = 'T_cones_ss2';
         
         drawnow;
         NicePlot.exportFigToPDF(fullfile([archiveBase,'.pdf']), hFig, 300);
-%         pathtoAllRenderings=strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings');
-%         NicePlot.exportFigToPDF(fullfile(pathtoAllRenderings,[archiveBase,'.pdf']), hFig, 300);
+        pathtoAllRenderings=strrep(workingFolder,'Working','AllRenderings');
+        NicePlot.exportFigToPDF(fullfile(pathtoAllRenderings,[archiveBase,'.pdf']), hFig, 300);
         close(hFig);

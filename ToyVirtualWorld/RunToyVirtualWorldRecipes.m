@@ -42,7 +42,7 @@ parser.addParameter('analyzeHeight', 480, @isnumeric);
 parser.addParameter('analyzeCropImageHalfSize', 50, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
-parser.addParameter('mosaicHalfSize', 50, @isnumeric);
+parser.addParameter('mosaicHalfSize', 25, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('lightPositionFixed', false, @islogical);
@@ -123,3 +123,4 @@ end
 
 %% Save timing info.
 PlotToyVirutalWorldTiming('outputName',parser.Results.outputName);
+saveRecipeConditionsInTextFile(parser);

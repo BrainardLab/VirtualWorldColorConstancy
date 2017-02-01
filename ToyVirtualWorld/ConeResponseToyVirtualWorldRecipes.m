@@ -25,9 +25,9 @@ if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
 
-% if ~exist(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'),'dir')
-%     mkdir(strrep(getpref(projectName, 'workingFolder'),'Working','AllRenderings'));
-% end
+if ~exist(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'AllRenderings'),'dir')
+    mkdir(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'AllRenderings'));
+end
 
 % location of saved figures
 figureFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Figures');
@@ -85,7 +85,7 @@ parfor ii = 1:nRecipes
             'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
             'isomerizationNoise', 'frozen', ...                % whether to add isomerization noise or not
             'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
-            'mosaicHalfSize', 25, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+            'mosaicHalfSize', mosaicHalfSize, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
             'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
             'randomSeed', randomSeed, ...                   % the random seed to use
             'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics
