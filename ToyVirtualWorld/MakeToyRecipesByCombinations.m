@@ -23,10 +23,10 @@ parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
-parser.addParameter('lightPositionFixed', false, @islogical);
-parser.addParameter('lightScaleFixed', false, @islogical);
-parser.addParameter('targetPositionFixed', false, @islogical);
-parser.addParameter('targetScaleFixed', false, @islogical);
+parser.addParameter('lightPositionRandom', true, @islogical);
+parser.addParameter('lightScaleRandom', true, @islogical);
+parser.addParameter('targetPositionRandom', true, @islogical);
+parser.addParameter('targetScaleRandom', true, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -178,20 +178,20 @@ parfor sceneIndex = 1:nScenes
             workingRecord.choices.insertedLights.names = shapeSet(randi(nShapes, 1));
             
             % Position of the illuminant
-            if parser.Results.lightPositionFixed
-                % using fixed light position that works for the Library base scene
-                workingRecord.choices.insertedLights.positions = ...
-                    {[-6.504209 18.729564 5.017080]};
-            else
+            if parser.Results.lightPositionRandom
                 workingRecord.choices.insertedLights.positions = ...
                     {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
+            else
+                % using fixed light position that works for the Library base scene
+                workingRecord.choices.insertedLights.positions = ...
+                    {[-6.504209 18.729564 5.017080]};                
             end
             
             % Size of the illuminant
-            if parser.Results.lightScaleFixed
-                workingRecord.choices.insertedLights.scales = {1};
-            else
+            if parser.Results.lightScaleRandom
                 workingRecord.choices.insertedLights.scales = {.5 + rand()};
+            else
+                workingRecord.choices.insertedLights.scales = {1};                
             end
             workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};                        
             workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
@@ -216,17 +216,17 @@ parfor sceneIndex = 1:nScenes
                 
                 workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
                 
-                if parser.Results.targetPositionFixed
+                if parser.Results.targetPositionRandom
+                    workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+                else
                     % using fixed object position that works for the Library base scene
                     workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
-                else
-                    workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
                 end
                 
-                if parser.Results.targetScaleFixed
-                    workingRecord.choices.insertedObjects.scales{oo} =  0.5;
-                else
+                if parser.Results.targetScaleRandom
                     workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
+                else
+                    workingRecord.choices.insertedObjects.scales{oo} =  0.5;
                 end
                                 
                 % object reflectance

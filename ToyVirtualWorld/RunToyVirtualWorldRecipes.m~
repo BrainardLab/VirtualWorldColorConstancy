@@ -41,8 +41,7 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   unique name to each random spectra.
 %   'mosaicHalfSize' - Cone mosaic half size
 %   'otherObjectReflectanceRandom' - Spectra of background objects
-%   'illuminantSpectraRandom' - Spectra of illuminants
-%   'illuminantSpectraRandom' - Spectra of illuminants
+%   'otherObjectReflectanceRandom' - Spectra of background objects
 
 %% Want each run to start with its own random seed
 rng('shuffle');

@@ -1,6 +1,9 @@
 function saveRecipesConditionsTogether(p)
 
 projectName = 'VirtualWorldColorConstancy';
+if ~exist(fullfile(getpref(projectName, 'baseFolder'),'Cases'))
+    mkdir(fullfile(getpref(projectName, 'baseFolder'),'Cases'))
+end
 filename = fullfile(getpref(projectName, 'baseFolder'),'Cases','Cases.txt');
 
 fieldNames = {
@@ -9,10 +12,10 @@ fieldNames = {
     'shapeSet'
     'illuminantSpectraRandom'
     'otherObjectReflectanceRandom'    
-    'lightPositionFixed'
-    'lightScaleFixed'
-    'targetPositionFixed'
-    'targetScaleFixed'
+    'lightPositionRandom'
+    'lightScaleRandom'
+    'targetPositionRandom'
+    'targetScaleRandom'
     'luminanceLevels'
     'reflectanceNumbers'};
 
@@ -24,6 +27,14 @@ if ~exist(filename)
                 fprintf(fid, '%20s\t', 'Illuminant Spectra');
             case {'otherObjectReflectanceRandom'}
                 fprintf(fid, '%20s\t', 'Background Spectra');
+            case {'lightPositionRandom'}
+                fprintf(fid, '%20s\t', 'Light Position');
+            case {'lightScaleRandom'}
+                fprintf(fid, '%20s\t', 'Light Scale');
+            case {'targetPositionRandom'}
+                fprintf(fid, '%20s\t', 'Target Position');
+            case {'targetScaleRandom'}
+                fprintf(fid, '%20s\t', 'Target Scale');
             otherwise
                 fprintf(fid, '%20s\t', fieldNames{numFields});
         end
@@ -61,12 +72,12 @@ for numFields = 1 : numel(fieldNames)
             else
                 fprintf(fid, '%20s\t', 'Random');
             end
-        case {'lightPositionFixed', ...
-                'lightScaleFixed', 'targetPositionFixed', 'targetScaleFixed'}
+        case {'lightPositionRandom', ...
+                'lightScaleRandom', 'targetPositionRandom', 'targetScaleRandom'}
             if (subFields==0)
-                fprintf(fid, '%20s\t', 'Random');
-            else
                 fprintf(fid, '%20s\t', 'Fixed');
+            else
+                fprintf(fid, '%20s\t', 'Random');
             end
     end
 end
