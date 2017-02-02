@@ -94,7 +94,7 @@ otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
-makeTargetReflectance(luminanceLevels, nReflectances, targetObjectFolder);
+makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;

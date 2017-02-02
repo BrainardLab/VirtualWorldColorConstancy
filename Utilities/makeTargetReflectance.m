@@ -1,4 +1,4 @@
-function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+function makeTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
 % makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
 %
 % Generate reflectances at particluar luminance levels, making sure that the
@@ -10,6 +10,7 @@ function makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToS
 S = [400 5 61];
 theWavelengths = SToWls(S);
 
+nSurfaceAtEachLuminace = numel(reflectanceNumbers);
 %% Load surfaces
 %
 % These are in the Psychtoolbox.
@@ -73,7 +74,7 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
         end
     end
     reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
-                rem(i,nSurfaceAtEachLuminace)+1);
+                reflectanceNumbers(i));
     fid = fopen(fullfile(folderToStore,reflectanceName),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
     fclose(fid);
