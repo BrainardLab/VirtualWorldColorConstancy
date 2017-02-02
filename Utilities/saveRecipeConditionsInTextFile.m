@@ -1,5 +1,13 @@
 function saveRecipeConditionsInTextFile(p)
 
+% This function writes all the fields in the parser of the
+% RunToyVirtualWorldRecipes function in the file recipeSummary.txt and
+% saves the file in the outputName folder of the outputName specified in
+% RunToyVirtualWorldRecipes.
+%
+% Written by VS 02/02/2017
+
+
 projectName = 'VirtualWorldColorConstancy';
 filename = fullfile(getpref(projectName, 'baseFolder'),p.Results.outputName,'recipeSummary.txt');
 fid = fopen(filename,'wt');

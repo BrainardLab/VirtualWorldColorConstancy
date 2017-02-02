@@ -40,18 +40,20 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   target object. These are just dummy variables to give a
 %                   unique name to each random spectra.
 %   'mosaicHalfSize' - Cone mosaic half size
-%   'otherObjectReflectanceRandom' - Spectra of background objects is
-%                    random or not. Default true = is random
-%   'illuminantSpectraRandom' - Spectra of illuminants is random or not.
-%                   Default is true = is random
-%   'lightPositionRandom' - Illuminant position is fixed or not. Default is
-%                   true. False will only work for library-bigball case
-%   'lightScaleRandom' - Illuminant scale/size is fixed or not. Default is
-%                   true.
-%   'targetPositionRandom' - Target position is fixed or not. Default is
-%                   true. False will only work for library-bigball case
-%   'targetScaleRandom' - Target scale/size is fixed or not. Default is
-%                   true.
+%   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
+%                   background objects is random or not. Default true
+%   'illuminantSpectraRandom' - boolean to specify if spectra of 
+%                   illuminant is random or not. Default true
+%   'lightPositionRandom' - boolean to specify illuminant position is fixed
+%                   or not. Default is true. False will only work for 
+%                   library-bigball case.
+%   'lightScaleRandom' - boolean to specify illuminant scale/size. Default 
+%                   is true.
+%   'targetPositionRandom' - boolean to specify illuminant scale/size. 
+%                   Default is true. False will only work for 
+%                   library-bigball case.
+%   'targetScaleRandom' - boolean to specify target scale/size is fixed or 
+%                   not. Default is true.
 %   'baseSceneSet'  - Base scenes to be used for renderings. One of these
 %                  base scenes is used for each rendering
 %   'shapeSet'  - Shapes of the object that can be used for target
