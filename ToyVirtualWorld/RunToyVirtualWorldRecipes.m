@@ -66,7 +66,7 @@ analyzeCropImageHalfSize = parser.Results.analyzeCropImageHalfSize;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
-
+saveRecipesConditionsTogether(parser);
 %% Set up ful-sized parpool if available.
 if exist('parpool', 'file')
     delete(gcp('nocreate'));
