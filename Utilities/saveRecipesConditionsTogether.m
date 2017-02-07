@@ -47,9 +47,9 @@ if ~exist(filename)
                 fprintf(fid, '%20s\t', 'Target Scale');
             otherwise
                 fprintf(fid, '%20s\t', fieldNames{numFields});
-        end
-        
+        end                
     end
+    fprintf(fid, '%20s\t', 'Date & Time');
     fprintf(fid, '\n');    
 else
     fid = fopen(filename,'at');
@@ -91,5 +91,6 @@ for numFields = 1 : numel(fieldNames)
             end
     end
 end
+fprintf(fid, '%20s\t', datetime);
 fprintf(fid, '\n');
 fclose(fid);
