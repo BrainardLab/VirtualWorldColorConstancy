@@ -79,5 +79,5 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
     fid = fopen(fullfile(folderToStore,reflectanceName),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
     fclose(fid);
-    if (m==10) m=0; end
+    if (m==numel(reflectanceNumbers)) m=0; end
 end
