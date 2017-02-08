@@ -55,6 +55,8 @@ parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
+parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
+parser.addParameter('targetSpectrumNotFlat', true, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -97,14 +99,26 @@ if (~exist(originalFolder, 'dir'))
 end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
+illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
+
 if parser.Results.illuminantSpectraRandom
     totalRandomLightSpectra = 100;
+    if (parser.Results.illuminantSpectrumNotFlat)
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
+    else
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, 10);
+    end
 else
     totalRandomLightSpectra = 1;
+    if (parser.Results.illuminantSpectrumNotFlat)
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
+    else
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 10, 0);
+    end
 end
 
-illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
-makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
+
+
 
 % Choose illuminant spectra from the Illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);
@@ -126,7 +140,11 @@ otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
-makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+if (parser.Results.illuminantSpectrumNotFlat)
+    makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+else
+    makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+end
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;
