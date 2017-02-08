@@ -56,8 +56,9 @@ newIndex = 1;
 if ~exist(folderToStore)
     mkdir(folderToStore);
 end
-
+m=0;
 for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
+    m=m+1;
     OK = false;
     while (~OK)
         ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
@@ -74,8 +75,9 @@ for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
         end
     end
     reflectanceName = sprintf('luminance-%.4f-reflectance-%03d.spd', theLuminanceTarget, ...
-                reflectanceNumbers(i));
+                reflectanceNumbers(m));
     fid = fopen(fullfile(folderToStore,reflectanceName),'w');
     fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
     fclose(fid);
+    if (m==10) m=0; end
 end
