@@ -91,6 +91,6 @@ for numFields = 1 : numel(fieldNames)
             end
     end
 end
-fprintf(fid, '%20s\t', datetime);
+fprintf(fid, '%20s\t', datestr(datetime));
 fprintf(fid, '\n');
 fclose(fid);
