@@ -106,7 +106,7 @@ if parser.Results.illuminantSpectraRandom
     if (parser.Results.illuminantSpectrumNotFlat)
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, 10);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, 300);
     end
 else
     totalRandomLightSpectra = 1;
@@ -140,7 +140,7 @@ otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
-if (parser.Results.illuminantSpectrumNotFlat)
+if (parser.Results.targetSpectrumNotFlat)
     makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
 else
     makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
