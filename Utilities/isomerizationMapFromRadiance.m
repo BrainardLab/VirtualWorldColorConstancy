@@ -74,7 +74,9 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     
     % Adjust scene parameters
     % 1. Set the mean luminance
-    scene = sceneAdjustLuminance(scene, p.meanLuminance);
+    if (p.meanLuminance ~= 0)
+        scene = sceneAdjustLuminance(scene, p.meanLuminance);
+    end
     
     % 2. Set the horizontal FOV
     scene = sceneSet(scene, 'wAngular', p.horizFOV);
