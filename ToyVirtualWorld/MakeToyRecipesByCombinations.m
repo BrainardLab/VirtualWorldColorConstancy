@@ -113,7 +113,7 @@ else
     if (parser.Results.illuminantSpectrumNotFlat)
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 10, 0);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 100, 100);
     end
 end
 
