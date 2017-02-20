@@ -78,6 +78,8 @@ targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
+illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
+illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
@@ -101,16 +103,17 @@ end
 %% Make some illuminants and store them in the Data/Illuminants folder.
 illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
 
-if parser.Results.illuminantSpectraRandom
-    totalRandomLightSpectra = 100;
-    if (parser.Results.illuminantSpectrumNotFlat)
+if illuminantSpectraRandom    
+    if (illuminantSpectrumNotFlat)
+        totalRandomLightSpectra = 100;
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, 300);
+        totalRandomLightSpectra = 10;
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 1, 300);
     end
 else
     totalRandomLightSpectra = 1;
-    if (parser.Results.illuminantSpectrumNotFlat)
+    if (illuminantSpectrumNotFlat)
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
     else
         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 150, 150);
@@ -220,7 +223,11 @@ parfor sceneIndex = 1:nScenes
             
             %% Assign a random illuminant to each light in the base scene.
             nBaseLights = numel(sceneData.lightIds);
-            whichLights = randi(nLightSpectra, [1, nBaseLights]);
+            if (illuminantSpectrumNotFlat || nLightSpectra==1)
+                whichLights = randi(nLightSpectra, [1, nBaseLights]);
+            else
+                whichLights = reflectanceNumber*ones([1, nBaseLights]);
+            end            
             workingRecord.choices.baseSceneLights = lightSpectra(whichLights);
             
             %% Pick a light shape to insert.
@@ -246,7 +253,13 @@ parfor sceneIndex = 1:nScenes
             workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};                        
             workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
             workingRecord.choices.insertedLights.wardMaterialSets = {wardIlluminant};
-            workingRecord.choices.insertedLights.lightSpectra = lightSpectra(randi(nLightSpectra));
+            if (illuminantSpectrumNotFlat || nLightSpectra==1)
+                workingRecord.choices.insertedLights.lightSpectra = ...
+                    lightSpectra(randi(nLightSpectra));
+            else
+                workingRecord.choices.insertedLights.lightSpectra = ...
+                    lightSpectra(reflectanceNumber);                
+            end                                    
             
             %% Pick a target object and random number of "others" to insert.
             %   the "target" object is always number 1.
