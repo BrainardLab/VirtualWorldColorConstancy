@@ -4,19 +4,20 @@
 % RenderToolbox4 and VirtualScenesEngine, instead of the old RenderToolbox3
 % code.
 %
-% I'm sorry to say I probably won't be able to finish.  But I am hoping to
-% make enough of a start that you can see how to generate vwcc-style
-% recipes using the VirtualScenesEngine, and I hope that will be enough for
-% you to pick up and run with.  Qapla'!
+% I'm sorry I didn't have time to work this through to production.  But I
+% am hoping this proof of concept will be enough so that you can see how to
+% generate vwcc-style recipes using the VirtualScenesEngine, and run with
+% it.  Qapla'!
 %
+% Ben H
 
 clear;
 clc;
 
 %% Choose batch render options.
 hints.fov = deg2rad(60);
-hints.imageHeight = 240;
-hints.imageWidth = 320;
+hints.imageHeight = 480;
+hints.imageWidth = 640;
 hints.renderer = 'Mitsuba';
 hints.recipeName = 'vwccVseProofOfConcept';
 
@@ -31,7 +32,7 @@ aioPrefs.locations = aioLocation( ...
     'baseDir', fullfile(vseaRoot(), 'examples'));
 
 
-%% Choose base scenes to work with.
+%% Choose base scenes to pick from.
 baseSceneNames = {'CheckerBoard', 'IndoorPlant', 'Library', ...
     'Mill', 'TableChairs', 'Warehouse'};
 
@@ -49,7 +50,7 @@ for bb = 1:nBaseScenes
 end
 
 
-%% Choose objects to insert.
+%% Choose shapes to insert.
 shapeNames = {'Barrel', 'BigBall', 'ChampagneBottle', ...
     'RingToy', 'SmallBall', 'Xylophone'};
 
@@ -64,12 +65,39 @@ for ss = 1:nShapes
 end
 
 
-%% Chose which base scene and which shapes and lights to insert.
-baseSceneIndex = randi(nBaseScenes);
-baseSceneInfo = baseSceneInfos{bb};
+%% Choose light spectra.
+
+% Sorry this is a simple, static list.  But you could replace it with
+% another cell array of spectrum strings or .spd file names.
+emitterSpectra = { ...
+    '300:2 800:0', ...
+    '300:0 800:2', ...
+    '300:1 800:1'};
+
+
+%% Choose reflectances for the scene overall.
+
+% Sorry this is just the color checker spectra.  But you could replace this
+% list with a list of cleverly generated spectrum strings or .spd file
+% names.
+baseSceneReflectances = aioGetFiles('Reflectances', 'ColorChecker', ...
+    'aioPrefs', aioPrefs, ...
+    'fullPaths', false);
+
+
+%% Choose the specific reflectance for the target object.
+
+% Again, sorry this is a silly, static spectrum.  But you could replace it
+% with a better spectrum string or .spd file name.
+targetObjectReflectance = '300:0 800:1';
+
+
+%% Randomly pick a base scene and shapes to insert.
+baseSceneIndex = 3;% randi(nBaseScenes);
+baseSceneInfo = baseSceneInfos{baseSceneIndex};
 baseScene = baseScenes{baseSceneIndex}.copy('name', 'base');
 
-nInsertShapes = 3;
+nInsertShapes = 10;
 shapeIndexes = randi(nShapes, [1, nInsertShapes]);
 
 nInsertLights = 2;
@@ -79,7 +107,7 @@ lightIndexes = randi(nShapes, [1, nInsertLights]);
 %% For each shape insert, choose a random spatial transformation.
 insertShapes = cell(1, nInsertShapes);
 for ss = 1:nInsertShapes
-    shape = shapes{ss};
+    shape = shapes{shapeIndexes(ss)};
     
     rotationX = randi([0, 359]);
     rotationY = randi([0, 359]);
@@ -116,9 +144,9 @@ baseScene.model.rootNode.children(isCameraNode).transformation = lookAt;
 
 
 %% For each light insert, choose a random spatial transformation.
-insertLights = cell(1, nInsertShapes);
+insertLights = cell(1, nInsertLights);
 for ll = 1:nInsertLights
-    light = shapes{ll};
+    light = shapes{lightIndexes(ll)};
     
     rotationX = randi([0, 359]);
     rotationY = randi([0, 359]);
@@ -138,32 +166,127 @@ for ll = 1:nInsertLights
 end
 
 
-%% Build recipe, render, and preview.
+%% Choose styles for the black and white mask rendering.
+
+% do a low quality, direct lighting rendering
+quickRendering = VwccMitsubaRenderingQuality( ...
+    'integratorPluginType', 'direct', ...
+    'samplerPluginType', 'ldsampler');
+quickRendering.addIntegratorProperty('shadingSamples', 'integer', 32);
+quickRendering.addSamplerProperty('sampleCount', 'integer', 32);
+
+% turn all materials into black diffuse
+allBlackDiffuse = VseMitsubaDiffuseMaterials( ...
+    'name', 'allBlackDiffuse');
+allBlackDiffuse.addSpectrum('300:0 800:0');
+
+% make the target shape a uniform emitter
+firstShapeEmitter = VseMitsubaAreaLights( ...
+    'name', 'targetEmitter', ...
+    'modelNameFilter', 'shape-1', ...
+    'elementNameFilter', '', ...
+    'elementTypeFilter', 'nodes', ...
+    'defaultSpectrum', '300:1 800:1');
+
+% these styles make up the "mask" condition
+styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
+
+
+%% Choose styles for the full radiance rendering.
+
+% do a higher quality, path tracing rendering
+fullRendering = VwccMitsubaRenderingQuality( ...
+    'integratorPluginType', 'path', ...
+    'samplerPluginType', 'ldsampler');
+fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
+fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
+
+% bless specific meshes in the base scene as area lights
+nBaseLights = numel(baseSceneInfo.lightIds);
+baseLightNames = cell(1, nBaseLights);
+for ll = 1:nBaseLights
+    lightId = baseSceneInfo.lightIds{ll};
+    meshSuffixIndex = strfind(lightId, '-mesh');
+    if ~isempty(meshSuffixIndex)
+        baseLightNames{ll} = lightId(1:meshSuffixIndex-1);
+    else
+        baseLightNames{ll} = lightId;
+    end
+end
+baseLightFilter = sprintf('%s|', baseLightNames{:});
+baseLightFilter = baseLightFilter(1:end-1);
+blessBaseLights = VseMitsubaAreaLights( ...
+    'name', 'blessBaseLights', ...
+    'applyToInnerModels', false, ...
+    'elementNameFilter', baseLightFilter);
+
+% bless inserted light meshes as area lights
+blessInsertedLights = VseMitsubaAreaLights( ...
+    'name', 'blessInsertedLights', ...
+    'applyToOuterModels', false, ...
+    'modelNameFilter', 'light-', ...
+    'elementNameFilter', '');
+
+% assign spectra to lights
+areaLightSpectra = VseMitsubaEmitterSpectra( ...
+    'name', 'areaLightSpectra', ...
+    'pluginType', 'area', ...
+    'propertyName', 'radiance');
+areaLightSpectra.spectra = emitterSpectra;
+
+% assign spectra to materials in the base scene
+baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
+    'name', 'baseSceneDiffuse', ...
+    'applyToInnerModels', false);
+baseSceneDiffuse.addManySpectra(baseSceneReflectances);
+
+% assign spectra to all materials of inserted shapes
+insertedSpectra = aioGetFiles('Reflectances', 'ColorChecker', ...
+    'aioPrefs', aioPrefs, ...
+    'fullPaths', false);
+insertedDiffuse = VseMitsubaDiffuseMaterials( ...
+    'name', 'insertedDiffuse', ...
+    'applyToOuterModels', false);
+insertedDiffuse.addManySpectra(insertedSpectra);
+
+% assign a specific reflectance to the target object
+targetDiffuse = VseMitsubaDiffuseMaterials( ...
+    'name', 'targetDiffuse', ...
+    'applyToOuterModels', false, ...
+    'modelNameFilter', 'scene-1');
+targetDiffuse.addSpectrum(targetObjectReflectance);
+
+styles.normal = {fullRendering, ...
+    blessBaseLights, blessInsertedLights, areaLightSpectra, ...
+    baseSceneDiffuse, insertedDiffuse, targetDiffuse};
+
+
+%% Build recipe and render it.
+
+% combine the models and make one condition per field of the styles struct
 innerModels = [insertShapes{:} insertLights{:}];
-styles.none = {};
 recipe = vseBuildRecipe(baseScene, innerModels, styles, 'hints', hints);
 
+% generate scene files and render
 recipe = rtbExecuteRecipe(recipe);
 
-imshow(uint8(recipe.processing.srgbMontage));
 
+%% Preview.
 
-%% Notes.
+isScale = true;
+toneMapFactor = 100;
 
-% full radiance rendering (a style)
-% quick mask rendering (a style)
-% make everything black except the target object area light (a style)
-
-% build recipes
-%   one style set is quick and make everything black
-%   one style is full radiance and use "real" spectra
-
-% luminance levels
-% reflectances
-
-% assign reflectances in base scene (a style)
-% assign illuminant spectra in base scene (a style)
-% assign reflectances to inserted shapes (a style)
-% assign reflectance to target shape (a style)
-% assign illuminant spectra in inserted lights (a style)
-
+nRenderings = numel(recipe.rendering.radianceDataFiles);
+for rr = 1:nRenderings
+    [~, conditionName] = fileparts(recipe.rendering.radianceDataFiles{rr});
+    
+    rgb = rtbMakeMontage(recipe.rendering.radianceDataFiles(rr), ...
+        'isScale', isScale, ...
+        'toneMapFactor', toneMapFactor, ...
+        'hints', hints);
+    
+    figure();
+    imshow(uint8(rgb));
+    drawnow();
+    title(conditionName);
+end
