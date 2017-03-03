@@ -43,6 +43,9 @@ if ~exist(folderToStore)
     mkdir(folderToStore);
 end
 
+
+illuminanceValues = 10.^(log10(1) + (log10(300)-log10(1)) * rand(1,nIlluminances));
+
 for i = 1:nNewIlluminaces
     OK = false;
     while (~OK)
@@ -57,7 +60,7 @@ for i = 1:nNewIlluminaces
     end
     filename = sprintf('illuminance_%03d.spd',i);
     fid = fopen(fullfile(folderToStore,filename),'w');
-    fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,i)]');
+    fprintf(fid,'%3d %3.6f\n',[theWavelengths,illuminanceValues(i)*newIlluminance(:,i)]');
     fclose(fid);
 end
 
