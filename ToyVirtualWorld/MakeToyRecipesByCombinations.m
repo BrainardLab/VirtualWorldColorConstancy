@@ -85,13 +85,16 @@ nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
 nShapes = numel(shapeSet);
 
-
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
 hints.isPlot = false;
 
-defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
+%% This doesn't work anymore because we don't have function VirtualScenesRoot.
+% 
+% Maybe we don't need the defaultMappings anymore.  We'll have to see.
+%
+% defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
 % Set up output
 hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
@@ -102,7 +105,6 @@ end
 
 %% Make some illuminants and store them in the Data/Illuminants folder.
 illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
-
 if illuminantSpectraRandom    
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 100;
@@ -120,10 +122,7 @@ else
     end
 end
 
-
-
-
-% Choose illuminant spectra from the Illuminants folder.
+% Choose illuminant spectra from the illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);
 nLightSpectra = numel(lightSpectra);
 

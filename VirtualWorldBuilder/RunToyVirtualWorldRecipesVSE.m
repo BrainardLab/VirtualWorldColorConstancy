@@ -19,7 +19,7 @@ hints.fov = deg2rad(60);
 hints.imageHeight = 480;
 hints.imageWidth = 640;
 hints.renderer = 'Mitsuba';
-hints.recipeName = 'vwccVseProofOfConcept';
+hints.recipeName = 'vwccToyVirtualWorld';
 
 projectName = 'VirtualWorldColorConstancy';
 hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'), 'Working');
