@@ -185,7 +185,7 @@ parfor sceneIndex = 1:nScenes
             %% Pick the base scene randomly.
             bIndex = randi(size(baseSceneSet, 2), 1);
             workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
-            sceneData = ReadMetadata(workingRecord.choices.baseSceneName);
+            sceneData = rtbReadMetadata(workingRecord.choices.baseSceneName);
             
             %% Pick the target object randomly.
             targetShapeIndex = randi(nShapes, 1);
