@@ -76,10 +76,22 @@ emitterSpectra = { ...
 
 
 %% Choose reflectances for the scene overall.
-
-% Sorry this is just the color checker spectra.  But you could replace this
-% list with a list of cleverly generated spectrum strings or .spd file
-% names.
+%
+% We created some spectra and stuck them in a directory, which 
+% we point to in the variable reflectanceBaseDir.
+%
+% We then get those into the right format using aioGetFiles, with aioPrefs
+% set to point at where our spectra are.
+%
+% The problem is, when it comes time to apply the style, the thing doing
+% the applying doesn't know where these files are, and thus doesn't copy
+% them over into the resource folder.  So they don't end up in the resource
+% folder, and the rendering crashes because it can't find them we we try to
+% execute the recipe.
+%
+% What we need is the "right" way to point at a set of spectra outside of
+% the Matlab path, someplace where we generated spectra, and then to get
+% them into the recipe's resource folder.
 reflectanceBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
 reflectanceLocations.config.baseDir = reflectanceBaseDir;
 reflectanceLocations.name = 'ToyVirtualWorldReflectances';
@@ -90,7 +102,12 @@ baseSceneReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'aioPrefs', reflectanceAioPrefs, ...
     'fullPaths', false);
 
-% This was the original example version. 
+% This was the original example version, currently commented out.
+%
+% Sorry this is just the color checker spectra.  But you could replace this
+% list with a list of cleverly generated spectrum strings or .spd file
+% names.
+%
 % baseSceneReflectances = aioGetFiles('Reflectances', 'ColorChecker', ...
 %     'aioPrefs', aioPrefs, ...
 %     'fullPaths', false);
