@@ -141,13 +141,18 @@ for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
 ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
+pathToTargetReflectanceFolder = fullfile(getpref(projectName, 'baseFolder'),...
+        parser.Results.outputName,'Data','Reflectances','TargetObjects');
+trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder);
+
 numLMSCones=numLMSCones(1,:);
 allLMSPositions=allLMSPositions(:,:,1);
 coneRescalingFactors=coneRescalingFactors(:,1);
 allLMSIndicator = allLMSIndicator(:,:,1);
 allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
 
+
 save(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'stimulusAMA.mat'),...
                 'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
             'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
-            'allDemosaicResponse','allAverageAnnularResponsesDemosaic','allLMSIndicator');
+            'allDemosaicResponse','allAverageAnnularResponsesDemosaic','allLMSIndicator','trueXYZ');

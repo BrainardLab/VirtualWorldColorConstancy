@@ -152,9 +152,9 @@ luminanceFigure = axes(hFig2,'units','pixels','position', [50 50 200 200]);
 errorbar(luminanceLevels,mean(LumCenter,2),std(LumCenter',1));
 xlabel('Luminace Levels','FontSize',15);
 ylabel('XYZ(2)','FontSize',15);
-title(name,'FontSize',15)
+% title(name,'FontSize',15)
 xlim([0.175,0.625]);
-ylim([0,120]);
+ylim([0,max(LumCenter(:))]);
 axis square;
 box on;
 
@@ -169,7 +169,7 @@ box on;
 errorbar(luminanceLevels,mean(LumAvTarget./LumAvOther,2),std((LumAvTarget./LumAvOther)',1));
 xlabel('Luminace Levels','FontSize',15);
 ylabel('Average Y Ratio ','FontSize',15);
-title(name,'FontSize',15)
+% title(name,'FontSize',15)
 xlim([0.175,0.625]);
 ylim([0,3]);
 
@@ -181,7 +181,7 @@ plot(trueHue(:),HueAvTarget(:),'.','MarkerSize',20);
 plot(trueHue(:),HueAvOther(:),'r.','MarkerSize',20);
 xlabel('True Hue','FontSize',15);
 ylabel('<Target Hue>','FontSize',15);
-title(name,'FontSize',15)
+% title(name,'FontSize',15)
 legend('Target','Other');
 xlim([0,2*pi]);
 ylim([0,2*pi]);
@@ -195,7 +195,7 @@ plot(trueSaturation(:),SaturationAvTarget(:),'.','MarkerSize',20)
 plot(trueSaturation(:),SaturationAvOther(:),'.','MarkerSize',20)
 xlabel('True Saturation','FontSize',15);
 ylabel('<Target Saturation>','FontSize',15);
-title(name,'FontSize',15)
+% title(name,'FontSize',15)
 legend('Target','Other');
 
 %% Now plot the full image and the scaled cropped image            
@@ -241,7 +241,8 @@ for ii = 1:size(whichLuminaceForMosaic,2)
     end
 end
 
-figFullMontage = fullfile(bucketFolder,jobFolder,['FullMontage.png']);
-print('-dpng', figFullMontage);
-
+figFullMontage = fullfile(bucketFolder,jobFolder,['FullMontage.pdf']);
+set(gcf,'PaperPositionMode','auto');
+save2pdf(figFullMontage);
+close;
 

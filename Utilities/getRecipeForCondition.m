@@ -69,7 +69,8 @@ end
 
 %% Check for a recipe file or folder in the given job folder and subfolder.
 function info = recipeInfoForPattern(bucketFolder, jobFolder, subfolder, namePattern)
-subFolderPath = fullfile(bucketFolder, jobFolder, 'VirtualWorldColorConstancy', subfolder);
+% subFolderPath = fullfile(bucketFolder, jobFolder, 'VirtualWorldColorConstancy', subfolder);
+subFolderPath = fullfile(bucketFolder, jobFolder, subfolder);
 recipePattern = fullfile(subFolderPath, namePattern);
 info = dir(recipePattern);
 
