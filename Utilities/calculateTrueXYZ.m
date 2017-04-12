@@ -36,7 +36,7 @@ for ii = 1:length(luminanceLevels)
         % then XYZ.
         theLightToEye = theIlluminant.*theReflectance;
         XYZSur = theXYZCMFs*theLightToEye;
-        trueXYZ(:,(ii-1)*length(luminanceLevels)+jj) = XYZSur;
+        trueXYZ(:,(ii-1)*length(reflectanceNumbers)+jj) = XYZSur;
     end
 end
 
