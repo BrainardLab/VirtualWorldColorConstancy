@@ -263,9 +263,15 @@ areaLightSpectra = VseMitsubaEmitterSpectra( ...
 areaLightSpectra.spectra = emitterSpectra;
 
 % assign spectra to materials in the base scene
+%
+% note setting of resourceFolder to point to where the
+% files with the spectra live.  This is necessary so
+% that when the recipe gets built, these spectral files
+% can be found and copied into the right place.
 baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
     'name', 'baseSceneDiffuse', ...
     'applyToInnerModels', false);
+baseSceneDiffuse.resourceFolder = reflectanceBaseDir;
 baseSceneDiffuse.addManySpectra(baseSceneReflectances);
 
 % assign spectra to all materials of inserted shapes
@@ -287,7 +293,7 @@ targetDiffuse.addSpectrum(targetObjectReflectance);
 styles.normal = {fullRendering, ...
     blessBaseLights, blessInsertedLights, areaLightSpectra, ...
     baseSceneDiffuse, insertedDiffuse, targetDiffuse};
-styles.normal.resourcePath = reflectanceBaseDir;
+
 
 %% Build recipe and render it.
 
