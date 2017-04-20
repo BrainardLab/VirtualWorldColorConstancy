@@ -287,7 +287,7 @@ targetDiffuse.addSpectrum(targetObjectReflectance);
 styles.normal = {fullRendering, ...
     blessBaseLights, blessInsertedLights, areaLightSpectra, ...
     baseSceneDiffuse, insertedDiffuse, targetDiffuse};
-
+styles.normal.resourcePath = reflectanceBaseDir;
 
 %% Build recipe and render it.
 
