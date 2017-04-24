@@ -69,11 +69,19 @@ end
 
 % Sorry this is a simple, static list.  But you could replace it with
 % another cell array of spectrum strings or .spd file names.
-emitterSpectra = { ...
-    '300:2 800:0', ...
-    '300:0 800:2', ...
-    '300:1 800:1'};
-
+% emitterSpectra = { ...
+%     '300:2 800:0', ...
+%     '300:0 800:2', ...
+%     '300:1 800:1'};
+emitterBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
+emitterLocations.config.baseDir = emitterBaseDir;
+emitterLocations.name = 'ToyVirtualWorldIlluminants';
+emitterLocations.strategy = 'AioFileSystemStrategy';
+emitterAioPrefs = aioPrefs;
+emitterAioPrefs.locations = emitterLocations;
+emitterSpectra = aioGetFiles('Illuminants', 'BaseScene', ...
+    'aioPrefs', emitterAioPrefs, ...
+    'fullPaths', false);
 
 %% Choose reflectances for the scene overall.
 %
@@ -260,7 +268,9 @@ areaLightSpectra = VseMitsubaEmitterSpectra( ...
     'name', 'areaLightSpectra', ...
     'pluginType', 'area', ...
     'propertyName', 'radiance');
-areaLightSpectra.spectra = emitterSpectra;
+%areaLightSpectra.spectra = emitterSpectra;
+areaLightSpectra.resourceFolder = emitterBaseDir;
+areaLightSpectra.addManySpectra(emitterSpectra);
 
 % assign spectra to materials in the base scene
 %
@@ -293,7 +303,6 @@ targetDiffuse.addSpectrum(targetObjectReflectance);
 styles.normal = {fullRendering, ...
     blessBaseLights, blessInsertedLights, areaLightSpectra, ...
     baseSceneDiffuse, insertedDiffuse, targetDiffuse};
-
 
 %% Build recipe and render it.
 
