@@ -73,7 +73,9 @@ end
 %     '300:2 800:0', ...
 %     '300:0 800:2', ...
 %     '300:1 800:1'};
-emitterBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
+% emitterBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
+emitterBaseDir = fullfile('/Users/vsin/Desktop/Data/');
+
 emitterLocations.config.baseDir = emitterBaseDir;
 emitterLocations.name = 'ToyVirtualWorldIlluminants';
 emitterLocations.strategy = 'AioFileSystemStrategy';
@@ -100,7 +102,8 @@ emitterSpectra = aioGetFiles('Illuminants', 'BaseScene', ...
 % What we need is the "right" way to point at a set of spectra outside of
 % the Matlab path, someplace where we generated spectra, and then to get
 % them into the recipe's resource folder.
-reflectanceBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
+% reflectanceBaseDir = fullfile('/Users/dhb','Desktop','TestVSEData');
+reflectanceBaseDir = fullfile('/Users/vsin/Desktop/Data/');
 reflectanceLocations.config.baseDir = reflectanceBaseDir;
 reflectanceLocations.name = 'ToyVirtualWorldReflectances';
 reflectanceLocations.strategy = 'AioFileSystemStrategy';
@@ -125,7 +128,17 @@ baseSceneReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
 
 % Again, sorry this is a silly, static spectrum.  But you could replace it
 % with a better spectrum string or .spd file name.
-targetObjectReflectance = '300:0 800:1';
+% targetObjectReflectance = '300:0 800:1';
+
+targetBaseDir = fullfile('/Users/vsin/Desktop/Data/');
+targetLocations.config.baseDir = targetBaseDir;
+targetLocations.name = 'ToyVirtualWorldReflectances';
+targetLocations.strategy = 'AioFileSystemStrategy';
+targetAioPrefs = aioPrefs;
+targetAioPrefs.locations = targetLocations;
+targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
+    'aioPrefs', targetAioPrefs, ...
+    'fullPaths', false);
 
 
 %% Randomly pick a base scene and shapes to insert.
@@ -133,7 +146,7 @@ baseSceneIndex = 3;% randi(nBaseScenes);
 baseSceneInfo = baseSceneInfos{baseSceneIndex};
 baseScene = baseScenes{baseSceneIndex}.copy('name', 'base');
 
-nInsertShapes = 10;
+nInsertShapes = 2;
 shapeIndexes = randi(nShapes, [1, nInsertShapes]);
 
 nInsertLights = 2;
@@ -156,7 +169,7 @@ for ss = 1:nInsertShapes
         * mexximpRotate([0 0 1], rotationZ) ...
         * mexximpTranslate(position);
     
-    shapeName = sprintf('shape-%d', ss);
+    shapeName = sprintf('shape-%02d', ss);
     insertShapes{ss} = shape.copy( ...
         'name', shapeName, ...
         'transformation', transformation);
@@ -219,7 +232,7 @@ allBlackDiffuse.addSpectrum('300:0 800:0');
 % make the target shape a uniform emitter
 firstShapeEmitter = VseMitsubaAreaLights( ...
     'name', 'targetEmitter', ...
-    'modelNameFilter', 'shape-1', ...
+    'modelNameFilter', 'shape-01', ...
     'elementNameFilter', '', ...
     'elementTypeFilter', 'nodes', ...
     'defaultSpectrum', '300:1 800:1');
@@ -285,8 +298,8 @@ baseSceneDiffuse.resourceFolder = reflectanceBaseDir;
 baseSceneDiffuse.addManySpectra(baseSceneReflectances);
 
 % assign spectra to all materials of inserted shapes
-insertedSpectra = aioGetFiles('Reflectances', 'ColorChecker', ...
-    'aioPrefs', aioPrefs, ...
+insertedSpectra = aioGetFiles('Reflectances', 'OtherObjects', ...
+    'aioPrefs', reflectanceAioPrefs, ...
     'fullPaths', false);
 insertedDiffuse = VseMitsubaDiffuseMaterials( ...
     'name', 'insertedDiffuse', ...
@@ -297,8 +310,10 @@ insertedDiffuse.addManySpectra(insertedSpectra);
 targetDiffuse = VseMitsubaDiffuseMaterials( ...
     'name', 'targetDiffuse', ...
     'applyToOuterModels', false, ...
-    'modelNameFilter', 'scene-1');
-targetDiffuse.addSpectrum(targetObjectReflectance);
+    'modelNameFilter', 'shape-01');
+% targetDiffuse.addSpectrum(targetObjectReflectance);
+targetDiffuse.resourceFolder = reflectanceBaseDir;
+targetDiffuse.addManySpectra({targetObjectReflectance{1}});
 
 styles.normal = {fullRendering, ...
     blessBaseLights, blessInsertedLights, areaLightSpectra, ...
