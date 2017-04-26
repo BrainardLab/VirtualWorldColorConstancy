@@ -132,7 +132,7 @@ baseSceneReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
 
 targetBaseDir = fullfile('/Users/vsin/Desktop/Data/');
 targetLocations.config.baseDir = targetBaseDir;
-targetLocations.name = 'ToyVirtualWorldReflectances';
+targetLocations.name = 'ToyVirtualWorldTarget';
 targetLocations.strategy = 'AioFileSystemStrategy';
 targetAioPrefs = aioPrefs;
 targetAioPrefs.locations = targetLocations;
