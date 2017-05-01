@@ -41,6 +41,9 @@ function MakeToyRecipesByCombinations(varargin)
 %   'targetPixelThresholdMax' - maximum fraction of target pixels that
 %                 should be present in the cropped image.
 
+%% Want each run to start with its own random seed
+rng('shuffle');
+
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
