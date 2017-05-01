@@ -1,16 +1,21 @@
 function AnalyzeToyVirtualWorldRecipes(varargin)
-%% Locate, unpack, and execute many WardLand recipes created earlier.
+%% Locate, unpack, and anaylze many WardLand recipes created earlier.
 %
 % Use this script to analyze many archived recipes rendered earlier.
 %
+% THIS IS NOT YET WORKING WITH RTB4/VirtualSceneEngine.  WE THINK IT IS
+% MOSTLY A QUESTION OF FILENAME CONVENTIONS.  WE MOVED OVER SOME UTILITIES
+% FROM THE OLD VIRTUALSCENES PROJECT, which we put into a
+% UtilitiesFromVirtualScenes folder.  But we need to clean this up and
+% understand it at some point.
 
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
-parser.addParameter('luminanceLevels', [], @isnumeric);
-parser.addParameter('reflectanceNumbers', [], @isnumeric);
+parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
+parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
@@ -18,11 +23,12 @@ reflectanceNumbers = parser.Results.reflectanceNumbers;
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
+
 %% Overall Setup.
 
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Rendered');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Originals');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
@@ -52,9 +58,10 @@ set(0, 'DefaultAxesFontSize', 14)
 archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflectanceNumbers);
 nRecipes = numel(archiveFiles);
 
-parfor ii = 1:nRecipes
+% parfor ii = 1:nRecipes
+for ii = 1:nRecipes
     recipe = [];
-    try
+%     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
         recipe.input.hints.imageWidth = hints.imageWidth;
@@ -63,7 +70,7 @@ parfor ii = 1:nRecipes
         
         % run basic recipe analysis functions
         recipe = MakeToyRGBImages(recipe, toneMapFactor, isScale);
-        recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
+        % recipe = MakeToyAlbedoFactoidImages(recipe, toneMapFactor, isScale);
         recipe = MakeToyShapeIndexFactoidImages(recipe,cropImageHalfSize);
         
         % save the results in a separate folder
@@ -78,7 +85,7 @@ parfor ii = 1:nRecipes
             rmdir(tempFolder, 's');
         end
         
-    catch err
-        SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
-    end
+%     catch err
+%         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
+%     end
 end
