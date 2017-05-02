@@ -62,7 +62,7 @@ allLMSIndicator = [];
 
 parfor ii = 1:nRecipes
     recipe = [];
-%     try
+    try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
         rtbChangeToWorkingFolder('hints', recipe.input.hints);
@@ -134,9 +134,9 @@ parfor ii = 1:nRecipes
     
 %% Make Figures for Visualization
         makeFigureForVisualization(coneResponse,projectName,archiveBase,hints.workingFolder);
-%     catch err
-%         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
-%     end
+    catch err
+        SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
+    end
         
 end
 

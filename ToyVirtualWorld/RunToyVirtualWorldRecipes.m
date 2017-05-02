@@ -95,11 +95,11 @@ parser.parse(varargin{:});
 makeWidth = parser.Results.makeWidth;
 makeHeight = parser.Results.makeHeight;
 makeCropImageHalfSize = parser.Results.makeCropImageHalfSize;
-executeWidth = parser.Results.executeWidth;
-executeHeight = parser.Results.executeHeight;
-analyzeWidth = parser.Results.analyzeWidth;
-analyzeHeight = parser.Results.analyzeHeight;
-analyzeCropImageHalfSize = parser.Results.analyzeCropImageHalfSize;
+% executeWidth = parser.Results.executeWidth;
+% executeHeight = parser.Results.executeHeight;
+% analyzeWidth = parser.Results.analyzeWidth;
+% analyzeHeight = parser.Results.analyzeHeight;
+% analyzeCropImageHalfSize = parser.Results.analyzeCropImageHalfSize;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
@@ -153,7 +153,8 @@ try
         'luminanceLevels', luminanceLevels, ...
         'reflectanceNumbers', reflectanceNumbers, ...
         'nAnnularRegions', 25, ...
-        'mosaicHalfSize', mosaicHalfSize);
+        'mosaicHalfSize', mosaicHalfSize,...
+        'cropImageHalfSize',makeCropImageHalfSize);
     
 catch err
     workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'baseFolder'),parser.Results.outputName);

@@ -230,266 +230,266 @@ end
 parfor sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
     
-    %     try
-    targetLuminanceLevel = workingRecord.targetLuminanceLevel;
-    reflectanceNumber = workingRecord.reflectanceNumber;
-    
-    for attempt = 1:maxAttempts
+    try
+        targetLuminanceLevel = workingRecord.targetLuminanceLevel;
+        reflectanceNumber = workingRecord.reflectanceNumber;
         
-        %% Pick the base scene randomly.
-        bIndex = randi(size(baseSceneSet, 2), 1);
-        %             workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
-        %             sceneData = rtbReadMetadata(workingRecord.choices.baseSceneName);
-        
-        sceneInfo = baseSceneInfos{bIndex};
-        workingRecord.choices.baseSceneName = sceneInfo.name;
-        sceneData = baseScenes{bIndex}.copy('name', workingRecord.choices.baseSceneName);
-        
-        
-        %% Pick the target object randomly.
-        targetShapeIndex = randi(nShapes, 1);
-        targetShapeName = shapeSet{targetShapeIndex};
-        
-        %% Choose a unique name for this recipe.
-        recipeName = FormatRecipeName( ...
-            targetLuminanceLevel, ...
-            reflectanceNumber, ...
-            targetShapeName, ...
-            workingRecord.choices.baseSceneName);
-        workingRecord.hints.recipeName = recipeName;
-        
-        %% Pick other obejcts and Light shapes to insert
-        shapeIndexes = randi(nShapes, [1, nInsertObjects]);
-        
-        %% For each shape insert, choose a random spatial transformation.
-        insertShapes = cell(1, nInsertObjects+1);
-        
-        targetShape = shapes{targetShapeIndex};
-        
-        targetRotationX = randi([0, 359]);
-        targetRotationY = randi([0, 359]);
-        targetRotationZ = randi([0, 359]);
-        targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
-        scale = 0.3 + rand()/2;
-        transformation = mexximpScale(scale) ...
-            * mexximpRotate([1 0 0], targetRotationX) ...
-            * mexximpRotate([0 1 0], targetRotationY) ...
-            * mexximpRotate([0 0 1], targetRotationZ) ...
-            * mexximpTranslate(targetPosition);
-        
-        insertShapes{1} = targetShape.copy( ...
-            'name', targetShapeName, ...
-            'transformation', transformation);
-        
-        for sss = 2:nInsertObjects
-            shape = shapes{shapeIndexes(sss)};
+        for attempt = 1:maxAttempts
             
-            rotationX = randi([0, 359]);
-            rotationY = randi([0, 359]);
-            rotationZ = randi([0, 359]);
-            position = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
+            %% Pick the base scene randomly.
+            bIndex = randi(size(baseSceneSet, 2), 1);
+            %             workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
+            %             sceneData = rtbReadMetadata(workingRecord.choices.baseSceneName);
+            
+            sceneInfo = baseSceneInfos{bIndex};
+            workingRecord.choices.baseSceneName = sceneInfo.name;
+            sceneData = baseScenes{bIndex}.copy('name', workingRecord.choices.baseSceneName);
+            
+            
+            %% Pick the target object randomly.
+            targetShapeIndex = randi(nShapes, 1);
+            targetShapeName = shapeSet{targetShapeIndex};
+            
+            %% Choose a unique name for this recipe.
+            recipeName = FormatRecipeName( ...
+                targetLuminanceLevel, ...
+                reflectanceNumber, ...
+                targetShapeName, ...
+                workingRecord.choices.baseSceneName);
+            workingRecord.hints.recipeName = recipeName;
+            
+            %% Pick other obejcts and Light shapes to insert
+            shapeIndexes = randi(nShapes, [1, nInsertObjects]);
+            
+            %% For each shape insert, choose a random spatial transformation.
+            insertShapes = cell(1, nInsertObjects+1);
+            
+            targetShape = shapes{targetShapeIndex};
+            
+            targetRotationX = randi([0, 359]);
+            targetRotationY = randi([0, 359]);
+            targetRotationZ = randi([0, 359]);
+            targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
             scale = 0.3 + rand()/2;
             transformation = mexximpScale(scale) ...
-                * mexximpRotate([1 0 0], rotationX) ...
-                * mexximpRotate([0 1 0], rotationY) ...
-                * mexximpRotate([0 0 1], rotationZ) ...
-                * mexximpTranslate(position);
+                * mexximpRotate([1 0 0], targetRotationX) ...
+                * mexximpRotate([0 1 0], targetRotationY) ...
+                * mexximpRotate([0 0 1], targetRotationZ) ...
+                * mexximpTranslate(targetPosition);
             
-            shapeName = sprintf('shape-%d', sss);
-            insertShapes{sss} = shape.copy( ...
-                'name', shapeName, ...
+            insertShapes{1} = targetShape.copy( ...
+                'name', targetShapeName, ...
                 'transformation', transformation);
-        end
-        
-        %% Position the camera.
-        %   "eye" position is from the first camera "slot"
-        %   "target" position is the target object's position
-        %   "up" direction is from the first camera "slot"
-        eye = sceneInfo.cameraSlots(1).position;
-        up = sceneInfo.cameraSlots(1).up;
-        lookAt = mexximpLookAt(eye, targetPosition, up);
-        
-        cameraName = sceneData.model.cameras(1).name;
-        isCameraNode = strcmp(cameraName, {sceneData.model.rootNode.children.name});
-        sceneData.model.rootNode.children(isCameraNode).transformation = lookAt;
-        
-        %% For each light insert, choose a random spatial transformation.
-        lightIndexes = randi(nShapes, [1, nInsertedLights]);
-        
-        insertLights = cell(1, nInsertedLights);
-        for ll = 1:nInsertedLights
-            light = shapes{lightIndexes(ll)};
             
-            rotationX = randi([0, 359]);
-            rotationY = randi([0, 359]);
-            rotationZ = randi([0, 359]);
-            position = GetRandomPosition(sceneInfo.lightExcludeBox, sceneInfo.lightBox);
-            scale = 0.3 + rand()/2;
-            transformation = mexximpScale(scale) ...
-                * mexximpRotate([1 0 0], rotationX) ...
-                * mexximpRotate([0 1 0], rotationY) ...
-                * mexximpRotate([0 0 1], rotationZ) ...
-                * mexximpTranslate(position);
-            
-            lightName = sprintf('light-%d', ss);
-            insertLights{ll} = light.copy(...
-                'name', lightName, ...
-                'transformation', transformation);
-        end
-        
-        %% Choose styles for the black and white mask rendering.
-        
-        % do a low quality, direct lighting rendering
-        quickRendering = VwccMitsubaRenderingQuality( ...
-            'integratorPluginType', 'direct', ...
-            'samplerPluginType', 'ldsampler');
-        quickRendering.addIntegratorProperty('shadingSamples', 'integer', 32);
-        quickRendering.addSamplerProperty('sampleCount', 'integer', 32);
-        
-        % turn all materials into black diffuse
-        allBlackDiffuse = VseMitsubaDiffuseMaterials( ...
-            'name', 'allBlackDiffuse');
-        allBlackDiffuse.addSpectrum('300:0 800:0');
-        
-        % make the target shape a uniform emitter
-        firstShapeEmitter = VseMitsubaAreaLights( ...
-            'name', 'targetEmitter', ...
-            'modelNameFilter', targetShapeName, ...
-            'elementNameFilter', '', ...
-            'elementTypeFilter', 'nodes', ...
-            'defaultSpectrum', '300:1 800:1');
-        
-        % these styles make up the "mask" condition
-        workingRecord.styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
-
-        %% Do the mask rendering and reject if required
-        innerModels = [insertShapes{:} insertLights{:}];
-        workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
-        
-        % generate scene files and render
-        workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
-        
-        workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
-            'imageWidth', imageWidth, ...
-            'imageHeight', imageHeight, ...
-            'targetPixelThresholdMin', targetPixelThresholdMin, ...
-            'targetPixelThresholdMax', targetPixelThresholdMax, ...
-            'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
-        if workingRecord.rejected
-            % delete this recipe and try again
-            rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
-            [~, ~] = rmdir(rejectedFolder, 's');
-            continue;
-        else
-            
-            %% Choose styles for the full radiance rendering.
-            fullRendering = VwccMitsubaRenderingQuality( ...
-                'integratorPluginType', 'path', ...
-                'samplerPluginType', 'ldsampler');
-            fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
-            fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
-            
-            % bless specific meshes in the base scene as area lights
-            nBaseLights = numel(sceneInfo.lightIds);
-            baseLightNames = cell(1, nBaseLights);
-            for ll = 1:nBaseLights
-                lightId = sceneInfo.lightIds{ll};
-                meshSuffixIndex = strfind(lightId, '-mesh');
-                if ~isempty(meshSuffixIndex)
-                    baseLightNames{ll} = lightId(1:meshSuffixIndex-1);
-                else
-                    baseLightNames{ll} = lightId;
-                end
+            for sss = 2:nInsertObjects
+                shape = shapes{shapeIndexes(sss)};
+                
+                rotationX = randi([0, 359]);
+                rotationY = randi([0, 359]);
+                rotationZ = randi([0, 359]);
+                position = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
+                scale = 0.3 + rand()/2;
+                transformation = mexximpScale(scale) ...
+                    * mexximpRotate([1 0 0], rotationX) ...
+                    * mexximpRotate([0 1 0], rotationY) ...
+                    * mexximpRotate([0 0 1], rotationZ) ...
+                    * mexximpTranslate(position);
+                
+                shapeName = sprintf('shape-%d', sss);
+                insertShapes{sss} = shape.copy( ...
+                    'name', shapeName, ...
+                    'transformation', transformation);
             end
-            baseLightFilter = sprintf('%s|', baseLightNames{:});
-            baseLightFilter = baseLightFilter(1:end-1);
-            blessBaseLights = VseMitsubaAreaLights( ...
-                'name', 'blessBaseLights', ...
-                'applyToInnerModels', false, ...
-                'elementNameFilter', baseLightFilter);
             
-            % bless inserted light meshes as area lights
-            blessInsertedLights = VseMitsubaAreaLights( ...
-                'name', 'blessInsertedLights', ...
-                'applyToOuterModels', false, ...
-                'modelNameFilter', 'light-', ...
-                'elementNameFilter', '');
+            %% Position the camera.
+            %   "eye" position is from the first camera "slot"
+            %   "target" position is the target object's position
+            %   "up" direction is from the first camera "slot"
+            eye = sceneInfo.cameraSlots(1).position;
+            up = sceneInfo.cameraSlots(1).up;
+            lookAt = mexximpLookAt(eye, targetPosition, up);
             
-            % assign spectra to lights
-            areaLightSpectra = VseMitsubaEmitterSpectra( ...
-                'name', 'areaLightSpectra', ...
-                'pluginType', 'area', ...
-                'propertyName', 'radiance');
-            %areaLightSpectra.spectra = emitterSpectra;
-            areaLightSpectra.resourceFolder = dataBaseDir;
-            areaLightSpectra.addManySpectra(illuminantSpectra);
+            cameraName = sceneData.model.cameras(1).name;
+            isCameraNode = strcmp(cameraName, {sceneData.model.rootNode.children.name});
+            sceneData.model.rootNode.children(isCameraNode).transformation = lookAt;
             
-            % assign spectra to materials in the base scene
-            %
-            % note setting of resourceFolder to point to where the
-            % files with the spectra live.  This is necessary so
-            % that when the recipe gets built, these spectral files
-            % can be found and copied into the right place.
-            baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
-                'name', 'baseSceneDiffuse', ...
-                'applyToInnerModels', false);
-            baseSceneDiffuse.resourceFolder = dataBaseDir;
-            baseSceneDiffuse.addManySpectra(baseSceneReflectances);
+            %% For each light insert, choose a random spatial transformation.
+            lightIndexes = randi(nShapes, [1, nInsertedLights]);
             
-            % assign spectra to all materials of inserted shapes
-            insertedDiffuse = VseMitsubaDiffuseMaterials( ...
-                'name', 'insertedDiffuse', ...
-                'applyToOuterModels', false);
-            insertedDiffuse.addManySpectra(otherObjectReflectances);
+            insertLights = cell(1, nInsertedLights);
+            for ll = 1:nInsertedLights
+                light = shapes{lightIndexes(ll)};
+                
+                rotationX = randi([0, 359]);
+                rotationY = randi([0, 359]);
+                rotationZ = randi([0, 359]);
+                position = GetRandomPosition(sceneInfo.lightExcludeBox, sceneInfo.lightBox);
+                scale = 0.3 + rand()/2;
+                transformation = mexximpScale(scale) ...
+                    * mexximpRotate([1 0 0], rotationX) ...
+                    * mexximpRotate([0 1 0], rotationY) ...
+                    * mexximpRotate([0 0 1], rotationZ) ...
+                    * mexximpTranslate(position);
+                
+                lightName = sprintf('light-%d', ss);
+                insertLights{ll} = light.copy(...
+                    'name', lightName, ...
+                    'transformation', transformation);
+            end
             
-            % assign a specific reflectance to the target object
-            targetDiffuse = VseMitsubaDiffuseMaterials( ...
-                'name', 'targetDiffuse', ...
-                'applyToOuterModels', false, ...
-                'modelNameFilter', targetShapeName);
-            % targetDiffuse.addSpectrum(targetObjectReflectance);
-            targetDiffuse.resourceFolder = dataBaseDir;
-            reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
-                targetLuminanceLevel, reflectanceNumber);
-            targetDiffuse.addManySpectra({reflectanceFileName});
+            %% Choose styles for the black and white mask rendering.
             
-            workingRecord.styles.normal = {fullRendering, ...
-                blessBaseLights, blessInsertedLights, areaLightSpectra, ...
-                baseSceneDiffuse, insertedDiffuse, targetDiffuse};
+            % do a low quality, direct lighting rendering
+            quickRendering = VwccMitsubaRenderingQuality( ...
+                'integratorPluginType', 'direct', ...
+                'samplerPluginType', 'ldsampler');
+            quickRendering.addIntegratorProperty('shadingSamples', 'integer', 32);
+            quickRendering.addSamplerProperty('sampleCount', 'integer', 32);
             
-            %% Do the final rendering
-            innerModels = [insertShapes{:} insertLights{:}];            
+            % turn all materials into black diffuse
+            allBlackDiffuse = VseMitsubaDiffuseMaterials( ...
+                'name', 'allBlackDiffuse');
+            allBlackDiffuse.addSpectrum('300:0 800:0');
+            
+            % make the target shape a uniform emitter
+            firstShapeEmitter = VseMitsubaAreaLights( ...
+                'name', 'targetEmitter', ...
+                'modelNameFilter', targetShapeName, ...
+                'elementNameFilter', '', ...
+                'elementTypeFilter', 'nodes', ...
+                'defaultSpectrum', '300:1 800:1');
+            
+            % these styles make up the "mask" condition
+            workingRecord.styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
+            
+            %% Do the mask rendering and reject if required
+            innerModels = [insertShapes{:} insertLights{:}];
             workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
-
+            
             % generate scene files and render
             workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
             
-            % move on to save this recipe                        
-            break;
+            workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
+                'imageWidth', imageWidth, ...
+                'imageHeight', imageHeight, ...
+                'targetPixelThresholdMin', targetPixelThresholdMin, ...
+                'targetPixelThresholdMax', targetPixelThresholdMax, ...
+                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
+            if workingRecord.rejected
+                % delete this recipe and try again
+                rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
+                [~, ~] = rmdir(rejectedFolder, 's');
+                continue;
+            else
+                
+                %% Choose styles for the full radiance rendering.
+                fullRendering = VwccMitsubaRenderingQuality( ...
+                    'integratorPluginType', 'path', ...
+                    'samplerPluginType', 'ldsampler');
+                fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
+                fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
+                
+                % bless specific meshes in the base scene as area lights
+                nBaseLights = numel(sceneInfo.lightIds);
+                baseLightNames = cell(1, nBaseLights);
+                for ll = 1:nBaseLights
+                    lightId = sceneInfo.lightIds{ll};
+                    meshSuffixIndex = strfind(lightId, '-mesh');
+                    if ~isempty(meshSuffixIndex)
+                        baseLightNames{ll} = lightId(1:meshSuffixIndex-1);
+                    else
+                        baseLightNames{ll} = lightId;
+                    end
+                end
+                baseLightFilter = sprintf('%s|', baseLightNames{:});
+                baseLightFilter = baseLightFilter(1:end-1);
+                blessBaseLights = VseMitsubaAreaLights( ...
+                    'name', 'blessBaseLights', ...
+                    'applyToInnerModels', false, ...
+                    'elementNameFilter', baseLightFilter);
+                
+                % bless inserted light meshes as area lights
+                blessInsertedLights = VseMitsubaAreaLights( ...
+                    'name', 'blessInsertedLights', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', 'light-', ...
+                    'elementNameFilter', '');
+                
+                % assign spectra to lights
+                areaLightSpectra = VseMitsubaEmitterSpectra( ...
+                    'name', 'areaLightSpectra', ...
+                    'pluginType', 'area', ...
+                    'propertyName', 'radiance');
+                %areaLightSpectra.spectra = emitterSpectra;
+                areaLightSpectra.resourceFolder = dataBaseDir;
+                areaLightSpectra.addManySpectra(illuminantSpectra);
+                
+                % assign spectra to materials in the base scene
+                %
+                % note setting of resourceFolder to point to where the
+                % files with the spectra live.  This is necessary so
+                % that when the recipe gets built, these spectral files
+                % can be found and copied into the right place.
+                baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'baseSceneDiffuse', ...
+                    'applyToInnerModels', false);
+                baseSceneDiffuse.resourceFolder = dataBaseDir;
+                baseSceneDiffuse.addManySpectra(baseSceneReflectances);
+                
+                % assign spectra to all materials of inserted shapes
+                insertedDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'insertedDiffuse', ...
+                    'applyToOuterModels', false);
+                insertedDiffuse.addManySpectra(otherObjectReflectances);
+                
+                % assign a specific reflectance to the target object
+                targetDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'targetDiffuse', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', targetShapeName);
+                % targetDiffuse.addSpectrum(targetObjectReflectance);
+                targetDiffuse.resourceFolder = dataBaseDir;
+                reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
+                    targetLuminanceLevel, reflectanceNumber);
+                targetDiffuse.addManySpectra({reflectanceFileName});
+                
+                workingRecord.styles.normal = {fullRendering, ...
+                    blessBaseLights, blessInsertedLights, areaLightSpectra, ...
+                    baseSceneDiffuse, insertedDiffuse, targetDiffuse};
+                
+                %% Do the final rendering
+                innerModels = [insertShapes{:} insertLights{:}];
+                workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
+                
+                % generate scene files and render
+                workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
+                
+                % move on to save this recipe
+                break;
+            end
         end
-    end
-    
-    % keep track of attempts and rejections
-    workingRecord.nAttempts = attempt;
-    
-    if workingRecord.rejected
-        warning('%s rejected after %d attempts!', ...
-            workingRecord.hints.recipeName, attempt);
-    else
-        fprintf('%s accepted after %d attempts.\n', ...
-            workingRecord.hints.recipeName, attempt);
         
-        % save the recipe to the recipesFolder
-        archiveFile = fullfile(originalFolder, workingRecord.hints.recipeName);
-        excludeFolders = {'scenes', 'renderings', 'images'};
-        workingRecord.recipe.input.sceneRecord = workingRecord;
-        workingRecord.recipe.input.hints.whichConditions = [];
-        rtbPackUpRecipe(workingRecord.recipe, archiveFile, 'ignoreFolders', excludeFolders);
+        % keep track of attempts and rejections
+        workingRecord.nAttempts = attempt;
+        
+        if workingRecord.rejected
+            warning('%s rejected after %d attempts!', ...
+                workingRecord.hints.recipeName, attempt);
+        else
+            fprintf('%s accepted after %d attempts.\n', ...
+                workingRecord.hints.recipeName, attempt);
+            
+            % save the recipe to the recipesFolder
+            archiveFile = fullfile(originalFolder, workingRecord.hints.recipeName);
+            excludeFolders = {'scenes', 'renderings', 'images'};
+            workingRecord.recipe.input.sceneRecord = workingRecord;
+            workingRecord.recipe.input.hints.whichConditions = [];
+            rtbPackUpRecipe(workingRecord.recipe, archiveFile, 'ignoreFolders', excludeFolders);
+        end
+        
+        sceneRecord(sceneIndex) = workingRecord;
+        
+    catch err
+        SaveToyVirutalWorldError(originalFolder, err, workingRecord.recipe, workingRecord);
     end
-    
-    sceneRecord(sceneIndex) = workingRecord;
-    
-    %     catch err
-    %         SaveToyVirutalWorldError(originalFolder, err, workingRecord.recipe, workingRecord);
-    %     end
 end
