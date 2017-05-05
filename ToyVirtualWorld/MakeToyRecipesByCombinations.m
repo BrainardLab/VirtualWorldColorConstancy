@@ -160,7 +160,6 @@ end
 %% Make some reflectances and store them where they want to be
 otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','OtherObjects');
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
-
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
 if (parser.Results.targetSpectrumNotFlat)
     makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
@@ -188,8 +187,8 @@ otherObjectAioPrefs.locations = otherObjectLocations;
 otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'aioPrefs', otherObjectAioPrefs, ...
     'fullPaths', false);
-
 baseSceneReflectances = otherObjectReflectances;
+
 %% Choose Reflectance for target object overall
 targetLocations.config.baseDir = dataBaseDir;
 targetLocations.name = 'ToyVirtualWorldTarget';
