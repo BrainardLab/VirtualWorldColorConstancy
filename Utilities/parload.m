@@ -1,5 +1,5 @@
-function imageData = parload(fname)
+function multispectralImage = parload(fname)
 % loads the data in the .mat file fname
-load(fname);
-imageData = imageData;
+radiance = load(fname);
+multispectralImage = radiance.multispectralImage;
 end

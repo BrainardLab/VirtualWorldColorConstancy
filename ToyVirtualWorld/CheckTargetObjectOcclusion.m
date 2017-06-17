@@ -36,12 +36,14 @@ recipe.input.hints.renderer = 'Mitsuba';
 recipe.input.hints.imageWidth = imageWidth;
 recipe.input.hints.imageHeight = imageHeight;
 recipe.input.hints.whichConditions = 2;
-recipe = rtbExecuteRecipe(recipe);
-recipe = MakeToyRGBImages(recipe);
+% recipe = rtbExecuteRecipe(recipe);
+% recipe = MakeToyRGBImages(recipe);
 
 %% Check if we can see enough target pixels.
-targetMask = LoadRecipeProcessingImageFile(recipe, 'radiance', 'mask');
-isTarget = 0 < sum(targetMask, 3);
+maskFilename = fullfile(recipe.input.hints.workingFolder, ...
+    recipe.input.hints.recipeName,'renderings','Mitsuba','mask.mat');
+targetMask = load(maskFilename);
+isTarget = 0 < sum(targetMask.multispectralImage, 3);
 targetPixelCount = sum(isTarget(:));
 
 if ((targetPixelCount/totalBoundingBoxPixels < targetPixelThresholdMin || ...

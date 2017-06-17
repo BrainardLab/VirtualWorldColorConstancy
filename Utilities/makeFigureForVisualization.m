@@ -21,7 +21,7 @@ lmsSensitivities = 'T_cones_ss2';
 
         % Plot the RGB rendition of the image
         subplot(3,2,1);
-        pathtoImage = fullfile(workingFolder,archiveBase,'images','Mitsuba','radiance','normal.mat');
+        pathtoImage = fullfile(workingFolder,archiveBase,'renderings','Mitsuba','normal.mat');
         imageData = parload(pathtoImage);
         [sRGBImage, ~, ~] = rtbMultispectralToSRGB(imageData,[400,10,31], 'toneMapFactor', toneMapFactor, 'isScale', isScale);
         srgbUint = uint8(sRGBImage);
@@ -32,7 +32,7 @@ lmsSensitivities = 'T_cones_ss2';
 
         % Plot the mask image
         subplot(3,2,2);
-        pathtoImage = fullfile(workingFolder,archiveBase,'images','Mitsuba','radiance','mask.mat');
+        pathtoImage = fullfile(workingFolder,archiveBase,'renderings','Mitsuba','mask.mat');
         imageData = parload(pathtoImage);
         [sRGBImage, ~, ~] = rtbMultispectralToSRGB(imageData,[400,10,31], 'toneMapFactor', toneMapFactor, 'isScale', isScale);
         image(sRGBImage);

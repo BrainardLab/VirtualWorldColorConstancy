@@ -3,7 +3,7 @@
 		"flavor": "",
 		"hook": "",
 		"localHookTemplate": "",
-		"name": "VirtualScenes",
+		"name": "VirtualScenesEngine",
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
@@ -26,7 +26,7 @@
 	{
 		"flavor": "",
 		"hook": "",
-		"localHookTemplate": "configuration/virtualWorldColorConstancyLocalHookTemplate.m",
+		"localHookTemplate": "configuration/VirtualWorldColorConstancyLocalHookTemplate.m",
 		"name": "VirtualWorldColorConstancy",
 		"pathPlacement": "append",
 		"subfolder": "",

@@ -5,21 +5,62 @@ function MakeToyRecipesByCombinations(varargin)
 % several parameter sets and build a scene for several combinations of
 % parameter values, drawing from each parameter set.
 %
-% (The way we do this has been in flux.  So maybe we write the
-% documentation after the design has settled and things are working.)
-%
+% Key/value pairs
+%   'outputName' - Output File Name, Default ExampleOutput
+%   'imageWidth' - image width, Should be kept small to keep redering time
+%                   low for rejected recipes
+%   'imageHeight'- image height, Should be kept small to keep redering time
+%                   low for rejected recipes
+%   'makeCropImageHalfSize'  - size of cropped patch
+%   'luminanceLevels' - luminance levels of target object
+%   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of 
+%                   target object. These are just dummy variables to give a
+%                   unique name to each random spectra.
+%   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
+%                   background objects is random or not. Default true
+%   'illuminantSpectraRandom' - boolean to specify if spectra of 
+%                   illuminant is random or not. Default true
+%   'lightPositionRandom' - boolean to specify illuminant position is fixed
+%                   or not. Default is true. False will only work for 
+%                   library-bigball case.
+%   'lightScaleRandom' - boolean to specify illuminant scale/size. Default 
+%                   is true.
+%   'targetPositionRandom' - boolean to specify illuminant scale/size. 
+%                   Default is true. False will only work for 
+%                   library-bigball case.
+%   'targetScaleRandom' - boolean to specify target scale/size is fixed or 
+%                   not. Default is true.
+%   'baseSceneSet'  - Base scenes to be used for renderings. One of these
+%                  base scenes is used for each rendering
+%   'shapeSet'  - Shapes of the object that can be used for target
+%                      object, illuminant and other inserted objects
+%   'maxAttempts'- Maximum number of attempts allowed for finding a recipe
+%                 for with no occlusion of the target
+%   'targetPixelThresholdMin' - minimum fraction of target pixels that
+%                 should be present in the cropped image.
+%   'targetPixelThresholdMax' - maximum fraction of target pixels that
+%                 should be present in the cropped image.
 
 %% Get inputs and defaults.
 parser = inputParser();
+parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
-parser.addParameter('nOtherObjectSurfaceReflectance', 10000, @isnumeric);
+parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
+parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
+parser.addParameter('illuminantSpectraRandom', true, @islogical);
+parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
+parser.addParameter('targetSpectrumNotFlat', true, @islogical);
+parser.addParameter('lightPositionRandom', true, @islogical);
+parser.addParameter('lightScaleRandom', true, @islogical);
+parser.addParameter('targetPositionRandom', true, @islogical);
+parser.addParameter('targetScaleRandom', true, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -36,42 +77,75 @@ targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
+otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
+illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
+illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
 nShapes = numel(shapeSet);
 
-
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
-hints.workingFolder = getpref(projectName, 'workingFolder');
 hints.isPlot = false;
 
-defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
+%% This doesn't work anymore because we don't have function VirtualScenesRoot.
+% 
+% Maybe we don't need the defaultMappings anymore.  We'll have to see.
+%
+% defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
-originalFolder = fullfile(getpref(projectName, 'recipesFolder'), 'Originals');
+% Set up output
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
+originalFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% Choose illuminant spectra from the Illuminants folder.
+%% Make some illuminants and store them in the Data/Illuminants folder.
+illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
+if illuminantSpectraRandom    
+    if (illuminantSpectrumNotFlat)
+        totalRandomLightSpectra = 100;
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
+    else
+        totalRandomLightSpectra = 10;
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 1, 300);
+    end
+else
+    totalRandomLightSpectra = 1;
+    if (illuminantSpectrumNotFlat)
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
+    else
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 150, 150);
+    end
+end
+
+% Choose illuminant spectra from the illuminants folder.
 lightSpectra = getIlluminantSpectra(hints);
 nLightSpectra = numel(lightSpectra);
 
 % flat reflectance for illuminants
-matteIlluminant = BuildDesription('material', 'matte', ...
+matteIlluminant = rtbBuildDesription('material', 'matte', ...
     {'diffuseReflectance'}, ...
     {'300:0.5 800:0.5'}, ...
     {'spectrum'});
-wardIlluminant = BuildDesription('material', 'anisoward', ...
+wardIlluminant = rtbBuildDesription('material', 'anisoward', ...
     {'diffuseReflectance', 'specularReflectance'}, ...
     {'300:0.5 800:0.5', '300:0.1 800:0.1'}, ...
     {'spectrum', 'spectrum'});
 
-% remember where these raw materials are so we can copy them, below
-commonResourceFolder = rtbWorkingFolder('folder','resources', 'hints', hints);
+%% Make some reflectances and store them where they want to be
+otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','OtherObjects');
+makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 
+targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
+if (parser.Results.targetSpectrumNotFlat)
+    makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+else
+    makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+end
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;
@@ -99,7 +173,7 @@ end
 
 % iterate scene records with one parfor loop
 % Matlab does not support nested parfor loops
-for sceneIndex = 1:nScenes
+parfor sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
     
     try
@@ -111,7 +185,7 @@ for sceneIndex = 1:nScenes
             %% Pick the base scene randomly.
             bIndex = randi(size(baseSceneSet, 2), 1);
             workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
-            sceneData = ReadMetadata(workingRecord.choices.baseSceneName);
+            sceneData = rtbReadMetadata(workingRecord.choices.baseSceneName);
             
             %% Pick the target object randomly.
             targetShapeIndex = randi(nShapes, 1);
@@ -126,33 +200,64 @@ for sceneIndex = 1:nScenes
             workingRecord.hints.recipeName = recipeName;
             
             
-            %% Assign a random reflectance to each object in the base scene.
+            %% Assign a reflectance to each object in the base scene.
             nBaseMaterials = numel(sceneData.materialIds);
             workingRecord.choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
             workingRecord.choices.baseSceneWardMaterials = cell(1, nBaseMaterials);
             pwd
             for mm = 1:nBaseMaterials
+                % use arbitrary but consistent reflectances
+                if otherObjectReflectanceRandom
+                    materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
+                else
+                    materialReflectanceNumber = mm;
+                end
+                
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    randi(nOtherObjectSurfaceReflectance), [], workingRecord.hints);
+                    materialReflectanceNumber, [], workingRecord.hints);
                 workingRecord.choices.baseSceneMatteMaterials{mm} = matteMaterial;
                 workingRecord.choices.baseSceneWardMaterials{mm} = wardMaterial;
             end
             
             %% Assign a random illuminant to each light in the base scene.
             nBaseLights = numel(sceneData.lightIds);
-            whichLights = randi(nLightSpectra, [1, nBaseLights]);
+            if (illuminantSpectrumNotFlat || nLightSpectra==1)
+                whichLights = randi(nLightSpectra, [1, nBaseLights]);
+            else
+                whichLights = reflectanceNumber*ones([1, nBaseLights]);
+            end            
             workingRecord.choices.baseSceneLights = lightSpectra(whichLights);
             
             %% Pick a light shape to insert.
             %   pack up the light in the format expected for Ward Land
             workingRecord.choices.insertedLights.names = shapeSet(randi(nShapes, 1));
-            workingRecord.choices.insertedLights.positions = ...
-                {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
-            workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};
-            workingRecord.choices.insertedLights.scales = {.5 + rand()};
+            
+            % Position of the illuminant
+            if parser.Results.lightPositionRandom
+                workingRecord.choices.insertedLights.positions = ...
+                    {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
+            else
+                % using fixed light position that works for the Library base scene
+                workingRecord.choices.insertedLights.positions = ...
+                    {[-6.504209 18.729564 5.017080]};                
+            end
+            
+            % Size of the illuminant
+            if parser.Results.lightScaleRandom
+                workingRecord.choices.insertedLights.scales = {.5 + rand()};
+            else
+                workingRecord.choices.insertedLights.scales = {1};                
+            end
+            workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};                        
             workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
             workingRecord.choices.insertedLights.wardMaterialSets = {wardIlluminant};
-            workingRecord.choices.insertedLights.lightSpectra = lightSpectra(randi(nLightSpectra));
+            if (illuminantSpectrumNotFlat || nLightSpectra==1)
+                workingRecord.choices.insertedLights.lightSpectra = ...
+                    lightSpectra(randi(nLightSpectra));
+            else
+                workingRecord.choices.insertedLights.lightSpectra = ...
+                    lightSpectra(reflectanceNumber);                
+            end                                    
             
             %% Pick a target object and random number of "others" to insert.
             %   the "target" object is always number 1.
@@ -169,10 +274,22 @@ for sceneIndex = 1:nScenes
             workingRecord.choices.insertedObjects.wardMaterialSets = cell(1, nObjects);
             for oo = 1:nObjects
                 % object pose in scene
-                workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
-                workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
-                workingRecord.choices.insertedObjects.scales{oo} = .5 + rand();
                 
+                workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
+                
+                if parser.Results.targetPositionRandom
+                    workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
+                else
+                    % using fixed object position that works for the Library base scene
+                    workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
+                end
+                
+                if parser.Results.targetScaleRandom
+                    workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
+                else
+                    workingRecord.choices.insertedObjects.scales{oo} =  0.5;
+                end
+                                
                 % object reflectance
                 [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
                     randi(nOtherObjectSurfaceReflectance), [], workingRecord.hints);
@@ -192,7 +309,6 @@ for sceneIndex = 1:nScenes
                 reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
             
             % force the target object to use this computed reflectance
-            workingRecord.choices.insertedObjects.scales{1} = 0.5 + rand();
             workingRecord.choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
             workingRecord.choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
@@ -209,9 +325,12 @@ for sceneIndex = 1:nScenes
             workingRecord.recipe = BuildToyRecipe( ...
                 defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
             
-            % copy common resources into this recipe folder
+            %% Copy common resources into this recipe folder
+            %
+            % This just copies the illuminants, maybe should generalize for
+            % other resources at some point.
             recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
-            copyfile(commonResourceFolder, recipeResourceFolder, 'f');
+            copyfile(illuminantsFolder, recipeResourceFolder, 'f');
             
             %% Do a mask rendering, reject if target object is occluded.
             workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
@@ -219,7 +338,7 @@ for sceneIndex = 1:nScenes
                 'imageHeight', imageHeight, ...
                 'targetPixelThresholdMin', targetPixelThresholdMin, ...
                 'targetPixelThresholdMax', targetPixelThresholdMax, ...
-                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2); 
+                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
             if workingRecord.rejected
                 % delete this recipe and try again
                 rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
