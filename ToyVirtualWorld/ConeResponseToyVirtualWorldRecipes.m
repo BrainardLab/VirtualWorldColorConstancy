@@ -6,21 +6,23 @@ function ConeResponseToyVirtualWorldRecipes(varargin)
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
-parser.addParameter('luminanceLevels', [], @isnumeric);
-parser.addParameter('reflectanceNumbers', [], @isnumeric);
+parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
+parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
+parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 nAnnularRegions = parser.Results.nAnnularRegions;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
+cropImageHalfSize = parser.Results.cropImageHalfSize;
 
 %% Overall Setup.
 
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Analysed');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Originals');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
@@ -28,9 +30,6 @@ end
 if ~exist(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'AllRenderings'),'dir')
     mkdir(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'AllRenderings'));
 end
-
-% location of saved figures
-figureFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Figures');
 
 % location of analysed folder
 analysedFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'ConeResponse');
@@ -68,16 +67,22 @@ parfor ii = 1:nRecipes
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
         rtbChangeToWorkingFolder('hints', recipe.input.hints);
     
-        radiance = recipe.processing.target.croppedImage;
+        pathToRadianceFile = fullfile(recipe.input.hints.workingFolder,...
+            recipe.input.hints.recipeName,'renderings','Mitsuba','normal.mat');
+        radiance = parload(pathToRadianceFile);
         wave = 400:10:700;
     
         randomSeed = 4343;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
+        cR = ceil(size(radiance,1)/2); % centerPixel Row
+        cC = ceil(size(radiance,2)/2); % centerPixel Column
+        croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
+            cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
     
         coneResponse = [];
         [coneResponse.isomerizationsVector, coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
         coneResponse.processingOptions, coneResponse.visualizationInfo, coneEfficiencyBasedResponseScalars] = ...
-        isomerizationMapFromRadiance(radiance, wave, ...
+        isomerizationMapFromRadiance(croppedImage, wave, ...
             'meanLuminance', 0, ...                       % mean luminance in c/m2, meanLuminance = 0 means no rescaling
             'horizFOV', 1, ...                              % horizontal field of view in degrees
             'distance', 1.0, ...                            % distance to object in meters
@@ -93,7 +98,7 @@ parfor ii = 1:nRecipes
 
 %% Save Demosaiced response
         allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
-        coneResponse.demosaicedIsomerizationsMaps = squeeze(demosaicedIsomerizationsMaps(1,:,:,:))
+        coneResponse.demosaicedIsomerizationsMaps = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
 %% Find average response for LMS cones in annular regions about the center pixel
         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
         coneResponse.averageResponse = averageResponse;

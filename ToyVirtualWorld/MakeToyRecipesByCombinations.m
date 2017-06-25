@@ -13,22 +13,22 @@ function MakeToyRecipesByCombinations(varargin)
 %                   low for rejected recipes
 %   'makeCropImageHalfSize'  - size of cropped patch
 %   'luminanceLevels' - luminance levels of target object
-%   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of 
+%   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of
 %                   target object. These are just dummy variables to give a
 %                   unique name to each random spectra.
-%   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
+%   'otherObjectReflectanceRandom' - boolean to specify if spectra of
 %                   background objects is random or not. Default true
-%   'illuminantSpectraRandom' - boolean to specify if spectra of 
+%   'illuminantSpectraRandom' - boolean to specify if spectra of
 %                   illuminant is random or not. Default true
 %   'lightPositionRandom' - boolean to specify illuminant position is fixed
-%                   or not. Default is true. False will only work for 
+%                   or not. Default is true. False will only work for
 %                   library-bigball case.
-%   'lightScaleRandom' - boolean to specify illuminant scale/size. Default 
+%   'lightScaleRandom' - boolean to specify illuminant scale/size. Default
 %                   is true.
-%   'targetPositionRandom' - boolean to specify illuminant scale/size. 
-%                   Default is true. False will only work for 
+%   'targetPositionRandom' - boolean to specify illuminant scale/size.
+%                   Default is true. False will only work for
 %                   library-bigball case.
-%   'targetScaleRandom' - boolean to specify target scale/size is fixed or 
+%   'targetScaleRandom' - boolean to specify target scale/size is fixed or
 %                   not. Default is true.
 %   'baseSceneSet'  - Base scenes to be used for renderings. One of these
 %                  base scenes is used for each rendering
@@ -41,6 +41,9 @@ function MakeToyRecipesByCombinations(varargin)
 %   'targetPixelThresholdMax' - maximum fraction of target pixels that
 %                 should be present in the cropped image.
 
+%% Want each run to start with its own random seed
+rng('shuffle');
+
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
@@ -50,6 +53,8 @@ parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
+parser.addParameter('nInsertedLights', 1, @isnumeric);
+parser.addParameter('nInsertObjects', 0, @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
@@ -80,18 +85,21 @@ baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
-
+nInsertedLights = parser.Results.nInsertedLights;
+nInsertObjects = parser.Results.nInsertObjects;
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
-nShapes = numel(shapeSet);
-
 
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
 hints.isPlot = false;
 
-defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
+%% This doesn't work anymore because we don't have function VirtualScenesRoot.
+%
+% Maybe we don't need the defaultMappings anymore.  We'll have to see.
+%
+% defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
 
 % Set up output
 hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
@@ -100,10 +108,39 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% Make some illuminants and store them in the Data/Illuminants folder.
-illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants');
+%% Configure where to find assets.
+aioPrefs.locations = aioLocation( ...
+    'name', 'VirtualScenesExampleAssets', ...
+    'strategy', 'AioFileSystemStrategy', ...
+    'baseDir', fullfile(vseaRoot(), 'examples'));
 
-if illuminantSpectraRandom    
+%% Choose base scene to pick from
+nBaseScenes = numel(baseSceneSet);
+baseScenes = cell(1, nBaseScenes);
+baseSceneInfos = cell(1, nBaseScenes);
+for bb = 1:nBaseScenes
+    name = baseSceneSet{bb};
+    [baseScenes{bb}, baseSceneInfos{bb}] = VseModel.fromAsset('BaseScenes', name, ...
+        'aioPrefs', aioPrefs, ...
+        'nameFilter', 'blend$');
+end
+
+%% Choose shapes to insert.
+
+% this will load models, like above
+nShapes = numel(shapeSet);
+shapes = cell(1, nShapes);
+for ss = 1:nShapes
+    name = shapeSet{ss};
+    shapes{ss} = VseModel.fromAsset('Objects', name, ...
+        'aioPrefs', aioPrefs, ...
+        'nameFilter', 'blend$');
+end
+
+%% Make some illuminants and store them in the Data/Illuminants/BaseScene folder.
+dataBaseDir = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data');
+illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants','BaseScene');
+if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 100;
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
@@ -120,34 +157,47 @@ else
     end
 end
 
-
-
-
-% Choose illuminant spectra from the Illuminants folder.
-lightSpectra = getIlluminantSpectra(hints);
-nLightSpectra = numel(lightSpectra);
-
-% flat reflectance for illuminants
-matteIlluminant = BuildDesription('material', 'matte', ...
-    {'diffuseReflectance'}, ...
-    {'300:0.5 800:0.5'}, ...
-    {'spectrum'});
-wardIlluminant = BuildDesription('material', 'anisoward', ...
-    {'diffuseReflectance', 'specularReflectance'}, ...
-    {'300:0.5 800:0.5', '300:0.1 800:0.1'}, ...
-    {'spectrum', 'spectrum'});
-
-
 %% Make some reflectances and store them where they want to be
 otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','OtherObjects');
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
-
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
 if (parser.Results.targetSpectrumNotFlat)
     makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
 else
     makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
 end
+
+%%
+% Choose illuminant spectra from the illuminants folder.
+illuminantsLocations.config.baseDir = dataBaseDir;
+illuminantsLocations.name = 'ToyVirtualWorldIlluminants';
+illuminantsLocations.strategy = 'AioFileSystemStrategy';
+illuminantsAioPrefs = aioPrefs;
+illuminantsAioPrefs.locations = illuminantsLocations;
+illuminantSpectra = aioGetFiles('Illuminants', 'BaseScene', ...
+    'aioPrefs', illuminantsAioPrefs, ...
+    'fullPaths', false);
+
+%% Choose Reflectance for scene overall
+otherObjectLocations.config.baseDir = dataBaseDir;
+otherObjectLocations.name = 'ToyVirtualWorldReflectances';
+otherObjectLocations.strategy = 'AioFileSystemStrategy';
+otherObjectAioPrefs = aioPrefs;
+otherObjectAioPrefs.locations = otherObjectLocations;
+otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
+    'aioPrefs', otherObjectAioPrefs, ...
+    'fullPaths', false);
+baseSceneReflectances = otherObjectReflectances;
+
+%% Choose Reflectance for target object overall
+targetLocations.config.baseDir = dataBaseDir;
+targetLocations.name = 'ToyVirtualWorldTarget';
+targetLocations.strategy = 'AioFileSystemStrategy';
+targetAioPrefs = aioPrefs;
+targetAioPrefs.locations = targetLocations;
+targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
+    'aioPrefs', targetAioPrefs, ...
+    'fullPaths', false);
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;
@@ -158,7 +208,8 @@ sceneRecord = struct( ...
     'choices', [], ...
     'hints', hints, ...
     'rejected', [], ...
-    'recipe', []);
+    'recipe', [], ...
+    'styles', []);
 
 % pre-fill luminance and reflectance conditions per scene
 % so that we can unroll the nested loops below
@@ -186,8 +237,13 @@ parfor sceneIndex = 1:nScenes
             
             %% Pick the base scene randomly.
             bIndex = randi(size(baseSceneSet, 2), 1);
-            workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
-            sceneData = ReadMetadata(workingRecord.choices.baseSceneName);
+            %             workingRecord.choices.baseSceneName = baseSceneSet{bIndex};
+            %             sceneData = rtbReadMetadata(workingRecord.choices.baseSceneName);
+            
+            sceneInfo = baseSceneInfos{bIndex};
+            workingRecord.choices.baseSceneName = sceneInfo.name;
+            sceneData = baseScenes{bIndex}.copy('name', workingRecord.choices.baseSceneName);
+            
             
             %% Pick the target object randomly.
             targetShapeIndex = randi(nShapes, 1);
@@ -201,140 +257,117 @@ parfor sceneIndex = 1:nScenes
                 workingRecord.choices.baseSceneName);
             workingRecord.hints.recipeName = recipeName;
             
+            %% Pick other obejcts and Light shapes to insert
+            shapeIndexes = randi(nShapes, [1, nInsertObjects]);
             
-            %% Assign a reflectance to each object in the base scene.
-            nBaseMaterials = numel(sceneData.materialIds);
-            workingRecord.choices.baseSceneMatteMaterials = cell(1, nBaseMaterials);
-            workingRecord.choices.baseSceneWardMaterials = cell(1, nBaseMaterials);
-            pwd
-            for mm = 1:nBaseMaterials
-                % use arbitrary but consistent reflectances
-                if otherObjectReflectanceRandom
-                    materialReflectanceNumber = randi(nOtherObjectSurfaceReflectance);
-                else
-                    materialReflectanceNumber = mm;
-                end
+            %% For each shape insert, choose a random spatial transformation.
+            insertShapes = cell(1, nInsertObjects+1);
+            
+            targetShape = shapes{targetShapeIndex};
+            
+            targetRotationX = randi([0, 359]);
+            targetRotationY = randi([0, 359]);
+            targetRotationZ = randi([0, 359]);
+            targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
+            scale = 0.3 + rand()/2;
+            transformation = mexximpScale(scale) ...
+                * mexximpRotate([1 0 0], targetRotationX) ...
+                * mexximpRotate([0 1 0], targetRotationY) ...
+                * mexximpRotate([0 0 1], targetRotationZ) ...
+                * mexximpTranslate(targetPosition);
+            
+            insertShapes{1} = targetShape.copy( ...
+                'name', targetShapeName, ...
+                'transformation', transformation);
+            
+            for sss = 2:nInsertObjects
+                shape = shapes{shapeIndexes(sss)};
                 
-                [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    materialReflectanceNumber, [], workingRecord.hints);
-                workingRecord.choices.baseSceneMatteMaterials{mm} = matteMaterial;
-                workingRecord.choices.baseSceneWardMaterials{mm} = wardMaterial;
-            end
-            
-            %% Assign a random illuminant to each light in the base scene.
-            nBaseLights = numel(sceneData.lightIds);
-            if (illuminantSpectrumNotFlat || nLightSpectra==1)
-                whichLights = randi(nLightSpectra, [1, nBaseLights]);
-            else
-                whichLights = reflectanceNumber*ones([1, nBaseLights]);
-            end            
-            workingRecord.choices.baseSceneLights = lightSpectra(whichLights);
-            
-            %% Pick a light shape to insert.
-            %   pack up the light in the format expected for Ward Land
-            workingRecord.choices.insertedLights.names = shapeSet(randi(nShapes, 1));
-            
-            % Position of the illuminant
-            if parser.Results.lightPositionRandom
-                workingRecord.choices.insertedLights.positions = ...
-                    {GetRandomPosition(sceneData.lightExcludeBox, sceneData.lightBox)};
-            else
-                % using fixed light position that works for the Library base scene
-                workingRecord.choices.insertedLights.positions = ...
-                    {[-6.504209 18.729564 5.017080]};                
-            end
-            
-            % Size of the illuminant
-            if parser.Results.lightScaleRandom
-                workingRecord.choices.insertedLights.scales = {.5 + rand()};
-            else
-                workingRecord.choices.insertedLights.scales = {1};                
-            end
-            workingRecord.choices.insertedLights.rotations = {randi([0, 359], [1, 3])};                        
-            workingRecord.choices.insertedLights.matteMaterialSets = {matteIlluminant};
-            workingRecord.choices.insertedLights.wardMaterialSets = {wardIlluminant};
-            if (illuminantSpectrumNotFlat || nLightSpectra==1)
-                workingRecord.choices.insertedLights.lightSpectra = ...
-                    lightSpectra(randi(nLightSpectra));
-            else
-                workingRecord.choices.insertedLights.lightSpectra = ...
-                    lightSpectra(reflectanceNumber);                
-            end                                    
-            
-            %% Pick a target object and random number of "others" to insert.
-            %   the "target" object is always number 1.
-            nOtherObjects = 0;%1 + randi(5);
-            nObjects = 1 + nOtherObjects;
-            otherShapeIndices = randi(nShapes, [1 nOtherObjects]);
-            
-            % pack up the objects in the format expected for Ward Land
-            workingRecord.choices.insertedObjects.names = cat(2, {targetShapeName}, shapeSet(otherShapeIndices));
-            workingRecord.choices.insertedObjects.positions = cell(1, nObjects);
-            workingRecord.choices.insertedObjects.rotations = cell(1, nObjects);
-            workingRecord.choices.insertedObjects.scales = cell(1, nObjects);
-            workingRecord.choices.insertedObjects.matteMaterialSets = cell(1, nObjects);
-            workingRecord.choices.insertedObjects.wardMaterialSets = cell(1, nObjects);
-            for oo = 1:nObjects
-                % object pose in scene
+                rotationX = randi([0, 359]);
+                rotationY = randi([0, 359]);
+                rotationZ = randi([0, 359]);
+                position = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
+                scale = 0.3 + rand()/2;
+                transformation = mexximpScale(scale) ...
+                    * mexximpRotate([1 0 0], rotationX) ...
+                    * mexximpRotate([0 1 0], rotationY) ...
+                    * mexximpRotate([0 0 1], rotationZ) ...
+                    * mexximpTranslate(position);
                 
-                workingRecord.choices.insertedObjects.rotations{oo} = randi([0, 359], [1, 3]);
-                
-                if parser.Results.targetPositionRandom
-                    workingRecord.choices.insertedObjects.positions{oo} = GetRandomPosition([0 0; 0 0; 0 0], sceneData.objectBox);
-                else
-                    % using fixed object position that works for the Library base scene
-                    workingRecord.choices.insertedObjects.positions{oo} = [ -0.010709 4.927981 0.482899];
-                end
-                
-                if parser.Results.targetScaleRandom
-                    workingRecord.choices.insertedObjects.scales{oo} =  0.3 + rand()/2;
-                else
-                    workingRecord.choices.insertedObjects.scales{oo} =  0.5;
-                end
-                                
-                % object reflectance
-                [~, ~, ~, matteMaterial, wardMaterial] = computeLuminance( ...
-                    randi(nOtherObjectSurfaceReflectance), [], workingRecord.hints);
-                workingRecord.choices.insertedObjects.matteMaterialSets{oo} = matteMaterial;
-                workingRecord.choices.insertedObjects.wardMaterialSets{oo} = wardMaterial;
+                shapeName = sprintf('shape-%d', sss);
+                insertShapes{sss} = shape.copy( ...
+                    'name', shapeName, ...
+                    'transformation', transformation);
             end
-            
-            %% Choose a standard, numbered reflectance for the target object.
-            %   and scale it based on the target luminance
-            %   this writes a spectrum file to the working "resources" folder
-            %   so we need to pass in the hints and hints.recipeName
-            
-            reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
-                targetLuminanceLevel, reflectanceNumber);
-            
-            [~, ~, ~, targetMatteMaterial, targetWardMaterial] = computeLuminanceByName( ...
-                reflectanceFileName, targetLuminanceLevel, workingRecord.hints);
-            
-            % force the target object to use this computed reflectance
-            workingRecord.choices.insertedObjects.matteMaterialSets{1} = targetMatteMaterial;
-            workingRecord.choices.insertedObjects.wardMaterialSets{1} = targetWardMaterial;
             
             %% Position the camera.
             %   "eye" position is from the first camera "slot"
             %   "target" position is the target object's position
             %   "up" direction is from the first camera "slot"
-            eye = sceneData.cameraSlots(1).position;
-            target = workingRecord.choices.insertedObjects.positions{1};
-            up = sceneData.cameraSlots(1).up;
-            lookAt = sprintf('%f %f %f ', eye, target, up);
+            eye = sceneInfo.cameraSlots(1).position;
+            up = sceneInfo.cameraSlots(1).up;
+            lookAt = mexximpLookAt(eye, targetPosition, up);
             
-            %% Build the recipe.
-            workingRecord.recipe = BuildToyRecipe( ...
-                defaultMappings, workingRecord.choices, {}, {}, lookAt, workingRecord.hints);
+            cameraName = sceneData.model.cameras(1).name;
+            isCameraNode = strcmp(cameraName, {sceneData.model.rootNode.children.name});
+            sceneData.model.rootNode.children(isCameraNode).transformation = lookAt;
             
-            %% Copy common resources into this recipe folder
-            %
-            % This just copies the illuminants, maybe should generalize for
-            % other resources at some point.
-            recipeResourceFolder = rtbWorkingFolder('folder','resources', 'hints', workingRecord.hints);
-            copyfile(illuminantsFolder, recipeResourceFolder, 'f');
+            %% For each light insert, choose a random spatial transformation.
+            lightIndexes = randi(nShapes, [1, nInsertedLights]);
             
-            %% Do a mask rendering, reject if target object is occluded.
+            insertLights = cell(1, nInsertedLights);
+            for ll = 1:nInsertedLights
+                light = shapes{lightIndexes(ll)};
+                
+                rotationX = randi([0, 359]);
+                rotationY = randi([0, 359]);
+                rotationZ = randi([0, 359]);
+                position = GetRandomPosition(sceneInfo.lightExcludeBox, sceneInfo.lightBox);
+                scale = 0.3 + rand()/2;
+                transformation = mexximpScale(scale) ...
+                    * mexximpRotate([1 0 0], rotationX) ...
+                    * mexximpRotate([0 1 0], rotationY) ...
+                    * mexximpRotate([0 0 1], rotationZ) ...
+                    * mexximpTranslate(position);
+                
+                lightName = sprintf('light-%d', ss);
+                insertLights{ll} = light.copy(...
+                    'name', lightName, ...
+                    'transformation', transformation);
+            end
+            
+            %% Choose styles for the black and white mask rendering.
+            
+            % do a low quality, direct lighting rendering
+            quickRendering = VwccMitsubaRenderingQuality( ...
+                'integratorPluginType', 'direct', ...
+                'samplerPluginType', 'ldsampler');
+            quickRendering.addIntegratorProperty('shadingSamples', 'integer', 32);
+            quickRendering.addSamplerProperty('sampleCount', 'integer', 32);
+            
+            % turn all materials into black diffuse
+            allBlackDiffuse = VseMitsubaDiffuseMaterials( ...
+                'name', 'allBlackDiffuse');
+            allBlackDiffuse.addSpectrum('300:0 800:0');
+            
+            % make the target shape a uniform emitter
+            firstShapeEmitter = VseMitsubaAreaLights( ...
+                'name', 'targetEmitter', ...
+                'modelNameFilter', targetShapeName, ...
+                'elementNameFilter', '', ...
+                'elementTypeFilter', 'nodes', ...
+                'defaultSpectrum', '300:1 800:1');
+            
+            % these styles make up the "mask" condition
+            workingRecord.styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
+            
+            %% Do the mask rendering and reject if required
+            innerModels = [insertShapes{:} insertLights{:}];
+            workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
+            
+            % generate scene files and render
+            workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
+            
             workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
                 'imageWidth', imageWidth, ...
                 'imageHeight', imageHeight, ...
@@ -347,6 +380,89 @@ parfor sceneIndex = 1:nScenes
                 [~, ~] = rmdir(rejectedFolder, 's');
                 continue;
             else
+                
+                %% Choose styles for the full radiance rendering.
+                fullRendering = VwccMitsubaRenderingQuality( ...
+                    'integratorPluginType', 'path', ...
+                    'samplerPluginType', 'ldsampler');
+                fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
+                fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
+                
+                % bless specific meshes in the base scene as area lights
+                nBaseLights = numel(sceneInfo.lightIds);
+                baseLightNames = cell(1, nBaseLights);
+                for ll = 1:nBaseLights
+                    lightId = sceneInfo.lightIds{ll};
+                    meshSuffixIndex = strfind(lightId, '-mesh');
+                    if ~isempty(meshSuffixIndex)
+                        baseLightNames{ll} = lightId(1:meshSuffixIndex-1);
+                    else
+                        baseLightNames{ll} = lightId;
+                    end
+                end
+                baseLightFilter = sprintf('%s|', baseLightNames{:});
+                baseLightFilter = baseLightFilter(1:end-1);
+                blessBaseLights = VseMitsubaAreaLights( ...
+                    'name', 'blessBaseLights', ...
+                    'applyToInnerModels', false, ...
+                    'elementNameFilter', baseLightFilter);
+                
+                % bless inserted light meshes as area lights
+                blessInsertedLights = VseMitsubaAreaLights( ...
+                    'name', 'blessInsertedLights', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', 'light-', ...
+                    'elementNameFilter', '');
+                
+                % assign spectra to lights
+                areaLightSpectra = VseMitsubaEmitterSpectra( ...
+                    'name', 'areaLightSpectra', ...
+                    'pluginType', 'area', ...
+                    'propertyName', 'radiance');
+                %areaLightSpectra.spectra = emitterSpectra;
+                areaLightSpectra.resourceFolder = dataBaseDir;
+                areaLightSpectra.addManySpectra(illuminantSpectra);
+                
+                % assign spectra to materials in the base scene
+                %
+                % note setting of resourceFolder to point to where the
+                % files with the spectra live.  This is necessary so
+                % that when the recipe gets built, these spectral files
+                % can be found and copied into the right place.
+                baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'baseSceneDiffuse', ...
+                    'applyToInnerModels', false);
+                baseSceneDiffuse.resourceFolder = dataBaseDir;
+                baseSceneDiffuse.addManySpectra(baseSceneReflectances);
+                
+                % assign spectra to all materials of inserted shapes
+                insertedDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'insertedDiffuse', ...
+                    'applyToOuterModels', false);
+                insertedDiffuse.addManySpectra(otherObjectReflectances);
+                
+                % assign a specific reflectance to the target object
+                targetDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'targetDiffuse', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', targetShapeName);
+                % targetDiffuse.addSpectrum(targetObjectReflectance);
+                targetDiffuse.resourceFolder = dataBaseDir;
+                reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
+                    targetLuminanceLevel, reflectanceNumber);
+                targetDiffuse.addManySpectra({reflectanceFileName});
+                
+                workingRecord.styles.normal = {fullRendering, ...
+                    blessBaseLights, blessInsertedLights, areaLightSpectra, ...
+                    baseSceneDiffuse, insertedDiffuse, targetDiffuse};
+                
+                %% Do the final rendering
+                innerModels = [insertShapes{:} insertLights{:}];
+                workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
+                
+                % generate scene files and render
+                workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
+                
                 % move on to save this recipe
                 break;
             end
@@ -364,7 +480,7 @@ parfor sceneIndex = 1:nScenes
             
             % save the recipe to the recipesFolder
             archiveFile = fullfile(originalFolder, workingRecord.hints.recipeName);
-            excludeFolders = {'scenes', 'renderings', 'images', 'temp'};
+            excludeFolders = {'scenes', 'renderings', 'images'};
             workingRecord.recipe.input.sceneRecord = workingRecord;
             workingRecord.recipe.input.hints.whichConditions = [];
             rtbPackUpRecipe(workingRecord.recipe, archiveFile, 'ignoreFolders', excludeFolders);
