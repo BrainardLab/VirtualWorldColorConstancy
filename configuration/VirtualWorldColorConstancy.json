@@ -23,6 +23,18 @@
 		"update": "",
 		"url": ""
 	},
+    {
+		"flavor": "",
+		"hook": "",
+		"localHookTemplate": "",
+		"name": "MatlabJobSupport",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "include",
+		"update": "",
+		"url": ""
+	},
 	{
 		"flavor": "",
 		"hook": "",
