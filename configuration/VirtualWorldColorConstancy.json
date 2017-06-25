@@ -3,7 +3,7 @@
 		"flavor": "",
 		"hook": "",
 		"localHookTemplate": "",
-		"name": "VirtualScenesEngine",
+		"name": "VirtualScenes",
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
@@ -23,10 +23,22 @@
 		"update": "",
 		"url": ""
 	},
+    {
+		"flavor": "",
+		"hook": "",
+		"localHookTemplate": "",
+		"name": "MatlabJobSupport",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "include",
+		"update": "",
+		"url": ""
+	},
 	{
 		"flavor": "",
 		"hook": "",
-		"localHookTemplate": "configuration/VirtualWorldColorConstancyLocalHookTemplate.m",
+		"localHookTemplate": "configuration/virtualWorldColorConstancyLocalHookTemplate.m",
 		"name": "VirtualWorldColorConstancy",
 		"pathPlacement": "append",
 		"subfolder": "",
