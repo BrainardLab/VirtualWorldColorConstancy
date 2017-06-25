@@ -3,7 +3,7 @@
 		"flavor": "",
 		"hook": "",
 		"localHookTemplate": "",
-		"name": "VirtualScenes",
+		"name": "VirtualScenesEngine",
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
