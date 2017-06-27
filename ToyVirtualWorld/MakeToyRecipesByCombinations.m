@@ -268,9 +268,22 @@ parfor sceneIndex = 1:nScenes
             targetRotationX = randi([0, 359]);
             targetRotationY = randi([0, 359]);
             targetRotationZ = randi([0, 359]);
-            targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
-            scale = 0.3 + rand()/2;
-            transformation = mexximpScale(scale) ...
+            if parser.Results.targetPositionRandom
+                targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
+            else
+                % using fixed object position that works for the Library base scene
+%                 targetPosition = [ -0.010709 4.927981 0.482899];
+%                 targetPosition = [ 1.510709 5.527981 2.482899];
+                targetPosition = [ -1.510709 3.527981 0.482899];
+            end
+            
+            if parser.Results.targetScaleRandom
+                targetScale = 0.3 + rand()/2;
+            else
+                targetScale =  1;
+            end            
+            
+            transformation = mexximpScale(targetScale) ...
                 * mexximpRotate([1 0 0], targetRotationX) ...
                 * mexximpRotate([0 1 0], targetRotationY) ...
                 * mexximpRotate([0 0 1], targetRotationZ) ...
@@ -322,8 +335,21 @@ parfor sceneIndex = 1:nScenes
                 rotationX = randi([0, 359]);
                 rotationY = randi([0, 359]);
                 rotationZ = randi([0, 359]);
-                position = GetRandomPosition(sceneInfo.lightExcludeBox, sceneInfo.lightBox);
-                scale = 0.3 + rand()/2;
+
+                if parser.Results.lightPositionRandom
+                    position = GetRandomPosition(sceneInfo.lightExcludeBox, sceneInfo.lightBox);
+                else
+                    % using fixed light position that works for the Library base scene
+                    position = [-6.504209 18.729564 5.017080];
+                        
+                end
+                
+                if parser.Results.lightScaleRandom
+                    scale = 0.3 + rand()/2;
+                else
+                    scale = 1;
+                end
+                
                 transformation = mexximpScale(scale) ...
                     * mexximpRotate([1 0 0], rotationX) ...
                     * mexximpRotate([0 1 0], rotationY) ...

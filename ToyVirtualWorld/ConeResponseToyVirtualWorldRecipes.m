@@ -111,9 +111,9 @@ parfor ii = 1:nRecipes
 
 %% Represent the LMS response as a vector and save it for AMA    
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
-        [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
-        allLMSResponses(:,ii) = LMSResponseVector;
-        allLMSPositions(:,:,ii) = LMSPositions;
+%         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
+        allLMSResponses(:,ii) = coneResponse.isomerizationsVector;
+        allLMSPositions(:,:,ii) = coneResponse.conePositions;
         allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
     
 %% Save modified recipe 
