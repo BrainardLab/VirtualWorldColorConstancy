@@ -30,7 +30,7 @@ outputDir = ['/home/ubuntu/' job.name];
 jobDate = datestr(now(), 'yyyy-mm-dd-HH-MM-SS');
 
 % copy all the output to S3
-bucketPath = ['s3://render-toolbox-reference/all-example-scenes/' jobDate];
+bucketPath = ['s3://render-toolbox-vwcc3/test-scenes/' jobDate];
 hostCleanupCommand = sprintf('aws s3 cp "%s" "%s" --recursive --region us-west-2', ...
     outputDir, ...
     bucketPath);
