@@ -273,8 +273,8 @@ parfor sceneIndex = 1:nScenes
             else
                 % using fixed object position that works for the Library base scene
 %                 targetPosition = [ -0.010709 4.927981 0.482899];
-%                 targetPosition = [ 1.510709 5.527981 2.482899];
-                targetPosition = [ -1.510709 3.527981 0.482899];
+                targetPosition = [ 1.510709 5.527981 2.482899];
+%                 targetPosition = [ -0.510709 0.527981 0.482899];
             end
             
             if parser.Results.targetScaleRandom

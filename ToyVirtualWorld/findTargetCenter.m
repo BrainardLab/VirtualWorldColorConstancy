@@ -1,6 +1,6 @@
 function [targetCenterR, targetCenterC] = findTargetCenter(isTarget)
 
-% finds the center pixels for croping the image. If the bounding box center
+% finds the center pixels for cropping the image. If the bounding box center
 % pixel has all neighbors and nearest neighbors on the target, then the
 % center is chosen. Otherwise, the center 
     
