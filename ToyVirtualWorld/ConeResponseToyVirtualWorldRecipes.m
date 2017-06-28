@@ -34,15 +34,13 @@ end
 % location of analysed folder
 analysedFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'ConeResponse');
 
+% location of reflectance folder
+pathToTargetReflectanceFolder = fullfile(getpref(projectName, 'baseFolder'),...
+        parser.Results.outputName,'Data','Reflectances','TargetObjects');
+
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
 hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
-
-% analysis params
-toneMapFactor = 10;
-isScale = true;
-filterWidth = 7;
-lmsSensitivities = 'T_cones_ss2';
 
 % easier to read plots
 set(0, 'DefaultAxesFontSize', 14)
@@ -72,10 +70,14 @@ parfor ii = 1:nRecipes
         radiance = parload(pathToRadianceFile);
         wave = 400:10:700;
     
+        maskFilename = fullfile(recipe.input.hints.workingFolder, ...
+            recipe.input.hints.recipeName,'renderings','Mitsuba','mask.mat');
+        targetMask = load(maskFilename);
+        isTarget = 0 < sum(targetMask.multispectralImage, 3);
+
         randomSeed = 4343;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
-        cR = ceil(size(radiance,1)/2); % centerPixel Row
-        cC = ceil(size(radiance,2)/2); % centerPixel Column
+        [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
         croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
             cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
     
@@ -100,14 +102,16 @@ parfor ii = 1:nRecipes
         allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
         coneResponse.demosaicedIsomerizationsMaps = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
 %% Find average response for LMS cones in annular regions about the center pixel
-        averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
-        coneResponse.averageResponse = averageResponse;
-        allAverageAnnularResponses(:,ii) = averageResponse(:);
-        coneRescalingFactors(:,ii) = coneEfficiencyBasedResponseScalars;
+%         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
+%         coneResponse.averageResponse = averageResponse;
+%         allAverageAnnularResponses(:,ii) = averageResponse(:);
+
+          coneRescalingFactors(:,ii) = coneEfficiencyBasedResponseScalars;
+          coneResponse.coneRescalingFactors = coneEfficiencyBasedResponseScalars;
 %% Find average response in annular regions about the center pixel using demosaiced responses
-        averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
-        coneResponse.averageResponseDemosaic = averageResponseDemosaic;
-        allAverageAnnularResponsesDemosaic(:,ii) = averageResponseDemosaic(:);
+%         averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
+%         coneResponse.averageResponseDemosaic = averageResponseDemosaic;
+%         allAverageAnnularResponsesDemosaic(:,ii) = averageResponseDemosaic(:);
 
 %% Represent the LMS response as a vector and save it for AMA    
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
@@ -117,17 +121,21 @@ parfor ii = 1:nRecipes
         allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
     
 %% Save modified recipe 
-        recipe.processing.coneResponse = coneResponse;
-
-%% Save the luminance levels for AMA
-        strTokens = stringTokenizer(recipe.input.conditionsFile, '-');
-        luminanceLevel(1,ii) = str2double(strrep(strTokens{2},'_','.'));
-    
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
+
+        % Save the luminance levels for AMA
+        strTokens = stringTokenizer(archiveBase, '-');
+        luminanceLevel(1,ii) = str2double(strrep(strTokens{2},'_','.'));
+        coneResponse.luminanceLevel = luminanceLevel(1,ii);
+        coneResponse.trueXYZ = calculateTrueXYZ(luminanceLevel(1,ii), ...
+            str2double(strTokens{4}), pathToTargetReflectanceFolder);
+        
+
+        recipe.processing.coneResponse = coneResponse;
+        
         tempName=matfile(fullfile(hints.workingFolder,archiveBase,'ConeResponse.mat'),'Writable',true);
-        tempName.coneResponse=coneResponse;
         tempName.recipe=recipe;
         excludeFolders = {'temp','images','renderings','resources','scenes'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
@@ -146,8 +154,6 @@ for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
 ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
-pathToTargetReflectanceFolder = fullfile(getpref(projectName, 'baseFolder'),...
-        parser.Results.outputName,'Data','Reflectances','TargetObjects');
 trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder);
 
 numLMSCones=numLMSCones(1,:);
@@ -158,6 +164,6 @@ allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSRespons
 
 
 save(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'stimulusAMA.mat'),...
-                'allAverageAnnularResponses','luminanceLevel','ctgInd','numLMSCones',...
+                'luminanceLevel','ctgInd','numLMSCones',...
             'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
-            'allDemosaicResponse','allAverageAnnularResponsesDemosaic','allLMSIndicator','trueXYZ');
+            'allDemosaicResponse','allLMSIndicator','trueXYZ');
