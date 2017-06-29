@@ -91,7 +91,7 @@ parfor ii = 1:nRecipes
                     randomAngles(iterRotations), cropImageHalfSize)
             end
             [coneResponse.isomerizationsVector(:,iterRotations), coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
-                coneResponse.processingOptions, coneResponse.visualizationInfo, coneEfficiencyBasedResponseScalars] = ...
+                coneResponse.processingOptions, coneResponse.visualizationInfo{iterRotations}, coneEfficiencyBasedResponseScalars] = ...
                 isomerizationMapFromRadiance(croppedImage, wave, ...
                 'meanLuminance', 0, ...                       % mean luminance in c/m2, meanLuminance = 0 means no rescaling
                 'horizFOV', 1, ...                              % horizontal field of view in degrees
@@ -107,8 +107,9 @@ parfor ii = 1:nRecipes
                 );
 %             coneResponse.demosaicedIsomerizationsMaps{iterRotations} = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
               coneResponse.demosaicedIsomerizationsMaps(:,iterRotations) = demosaicedIsomerizationsMaps(:);
+              
         end
-        
+        coneResponse.rotationAngles = randomAngles;
         %% Save Demosaiced response
         allDemosaicResponse(:,ii) = coneResponse.demosaicedIsomerizationsMaps(:);
         %% Find average response for LMS cones in annular regions about the center pixel
@@ -151,7 +152,7 @@ parfor ii = 1:nRecipes
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
         
         %% Make Figures for Visualization
-        makeFigureForVisualization(coneResponse,projectName,archiveBase,hints.workingFolder);
+        makeFigureForVisualization(coneResponse,archiveBase,hints.workingFolder);
     catch err
         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
     end

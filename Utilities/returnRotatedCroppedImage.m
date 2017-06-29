@@ -19,7 +19,7 @@ function croppedImage = returnRotatedCroppedImage(maskImage, radianceImage, angl
 % Written by VS: Jun 28 2017
  
 % Rotate the mask image and find the center pixel
-rotatedMaskImage = imrotate(maskImage,angleOfRotation,'nearest','crop');
+rotatedMaskImage = imrotate(maskImage,angleOfRotation,'bilinear','crop');
 [tempR, tempC] = findTargetCenter(rotatedMaskImage); % rotated image target center
                                                         % pixel row and column
 % Rotate the radiance image
