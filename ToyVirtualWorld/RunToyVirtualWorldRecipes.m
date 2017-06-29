@@ -59,7 +59,8 @@ function RunToyVirtualWorldRecipes(varargin)
 %                  base scenes is used for each rendering
 %   'shapeSet'  - Shapes of the object that can be used for target
 %                      object, illuminant and other inserted objects
-
+%   'nRandomRotations'  - Number of random rotations applied to the
+%                   rendered image to get new set of cone responses
 
 %% Want each run to start with its own random seed
 rng('shuffle');
@@ -87,6 +88,7 @@ parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
 parser.addParameter('targetScaleRandom', true, @islogical);
+parser.addParameter('nRandomRotations', 0, @isnumeric);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -155,7 +157,8 @@ try
         'reflectanceNumbers', reflectanceNumbers, ...
         'nAnnularRegions', 25, ...
         'mosaicHalfSize', mosaicHalfSize,...
-        'cropImageHalfSize',makeCropImageHalfSize);
+        'cropImageHalfSize',makeCropImageHalfSize,...
+        'nRandomRotations',parser.Results.nRandomRotations);
     
 catch err
     workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'baseFolder'),parser.Results.outputName);
