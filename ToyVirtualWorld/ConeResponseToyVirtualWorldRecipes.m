@@ -11,6 +11,7 @@ parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
+parser.addParameter('nRandomRotations', 0, @isnumeric);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
@@ -36,7 +37,7 @@ analysedFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outp
 
 % location of reflectance folder
 pathToTargetReflectanceFolder = fullfile(getpref(projectName, 'baseFolder'),...
-        parser.Results.outputName,'Data','Reflectances','TargetObjects');
+    parser.Results.outputName,'Data','Reflectances','TargetObjects');
 
 % edit some batch renderer options
 hints.renderer = 'Mitsuba';
@@ -64,67 +65,75 @@ parfor ii = 1:nRecipes
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);
         rtbChangeToWorkingFolder('hints', recipe.input.hints);
-    
+        
         pathToRadianceFile = fullfile(recipe.input.hints.workingFolder,...
             recipe.input.hints.recipeName,'renderings','Mitsuba','normal.mat');
         radiance = parload(pathToRadianceFile);
         wave = 400:10:700;
-    
+        
         maskFilename = fullfile(recipe.input.hints.workingFolder, ...
             recipe.input.hints.recipeName,'renderings','Mitsuba','mask.mat');
         targetMask = load(maskFilename);
         isTarget = 0 < sum(targetMask.multispectralImage, 3);
-
+        
         randomSeed = 4343;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
-        [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
-        croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
-            cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
-    
         coneResponse = [];
-        [coneResponse.isomerizationsVector, coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
-        coneResponse.processingOptions, coneResponse.visualizationInfo, coneEfficiencyBasedResponseScalars] = ...
-        isomerizationMapFromRadiance(croppedImage, wave, ...
-            'meanLuminance', 0, ...                       % mean luminance in c/m2, meanLuminance = 0 means no rescaling
-            'horizFOV', 1, ...                              % horizontal field of view in degrees
-            'distance', 1.0, ...                            % distance to object in meters
-            'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
-            'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
-            'isomerizationNoise', 'frozen', ...                % whether to add isomerization noise or not
-            'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
-            'mosaicHalfSize', mosaicHalfSize, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
-            'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
-            'randomSeed', randomSeed, ...                   % the random seed to use
-            'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics
-            );
-
-%% Save Demosaiced response
+        
+        randomAngles = [0 randi(360,parser.Results.nRandomRotations)];
+        for iterRotations = 1 : length(randomAngles)
+            if (iterRotations == 1)
+                [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
+                croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
+                    cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
+            else
+                croppedImage = returnRotatedCroppedImage(isTarget, radiance, ...
+                    randomAngles(iterRotations), cropImageHalfSize)
+            end
+            [coneResponse.isomerizationsVector(:,iterRotations), coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
+                coneResponse.processingOptions, coneResponse.visualizationInfo, coneEfficiencyBasedResponseScalars] = ...
+                isomerizationMapFromRadiance(croppedImage, wave, ...
+                'meanLuminance', 0, ...                       % mean luminance in c/m2, meanLuminance = 0 means no rescaling
+                'horizFOV', 1, ...                              % horizontal field of view in degrees
+                'distance', 1.0, ...                            % distance to object in meters
+                'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
+                'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
+                'isomerizationNoise', 'frozen', ...                % whether to add isomerization noise or not
+                'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
+                'mosaicHalfSize', mosaicHalfSize, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+                'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
+                'randomSeed', randomSeed, ...                   % the random seed to use
+                'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics
+                );
+            coneResponse.demosaicedIsomerizationsMaps{iterRotations} = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
+        end
+        
+        %% Save Demosaiced response
         allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
-        coneResponse.demosaicedIsomerizationsMaps = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
-%% Find average response for LMS cones in annular regions about the center pixel
-%         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
-%         coneResponse.averageResponse = averageResponse;
-%         allAverageAnnularResponses(:,ii) = averageResponse(:);
-
-          coneRescalingFactors(:,ii) = coneEfficiencyBasedResponseScalars;
-          coneResponse.coneRescalingFactors = coneEfficiencyBasedResponseScalars;
-%% Find average response in annular regions about the center pixel using demosaiced responses
-%         averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
-%         coneResponse.averageResponseDemosaic = averageResponseDemosaic;
-%         allAverageAnnularResponsesDemosaic(:,ii) = averageResponseDemosaic(:);
-
-%% Represent the LMS response as a vector and save it for AMA    
+        %% Find average response for LMS cones in annular regions about the center pixel
+        %         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
+        %         coneResponse.averageResponse = averageResponse;
+        %         allAverageAnnularResponses(:,ii) = averageResponse(:);
+        
+        coneRescalingFactors(:,ii) = coneEfficiencyBasedResponseScalars;
+        coneResponse.coneRescalingFactors = coneEfficiencyBasedResponseScalars;
+        %% Find average response in annular regions about the center pixel using demosaiced responses
+        %         averageResponseDemosaic =  averageAnnularConeResponseDemosaic(nAnnularRegions, squeeze(demosaicedIsomerizationsMaps(1,:,:,:)));
+        %         coneResponse.averageResponseDemosaic = averageResponseDemosaic;
+        %         allAverageAnnularResponsesDemosaic(:,ii) = averageResponseDemosaic(:);
+        
+        %% Represent the LMS response as a vector and save it for AMA
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
-%         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
+        %         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
         allLMSResponses(:,ii) = coneResponse.isomerizationsVector;
         allLMSPositions(:,:,ii) = coneResponse.conePositions;
         allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
-    
-%% Save modified recipe 
+        
+        %% Save modified recipe
         % save the results in a separate folder
         [archivePath, archiveBase, archiveExt] = fileparts(archiveFiles{ii});
         analysedArchiveFile = fullfile(analysedFolder, [archiveBase archiveExt]);
-
+        
         % Save the luminance levels for AMA
         strTokens = stringTokenizer(archiveBase, '-');
         luminanceLevel(1,ii) = str2double(strrep(strTokens{2},'_','.'));
@@ -132,26 +141,26 @@ parfor ii = 1:nRecipes
         coneResponse.trueXYZ = calculateTrueXYZ(luminanceLevel(1,ii), ...
             str2double(strTokens{4}), pathToTargetReflectanceFolder);
         
-
+        
         recipe.processing.coneResponse = coneResponse;
         
         tempName=matfile(fullfile(hints.workingFolder,archiveBase,'ConeResponse.mat'),'Writable',true);
         tempName.recipe=recipe;
         excludeFolders = {'temp','images','renderings','resources','scenes'};
         rtbPackUpRecipe(recipe, analysedArchiveFile, 'ignoreFolders', excludeFolders);
-    
-%% Make Figures for Visualization
+        
+        %% Make Figures for Visualization
         makeFigureForVisualization(coneResponse,projectName,archiveBase,hints.workingFolder);
     catch err
         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
     end
-        
+    
 end
 
 uniqueLuminaceLevel = unique(luminanceLevel);
 for ii = 1: size(unique(luminanceLevel),2)
-for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
-ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
+    for jj = 1: size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)
+        ctgInd(1,(ii-1)*size(find(luminanceLevel==uniqueLuminaceLevel(ii)),2)+jj)=ii;end
 end
 
 trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder);
@@ -164,6 +173,6 @@ allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSRespons
 
 
 save(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'stimulusAMA.mat'),...
-                'luminanceLevel','ctgInd','numLMSCones',...
-            'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
-            'allDemosaicResponse','allLMSIndicator','trueXYZ');
+    'luminanceLevel','ctgInd','numLMSCones',...
+    'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
+    'allDemosaicResponse','allLMSIndicator','trueXYZ');
