@@ -80,7 +80,7 @@ parfor ii = 1:nRecipes
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
         coneResponse = [];
         
-        randomAngles = [0 randi(360,parser.Results.nRandomRotations)];
+        randomAngles = [0 randi(360,1,parser.Results.nRandomRotations)];
         for iterRotations = 1 : length(randomAngles)
             if (iterRotations == 1)
                 [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
@@ -105,11 +105,12 @@ parfor ii = 1:nRecipes
                 'randomSeed', randomSeed, ...                   % the random seed to use
                 'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics
                 );
-            coneResponse.demosaicedIsomerizationsMaps{iterRotations} = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
+%             coneResponse.demosaicedIsomerizationsMaps{iterRotations} = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
+              coneResponse.demosaicedIsomerizationsMaps(:,iterRotations) = demosaicedIsomerizationsMaps(:);
         end
         
         %% Save Demosaiced response
-        allDemosaicResponse(:,:,:,ii) = squeeze(demosaicedIsomerizationsMaps(1,:,:,:));
+        allDemosaicResponse(:,ii) = coneResponse.demosaicedIsomerizationsMaps(:);
         %% Find average response for LMS cones in annular regions about the center pixel
         %         averageResponse =  averageAnnularConeResponse(nAnnularRegions, coneResponse);
         %         coneResponse.averageResponse = averageResponse;
@@ -125,7 +126,7 @@ parfor ii = 1:nRecipes
         %% Represent the LMS response as a vector and save it for AMA
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
         %         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
-        allLMSResponses(:,ii) = coneResponse.isomerizationsVector;
+        allLMSResponses(:,ii) = coneResponse.isomerizationsVector(:);
         allLMSPositions(:,:,ii) = coneResponse.conePositions;
         allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
         
@@ -164,6 +165,23 @@ for ii = 1: size(unique(luminanceLevel),2)
 end
 
 trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder);
+
+%% If there are more cone response vectors for one image due to rotations, 
+% the luminancelevel, category index and true XYZ care repeated to match
+% the number of cone response vectors produced.
+
+numberOfConeResponseVectors = parser.Results.nRandomRotations+1;
+luminanceLevel = repmat(luminanceLevel,numberOfConeResponseVectors,1);
+luminanceLevel = (luminanceLevel(:))';
+ctgInd = repmat(ctgInd,numberOfConeResponseVectors,1);
+ctgInd = (ctgInd(:))';
+trueXYZ = reshape(repmat(trueXYZ,numberOfConeResponseVectors,1),[],...
+    numberOfConeResponseVectors*size(trueXYZ,2));
+
+% Similarly the allLMSResponse and all demosaic response matrices needs to
+% be reshaped
+allLMSResponses = reshape(allLMSResponses,[],numberOfConeResponseVectors*size(allLMSResponses,2));
+allDemosaicResponse = reshape(allDemosaicResponse,[],numberOfConeResponseVectors*size(allDemosaicResponse,2));
 
 numLMSCones=numLMSCones(1,:);
 allLMSPositions=allLMSPositions(:,:,1);
