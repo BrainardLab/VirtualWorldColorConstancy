@@ -21,6 +21,7 @@ imageData = parload(pathtoImage);
 [sRGBImage, ~, ~] = rtbMultispectralToSRGB(imageData,[400,10,31], 'toneMapFactor', toneMapFactor, 'isScale', isScale);
 srgbUint = uint8(sRGBImage);
 image(srgbUint);
+pbaspect([3 2 1]);
 title(archiveBase);
 set(gca,'XTickLabel','');
 set(gca,'YTickLabel','');
@@ -31,6 +32,7 @@ pathtoImage = fullfile(workingFolder,archiveBase,'renderings','Mitsuba','mask.ma
 imageData = parload(pathtoImage);
 [sRGBImage, ~, ~] = rtbMultispectralToSRGB(imageData,[400,10,31], 'toneMapFactor', toneMapFactor, 'isScale', isScale);
 image(sRGBImage);
+pbaspect([3 2 1]);
 set(gca,'XTickLabel','');
 set(gca,'YTickLabel','');
 

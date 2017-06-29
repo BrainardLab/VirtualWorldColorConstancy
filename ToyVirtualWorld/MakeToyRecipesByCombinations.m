@@ -272,15 +272,19 @@ parfor sceneIndex = 1:nScenes
                 targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
             else
                 % using fixed object position that works for the Library base scene
-%                 targetPosition = [ -0.010709 4.927981 0.482899];
-                targetPosition = [ 1.510709 5.527981 2.482899];
-%                 targetPosition = [ -0.510709 0.527981 0.482899];
+%              targetPosition = [ -0.010709 4.927981 0.482899]; % BigBall-Library Case 1  
+             targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
+%              targetPosition = [ -0.510709 0.0527981 0.482899]; % BigBall-Library Case 3
+%              targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
             end
             
             if parser.Results.targetScaleRandom
                 targetScale = 0.3 + rand()/2;
             else
-                targetScale =  1;
+%               targetScale =  1; % BigBall-Library Case 1  
+              targetScale =  1; % BigBall-Library Case 2  
+%               targetScale =  0.5; % BigBall-Library Case 3
+%               targetScale =  1; % BigBall-Mill Case 4
             end            
             
             transformation = mexximpScale(targetScale) ...
