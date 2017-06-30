@@ -1,7 +1,7 @@
 function info = AwsRecipeForCondition(luminanceLevel, reflectanceNumber, varargin)
 % Get paths to a Toy Virutal World Recipe that we rendered on AWS.
 %
-% This is a utility to make it easier to find recupes, without worrying
+% This is a utility to make it easier to find recipes, without worrying
 % about how we organized our AWS jobs.
 %
 % You'd need to mount our S3 bucket named "render-toolbox-vwcc".  Here are

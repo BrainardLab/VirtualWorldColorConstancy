@@ -1,6 +1,8 @@
 function tokens = stringTokenizer(string, delimiter)
-%STRINGTOKENIZER Summary of this function goes here
-%   Detailed explanation goes here
+%
+% STRINGTOKENIZER This funciton returns a cell with the strings that are
+% between the specified delimiter
+% 
 
 idx = 1;
 remain = string;

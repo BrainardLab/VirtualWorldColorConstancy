@@ -1,11 +1,11 @@
 function imageColor = calculateImageColor(XYZImage)
-
 % This function calcualtes the luminance, chroma and the hue of every pixel
-% in the image fromt he XYZ values of the multispectral image provided as 
+% in the image fromt the XYZ values of the multispectral image provided as 
 % the input. We compare the XYZImage values to the XYZ of standard daylight
 % as a reference to obtain the imageHue
 %
 % 11/03/2016    VS wrote it
+%
 imageColor = zeros(size(XYZImage,1),size(XYZImage,2),3);
 theWavelengths = [400:5:700]';
 %% Load in spectral weighting function for luminance
