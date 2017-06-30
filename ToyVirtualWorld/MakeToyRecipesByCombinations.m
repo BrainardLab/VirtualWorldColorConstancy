@@ -187,6 +187,7 @@ otherObjectAioPrefs.locations = otherObjectLocations;
 otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'aioPrefs', otherObjectAioPrefs, ...
     'fullPaths', false);
+otherObjectReflectances(17)=[];
 baseSceneReflectances = otherObjectReflectances;
 
 %% Choose Reflectance for target object overall
@@ -451,7 +452,12 @@ parfor sceneIndex = 1:nScenes
                     'propertyName', 'radiance');
                 %areaLightSpectra.spectra = emitterSpectra;
                 areaLightSpectra.resourceFolder = dataBaseDir;
-                areaLightSpectra.addManySpectra(illuminantSpectra);
+                if illuminantSpectraRandom
+                    tempIlluminantSpectra = illuminantSpectra((randperm(length(illuminantSpectra))));
+                else
+                    tempIlluminantSpectra = illuminantSpectra;
+                end
+                areaLightSpectra.addManySpectra(tempIlluminantSpectra);
                 
                 % assign spectra to materials in the base scene
                 %
@@ -463,13 +469,23 @@ parfor sceneIndex = 1:nScenes
                     'name', 'baseSceneDiffuse', ...
                     'applyToInnerModels', false);
                 baseSceneDiffuse.resourceFolder = dataBaseDir;
-                baseSceneDiffuse.addManySpectra(baseSceneReflectances);
+                if otherObjectReflectanceRandom
+                    tempBaseSceneReflectances = baseSceneReflectances((randperm(length(baseSceneReflectances))));
+                else
+                    tempBaseSceneReflectances = baseSceneReflectances;
+                end
+                baseSceneDiffuse.addManySpectra(tempBaseSceneReflectances);
                 
                 % assign spectra to all materials of inserted shapes
                 insertedDiffuse = VseMitsubaDiffuseMaterials( ...
                     'name', 'insertedDiffuse', ...
                     'applyToOuterModels', false);
-                insertedDiffuse.addManySpectra(otherObjectReflectances);
+                if otherObjectReflectanceRandom
+                    tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
+                else
+                    tempOtherObjectReflectances = otherObjectReflectances;
+                end
+                insertedDiffuse.addManySpectra(tempOtherObjectReflectances);
                 
                 % assign a specific reflectance to the target object
                 targetDiffuse = VseMitsubaDiffuseMaterials( ...
