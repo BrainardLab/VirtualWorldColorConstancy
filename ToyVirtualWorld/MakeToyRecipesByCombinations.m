@@ -187,7 +187,6 @@ otherObjectAioPrefs.locations = otherObjectLocations;
 otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'aioPrefs', otherObjectAioPrefs, ...
     'fullPaths', false);
-otherObjectReflectances(17)=[];
 baseSceneReflectances = otherObjectReflectances;
 
 %% Choose Reflectance for target object overall
@@ -297,6 +296,33 @@ parfor sceneIndex = 1:nScenes
             insertShapes{1} = targetShape.copy( ...
                 'name', 'shape-01', ...
                 'transformation', transformation);
+ 
+% % Store the shape, locations, rotation, etc. of the inserted objects in a
+% conditions.txt file
+% 
+            % Basic setupe of the conditions.txt file
+            allNames = {'imageName', 'groupName'};
+            allValues = cat(1, {'normal', 'normal'}, {'mask', 'mask'});
+    
+            allNames = cat(2, allNames);
+            allValues = cat(2, allValues);
+
+            % Setup fo the target object position, rotation and scale, etc
+            % for the conditions file
+            objectColumn = sprintf('object-%d', 1);
+            positionColumn = sprintf('object-position-%d', 1);
+            rotationColumn = sprintf('object-rotation-%d', 1);
+            scaleColumn = sprintf('object-scale-%d', 1);
+            
+            varNames = {objectColumn, positionColumn, rotationColumn, scaleColumn};
+            allNames = cat(2, allNames, varNames);
+            
+            varValues = {targetShape.name, ...
+                targetPosition, ...
+                [targetRotationX targetRotationY targetRotationZ], ...
+                targetScale};
+            allValues = cat(2, allValues, repmat(varValues, 2, 1));
+
             
             for sss = 2:(nInsertObjects+1)
                 shape = shapes{shapeIndexes(sss)};
@@ -316,6 +342,23 @@ parfor sceneIndex = 1:nScenes
                 insertShapes{sss} = shape.copy( ...
                     'name', shapeName, ...
                     'transformation', transformation);
+
+                % Write conditions file for saving the position, scale and
+                % rotation of the objects
+                objectColumn = sprintf('object-%d', sss);
+                positionColumn = sprintf('object-position-%d', sss);
+                rotationColumn = sprintf('object-rotation-%d', sss);
+                scaleColumn = sprintf('object-scale-%d', sss);
+                
+                varNames = {objectColumn, positionColumn, rotationColumn, scaleColumn};
+                allNames = cat(2, allNames, varNames);
+                
+                varValues = {shape.name, ...
+                    position, ...
+                    [rotationX rotationY rotationZ], ...
+                    scale};
+                allValues = cat(2, allValues, repmat(varValues, 2, 1));
+
             end
             
             %% Position the camera.
@@ -365,8 +408,26 @@ parfor sceneIndex = 1:nScenes
                 insertLights{ll} = light.copy(...
                     'name', lightName, ...
                     'transformation', transformation);
+                
+                % Write the conditions file for saving position of the
+                % objects and lights
+                lightColumn = sprintf('light-%d', ll);
+                positionColumn = sprintf('light-position-%d', ll);
+                rotationColumn = sprintf('light-rotation-%d', ll);
+                scaleColumn = sprintf('light-scale-%d', ll);
+                
+                varNames = {lightColumn, positionColumn, rotationColumn, scaleColumn};
+                allNames = cat(2, allNames, varNames);
+                
+                varValues = {light.name, ...
+                    position, ...
+                    [rotationX rotationY rotationZ], ...
+                    scale};
+                allValues = cat(2, allValues, repmat(varValues, 2, 1));
+
             end
-            
+            conditionsFile = fullfile(hints.workingFolder,recipeName,'Conditions.txt');
+            rtbWriteConditionsFile(conditionsFile, allNames, allValues);            
             %% Choose styles for the black and white mask rendering.
             
             % do a low quality, direct lighting rendering
