@@ -542,6 +542,7 @@ parfor sceneIndex = 1:nScenes
                     'name', 'insertedDiffuse', ...
                     'modelNameFilter', 'shape-',...
                     'applyToOuterModels', false);
+                insertedDiffuse.resourceFolder = dataBaseDir;
                 if otherObjectReflectanceRandom
                     tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
                 else
