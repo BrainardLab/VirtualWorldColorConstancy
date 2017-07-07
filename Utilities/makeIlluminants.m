@@ -44,7 +44,7 @@ if ~exist(folderToStore)
 end
 
 
-illuminanceValues = 10.^(log10(1) + (log10(30)-log10(1)) * rand(1,nIlluminances));
+illuminanceValues = 10.^(log10(1) + (log10(300)-log10(1)) * rand(1,nIlluminances));
 
 for i = 1:nNewIlluminaces
     OK = false;

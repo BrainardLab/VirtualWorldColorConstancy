@@ -142,7 +142,7 @@ dataBaseDir = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputN
 illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Illuminants','BaseScene');
 if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
-        totalRandomLightSpectra = 100;
+        totalRandomLightSpectra = 999;
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder);
     else
         totalRandomLightSpectra = 10;
