@@ -1,4 +1,25 @@
-function run1000scenes()
+function Run1000TestScenes
+%Run1000TestScenes
+%
+% Usage: 
+%     Run100TestScenes
+%
+% Description:
+%     Use the VWCC environment to generate 1000 test scenes according to parameters 
+%     that Vijay Singh knows but didn't take the time to write down here.
+%
+% Input:
+%    None
+%
+% Output:
+%    The scene and image data is written into the output directory.
+%
+% Optional key/value pairs
+%    None
+
+% 07/08/17  dhb  Added a header comment, as far as I could.
+%           dhb  Change name to match conventions of this project.
+
 RunToyVirtualWorldRecipes('outputName','Set2Images1000Rotations10',...
     'imageWidth',320,...
     'imageHeight',240,...

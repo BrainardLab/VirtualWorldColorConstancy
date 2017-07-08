@@ -1,13 +1,18 @@
-% Create a job and AWS run script to run MakeToyRecipeByCombinations.
+% mjs1000ScenesMakeToyRecipesByCombinations
 %
-% This script will produce a job struct suitable for running RenderToolbox4
-% example recipes and validations.
+% Description:
+%    Script that uses MatlabJobSupport to create an AWS script that will
+%    run a simple test job to make a few ToyVirtualWorldRecipes.  Calls
+%    Run1000TestScenes.
 %
-% It will produce a shell script suitable for running the job on a
-% short-lived AWS instance, via SSH, under control of the local
-% workstation.
-%
+%    The script produces a job struct suitable for running in the terminal
+%    window of a desktop set up for MatlabJobSupport. The script runs the
+%    job on a short-lived AWS instance, via SSH, under control of the local
+%    workstation.
+% 
 % 2016-2017 Brainard Lab, University of Pennsylvania
+
+% 07/08/17  dhb  Created from mjsSimpleMakeToyRecipesByCombinations.
 
 %% The job we want to run.
 %
@@ -15,9 +20,9 @@
 % the VirtualWorldColorConstancy local hook script
 % container.
 job = mjsJob( ...
-    'name', 'VirtualWorldColorConstancy', ...
+    'name', 'mjs1000ScenesMakeToyRecipesByCombinations', ...
     'toolboxCommand', 'tbUseProject(''VirtualWorldColorConstancy'');', ...
-    'jobCommand', 'RunToyVirtualWorldRecipes()');
+    'jobCommand', 'Run1000TestScenes()');
 
 %% Choose AWS credentials and config.
 % "aws" profile holds many boring but necessary parameters.  Try:
@@ -35,7 +40,7 @@ outputDir = ['/home/ubuntu/' job.name];
 jobDate = datestr(now(), 'yyyy-mm-dd-HH-MM-SS');
 
 % copy all the output to S3
-bucketPath = ['s3://render-toolbox-vwcc3/' jobDate];
+bucketPath = ['s3://render-toolbox-vwcc3/' 'mjs1000ScenesMakeToyRecipes/' jobDate];
 hostCleanupCommand = sprintf('aws s3 cp "%s" "%s" --recursive --region us-west-2', ...
     outputDir, ...
     bucketPath);
