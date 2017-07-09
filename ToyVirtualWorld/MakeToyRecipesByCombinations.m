@@ -95,13 +95,7 @@ projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';
 hints.isPlot = false;
 
-%% This doesn't work anymore because we don't have function VirtualScenesRoot.
-%
-% Maybe we don't need the defaultMappings anymore.  We'll have to see.
-%
-% defaultMappings = fullfile(VirtualScenesRoot(), 'MiscellaneousData', 'DefaultMappings.txt');
-
-% Set up output
+%% Set up output
 hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
 originalFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if (~exist(originalFolder, 'dir'))
@@ -257,7 +251,7 @@ parfor sceneIndex = 1:nScenes
                 workingRecord.choices.baseSceneName);
             workingRecord.hints.recipeName = recipeName;
             
-            %% Pick other obejcts and Light shapes to insert
+            %% Pick other objects and Light shapes to insert
             shapeIndexes = randi(nShapes, [1, nInsertObjects+1]);
             
             %% For each shape insert, choose a random spatial transformation.
