@@ -102,6 +102,11 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
+%% HERE IS WHAT I THINK.  THIS CODE WILL CHANGE THE SIZE OF THE IMAGE.
+% TRY IT OUT
+% hints.imageHeight = imageHeight;
+% hints.imageWidth = imageWidth;
+
 %% Configure where to find assets.
 aioPrefs.locations = aioLocation( ...
     'name', 'VirtualScenesExampleAssets', ...
@@ -220,7 +225,7 @@ end
 
 % iterate scene records with one parfor loop
 % Matlab does not support nested parfor loops
-parfor sceneIndex = 1:nScenes
+for sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
     
     try
