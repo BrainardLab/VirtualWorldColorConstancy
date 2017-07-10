@@ -103,9 +103,9 @@ if (~exist(originalFolder, 'dir'))
 end
 
 %% HERE IS WHAT I THINK.  THIS CODE WILL CHANGE THE SIZE OF THE IMAGE.
-% TRY IT OUT
-% hints.imageHeight = imageHeight;
-% hints.imageWidth = imageWidth;
+
+hints.imageHeight = imageHeight;
+hints.imageWidth = imageWidth;
 
 %% Configure where to find assets.
 aioPrefs.locations = aioLocation( ...
