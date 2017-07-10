@@ -147,4 +147,5 @@ end
 
 %% Save timing info.
 PlotToyVirutalWorldTiming('outputName',parser.Results.outputName);
+% Save summary of conditions in text file
 saveRecipeConditionsInTextFile(parser);
