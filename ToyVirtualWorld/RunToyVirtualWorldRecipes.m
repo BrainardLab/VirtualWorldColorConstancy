@@ -1,17 +1,6 @@
 function RunToyVirtualWorldRecipes(varargin)
 % function RunToyVirtualWorldRecipes(varargin)
 % 
-% Example: Uses a fixed target object - Bigball, and fixed basescene -
-% Library, fixed size and position of light source, fixed position and 
-% scale of target object, fixed illuminant spectra, fixed background object
-% reflectance spectra.
-% 
-% RunToyVirtualWorldRecipes('luminanceLevels',[0.2],'reflectanceNumbers',[1], ...
-% 'executeWidth',320,'executeHeight', 240,'analyzeWidth',320,'analyzeHeight',240,...
-% 'analyzeCropImageHalfSize', 25, 'shapeSet',{'BigBall'},'baseSceneSet',{'Library'},...
-% 'otherObjectReflectanceRandom',false,'illuminantSpectraRandom',false,...
-% 'lightPositionRandom',false, 'lightScaleRandom', false,...
-% 'targetPositionRandom',false,'targetScaleRandom',false)
 %
 % Make, Execute, and Analyze Toy Virtual World Recipes.
 %

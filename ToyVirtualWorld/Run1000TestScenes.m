@@ -2,7 +2,7 @@ function Run1000TestScenes
 %Run1000TestScenes
 %
 % Usage: 
-%     Run100TestScenes
+%     Run1000TestScenes
 %
 % Description:
 %     Use the VWCC environment to generate 1000 test scenes. Parameters are
