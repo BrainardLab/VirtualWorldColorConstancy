@@ -62,6 +62,7 @@ parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
+parser.addParameter('targetSpectrumSameShape', false, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -161,7 +162,11 @@ otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
 if (parser.Results.targetSpectrumNotFlat)
-    makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+    if (parser.Results.targetSpectrumSameShape)
+        makeSameShapeTargetReflectance(luminanceLevels,reflectanceNumbers, targetObjectFolder);
+    else
+        makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+    end
 else
     makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
 end
