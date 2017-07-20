@@ -86,6 +86,7 @@ parfor ii = 1:nRecipes
                 [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
                 croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
                     cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
+                recipe.processing.croppedImage = croppedImage;
             else
                 croppedImage = returnRotatedCroppedImage(isTarget, radiance, ...
                     randomAngles(iterRotations), cropImageHalfSize)
