@@ -1,16 +1,13 @@
-function RunToyVirtualWorldRecipes(varargin)
-% function RunToyVirtualWorldRecipes(varargin)
+function RunMakeComparisionRecipes(varargin)
+% function RunMakeComparisionRecipes(varargin)
 % 
 %
-% Make, Execute, and Analyze Toy Virtual World Recipes.
+% Run the script to make psychophysics experiment data
 %
-% The idea of this function is to take a parameter set and carry it through
-% the all the steps of the ToyVirtualWorld project: recipe generation,
-% recipe execution and rendering, and recipe analysis.
-%
-% This should let us divide up work in terms of what functions we pass to
-% this function.  We could pass these from the command line.  That means we
-% have a way to divide up work without editing our Matlab scripts.
+% The idea here is to specify the lightness levels of the standard and
+% comparison images and produce the images that will be compared. By
+% default, there the two comparison images will be identical except for the
+% target object reflectance.
 %
 % Key/value pairs
 %   'outputName' - Output File Name, Default ExampleOutput
@@ -21,10 +18,10 @@ function RunToyVirtualWorldRecipes(varargin)
 %   'cropImageHalfSize'  - crop size for MakeToyRecipesByCombinations
 %   'analyzeCropImageHalfSize' - crop image size for analysis, default is
 %                    50, twice of cropImageHalfSize default
-%   'luminanceLevels' - Luminance levels of target object
-%   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of 
-%                   target object. These are just dummy variables to give a
-%                   unique name to each random spectra.
+%   'standardLightness' - lightness of standard image target object
+%   'comparisionLightness1' - lightness of first comparision target object
+%   'comparisionLightness2' - lightness of second comparision target object
+%
 %   'mosaicHalfSize' - Cone mosaic half size
 %   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
 %                   background objects is random or not. Default true
@@ -58,8 +55,9 @@ parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
-parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
-parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
+parser.addParameter('standardLightness', [0.2 0.6], @isnumeric);
+parser.addParameter('comparisionLightness1', [0.2 0.6], @isnumeric);
+parser.addParameter('comparisionLightness2', [0.2 0.6], @isnumeric);
 parser.addParameter('nInsertedLights', 1, @isnumeric);
 parser.addParameter('nInsertObjects', 0, @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
@@ -87,10 +85,11 @@ parser.parse(varargin{:});
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
-luminanceLevels = parser.Results.luminanceLevels;
-reflectanceNumbers = parser.Results.reflectanceNumbers;
+standardLightness = parser.Results.standardLightness;
+comparisionLightness1 = parser.Results.comparisionLightness1;
+comparisionLightness2 = parser.Results.comparisionLightness2;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
-saveRecipesConditionsTogether(parser);
+% saveRecipesConditionsTogether(parser);
 
 %% Set up ful-sized parpool if available.
 if exist('parpool', 'file')
@@ -102,14 +101,15 @@ end
 %% Go through the steps for this combination of parameters.
 try
     % using one base scene and one object at a time
-    MakeToyRecipesByCombinations( ...
+    MakeComparisionRecipes( ...
         'outputName',parser.Results.outputName,...
         'imageWidth', imageWidth, ...
         'imageHeight', imageHeight, ...
         'cropImageHalfSize', cropImageHalfSize, ...   
         'nOtherObjectSurfaceReflectance', parser.Results.nOtherObjectSurfaceReflectance,...
-        'luminanceLevels', luminanceLevels, ...
-        'reflectanceNumbers', reflectanceNumbers,...
+        'standardLightness', standardLightness, ...
+        'comparisionLightness1', comparisionLightness1, ...
+        'comparisionLightness2', comparisionLightness2, ...
         'nInsertedLights',parser.Results.nInsertedLights,...
         'nInsertObjects',parser.Results.nInsertObjects, ...
         'maxAttempts',parser.Results.maxAttempts,...
@@ -129,14 +129,14 @@ try
         'shapeSet', parser.Results.shapeSet, ...
         'baseSceneSet', parser.Results.baseSceneSet);
         
-    ConeResponseToyVirtualWorldRecipes(...
-        'outputName',parser.Results.outputName,...
-        'luminanceLevels', luminanceLevels, ...
-        'reflectanceNumbers', reflectanceNumbers, ...
-        'nAnnularRegions', 25, ...
-        'mosaicHalfSize', mosaicHalfSize,...
-        'cropImageHalfSize',cropImageHalfSize,...
-        'nRandomRotations',parser.Results.nRandomRotations);
+%     ConeResponseToyVirtualWorldRecipes(...
+%         'outputName',parser.Results.outputName,...
+%         'luminanceLevels', luminanceLevels, ...
+%         'reflectanceNumbers', reflectanceNumbers, ...
+%         'nAnnularRegions', 25, ...
+%         'mosaicHalfSize', mosaicHalfSize,...
+%         'cropImageHalfSize',cropImageHalfSize,...
+%         'nRandomRotations',parser.Results.nRandomRotations);
     
 catch err
     workingFolder = fullfile(getpref('VirtualWorldColorConstancy', 'baseFolder'),parser.Results.outputName);
@@ -147,4 +147,4 @@ end
 %% Save timing info.
 PlotToyVirutalWorldTiming('outputName',parser.Results.outputName);
 % Save summary of conditions in text file
-saveRecipeConditionsInTextFile(parser);
+% saveRecipeConditionsInTextFile(parser);

@@ -1,9 +1,14 @@
-function MakeToyRecipesByCombinations(varargin)
-%% Construct and archive a set of many Ward Land recipes.
+function MakeComparisionRecipes(varargin)
+%% Make a set of comparison images for performing the threshold experiment
 %
-% The idea here is to generate many WardLand scenes.  We choose values for
-% several parameter sets and build a scene for several combinations of
-% parameter values, drawing from each parameter set.
+% The idea here is to generate two comarison images for each standard image
+% that has been generate elsewhere. The recipe conditions should be the
+% same as that of the standard image.
+% The function takes two sets of comparision lightness levels and gives the
+% correspoinding comparision images. First comparision image is generated 
+% depending on the specified variabilites. A second comparision images is 
+% generated that is equivalent to the first comparision image apart from 
+% the target reflectance. 
 %
 % Key/value pairs
 %   'outputName' - Output File Name, Default ExampleOutput
@@ -12,10 +17,10 @@ function MakeToyRecipesByCombinations(varargin)
 %   'imageHeight'- image height, Should be kept small to keep redering time
 %                   low for rejected recipes
 %   'makeCropImageHalfSize'  - size of cropped patch
-%   'luminanceLevels' - luminance levels of target object
-%   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of
-%                   target object. These are just dummy variables to give a
-%                   unique name to each random spectra.
+%   'standardLightness' - lightness of standard image target object
+%   'comparisionLightness1' - lightness of first comparision target object
+%   'comparisionLightness2' - lightness of second comparision target object
+%
 %   'otherObjectReflectanceRandom' - boolean to specify if spectra of
 %                   background objects is random or not. Default true
 %   'illuminantSpectraRandom' - boolean to specify if spectra of
@@ -51,8 +56,9 @@ parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
-parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
-parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
+parser.addParameter('standardLightness', [0.2 0.6], @isnumeric);
+parser.addParameter('comparisionLightness1', [0.2 0.6], @isnumeric);
+parser.addParameter('comparisionLightness2', [0.2 0.6], @isnumeric);
 parser.addParameter('nInsertedLights', 1, @isnumeric);
 parser.addParameter('nInsertObjects', 0, @isnumeric);
 parser.addParameter('maxAttempts', 30, @isnumeric);
@@ -78,8 +84,9 @@ imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
 nOtherObjectSurfaceReflectance = parser.Results.nOtherObjectSurfaceReflectance;
-luminanceLevels = parser.Results.luminanceLevels;
-reflectanceNumbers = parser.Results.reflectanceNumbers;
+standardLightness = parser.Results.standardLightness;
+comparisionLightness1 = parser.Results.comparisionLightness1;
+comparisionLightness2 = parser.Results.comparisionLightness2;
 maxAttempts = parser.Results.maxAttempts;
 targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
@@ -90,8 +97,7 @@ illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 nInsertedLights = parser.Results.nInsertedLights;
 nInsertObjects = parser.Results.nInsertObjects;
-nLuminanceLevels = numel(luminanceLevels);
-nReflectances = numel(reflectanceNumbers);
+nStimuli = numel(standardLightness);
 
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
@@ -105,8 +111,7 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% HERE IS WHAT I THINK.  THIS CODE WILL CHANGE THE SIZE OF THE IMAGE.
-
+%% Size of image
 hints.imageHeight = imageHeight;
 hints.imageWidth = imageWidth;
 
@@ -158,7 +163,7 @@ else
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 150, 150);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 1,1);
     end
 end
 
@@ -166,14 +171,12 @@ end
 otherObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','OtherObjects');
 makeOtherObjectReflectance(nOtherObjectSurfaceReflectance,otherObjectFolder);
 targetObjectFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Data','Reflectances','TargetObjects');
-if (parser.Results.targetSpectrumNotFlat)
-    if (parser.Results.targetSpectrumSameShape)
-        makeSameShapeTargetReflectance(luminanceLevels,reflectanceNumbers, targetObjectFolder);
-    else
-        makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
-    end
+if (parser.Results.targetSpectrumSameShape)
+    makeSameShapeReflectanceForExperiment(standardLightness,comparisionLightness1, ...
+                                comparisionLightness2, targetObjectFolder);
 else
-    makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+    makeReflectanceForExperiment(standardLightness,comparisionLightness1, ...
+                                comparisionLightness2, targetObjectFolder);
 end
 
 %%
@@ -209,7 +212,7 @@ targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
     'fullPaths', false);
 
 %% Assemble recipies by combinations of target luminances reflectances.
-nScenes = nLuminanceLevels * nReflectances;
+nScenes = nStimuli;
 sceneRecord = struct( ...
     'targetLuminanceLevel', [], ...
     'reflectanceNumber', [],  ...
@@ -222,15 +225,10 @@ sceneRecord = struct( ...
 
 % pre-fill luminance and reflectance conditions per scene
 % so that we can unroll the nested loops below
-for ll = 1:nLuminanceLevels
-    targetLuminanceLevel = luminanceLevels(ll);
-    for rr = 1:nReflectances
-        reflectanceNumber = reflectanceNumbers(rr);
-        
-        sceneIndex = rr + (ll-1)*nReflectances;
-        sceneRecord(sceneIndex).targetLuminanceLevel = targetLuminanceLevel;
-        sceneRecord(sceneIndex).reflectanceNumber = reflectanceNumber;
-    end
+for ll = 1:nStimuli
+    sceneRecord(ll).standardLightness = standardLightness(ll);
+    sceneRecord(ll).comparisionLightness1 = comparisionLightness1(ll);
+    sceneRecord(ll).comparisionLightness2 = comparisionLightness2(ll);
 end
 
 % iterate scene records with one parfor loop
@@ -239,8 +237,9 @@ parfor sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
     
     try
-        targetLuminanceLevel = workingRecord.targetLuminanceLevel;
-        reflectanceNumber = workingRecord.reflectanceNumber;
+        standardLightness = workingRecord.standardLightness;
+        comparisionLightness1 = workingRecord.comparisionLightness1;
+        comparisionLightness2 = workingRecord.comparisionLightness2;
         
         for attempt = 1:maxAttempts
             
@@ -259,11 +258,7 @@ parfor sceneIndex = 1:nScenes
             targetShapeName = shapeSet{targetShapeIndex};
             
             %% Choose a unique name for this recipe.
-            recipeName = FormatRecipeName( ...
-                targetLuminanceLevel, ...
-                reflectanceNumber, ...
-                targetShapeName, ...
-                workingRecord.choices.baseSceneName);
+            recipeName = ['Stimuli-',num2str(sceneIndex)];
             workingRecord.hints.recipeName = recipeName;
             
             %% Pick other objects and Light shapes to insert
@@ -482,7 +477,7 @@ parfor sceneIndex = 1:nScenes
                 continue;
             else
                 
-                %% Choose styles for the full radiance rendering.
+%% Choose styles for the full radiance rendering of the standrad image
                 fullRendering = VwccMitsubaRenderingQuality( ...
                     'integratorPluginType', 'path', ...
                     'samplerPluginType', 'ldsampler');
@@ -566,22 +561,126 @@ parfor sceneIndex = 1:nScenes
                     'modelNameFilter', 'shape-01');
                 % targetDiffuse.addSpectrum(targetObjectReflectance);
                 targetDiffuse.resourceFolder = dataBaseDir;
-                reflectanceFileName = sprintf('luminance-%.4f-reflectance-%03d.spd', ...
-                    targetLuminanceLevel, reflectanceNumber);
+                reflectanceFileName = sprintf('standard-%03d.spd',sceneIndex);
                 targetDiffuse.addManySpectra({reflectanceFileName});
                 
-                workingRecord.styles.normal = {fullRendering, ...
+                workingRecord.styles.standard = {fullRendering, ...
+                    blessBaseLights, blessInsertedLights, areaLightSpectra, ...
+                    baseSceneDiffuse, insertedDiffuse, targetDiffuse};                
+
+%% Choose styles for the full radiance rendering of the comparision1 image
+                fullRendering = VwccMitsubaRenderingQuality( ...
+                    'integratorPluginType', 'path', ...
+                    'samplerPluginType', 'ldsampler');
+                fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
+                fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
+                
+                % bless specific meshes in the base scene as area lights
+                nBaseLights = numel(sceneInfo.lightIds);
+                baseLightNames = cell(1, nBaseLights);
+                for ll = 1:nBaseLights
+                    lightId = sceneInfo.lightIds{ll};
+                    meshSuffixIndex = strfind(lightId, '-mesh');
+                    if ~isempty(meshSuffixIndex)
+                        baseLightNames{ll} = lightId(1:meshSuffixIndex-1);
+                    else
+                        baseLightNames{ll} = lightId;
+                    end
+                end
+                baseLightFilter = sprintf('%s|', baseLightNames{:});
+                baseLightFilter = baseLightFilter(1:end-1);
+                blessBaseLights = VseMitsubaAreaLights( ...
+                    'name', 'blessBaseLights', ...
+                    'applyToInnerModels', false, ...
+                    'elementNameFilter', baseLightFilter);
+                
+                % bless inserted light meshes as area lights
+                blessInsertedLights = VseMitsubaAreaLights( ...
+                    'name', 'blessInsertedLights', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', 'light-', ...
+                    'elementNameFilter', '');
+                
+                % assign spectra to lights
+                areaLightSpectra = VseMitsubaEmitterSpectra( ...
+                    'name', 'areaLightSpectra', ...
+                    'pluginType', 'area', ...
+                    'propertyName', 'radiance');
+                %areaLightSpectra.spectra = emitterSpectra;
+                areaLightSpectra.resourceFolder = dataBaseDir;
+                if illuminantSpectraRandom
+                    tempIlluminantSpectra = illuminantSpectra((randperm(length(illuminantSpectra))));
+                else
+                    tempIlluminantSpectra = illuminantSpectra;
+                end
+                areaLightSpectra.addManySpectra(tempIlluminantSpectra);
+                
+                % assign spectra to materials in the base scene
+                %
+                % note setting of resourceFolder to point to where the
+                % files with the spectra live.  This is necessary so
+                % that when the recipe gets built, these spectral files
+                % can be found and copied into the right place.
+                baseSceneDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'baseSceneDiffuse', ...
+                    'applyToInnerModels', false);
+                baseSceneDiffuse.resourceFolder = dataBaseDir;
+                if otherObjectReflectanceRandom
+                    tempBaseSceneReflectances = baseSceneReflectances((randperm(length(baseSceneReflectances))));
+                else
+                    tempBaseSceneReflectances = baseSceneReflectances;
+                end
+                baseSceneDiffuse.addManySpectra(tempBaseSceneReflectances);
+                
+                % assign spectra to all materials of inserted shapes
+                insertedDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'insertedDiffuse', ...
+                    'modelNameFilter', 'shape-',...
+                    'applyToOuterModels', false);
+                insertedDiffuse.resourceFolder = dataBaseDir;
+                if otherObjectReflectanceRandom
+                    tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
+                else
+                    tempOtherObjectReflectances = otherObjectReflectances;
+                end
+                insertedDiffuse.addManySpectra(tempOtherObjectReflectances);
+                
+                % assign a specific reflectance to the target object
+                targetDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'targetDiffuse', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', 'shape-01');
+                % targetDiffuse.addSpectrum(targetObjectReflectance);
+                targetDiffuse.resourceFolder = dataBaseDir;
+                reflectanceFileName = sprintf('comparision1-%03d.spd',sceneIndex);
+                targetDiffuse.addManySpectra({reflectanceFileName});
+                
+                workingRecord.styles.comparision1 = {fullRendering, ...
                     blessBaseLights, blessInsertedLights, areaLightSpectra, ...
                     baseSceneDiffuse, insertedDiffuse, targetDiffuse};
                 
-                %% Do the final rendering
+%% Choose styles for the full radiance rendering of the comparision2 image
+                % assign a specific reflectance to the target object
+                targetDiffuse = VseMitsubaDiffuseMaterials( ...
+                    'name', 'targetDiffuse', ...
+                    'applyToOuterModels', false, ...
+                    'modelNameFilter', 'shape-01');
+                % targetDiffuse.addSpectrum(targetObjectReflectance);
+                targetDiffuse.resourceFolder = dataBaseDir;
+                reflectanceFileName = sprintf('comparision2-%03d.spd',sceneIndex);
+                targetDiffuse.addManySpectra({reflectanceFileName});
+                
+                workingRecord.styles.comparision2 = {fullRendering, ...
+                    blessBaseLights, blessInsertedLights, areaLightSpectra, ...
+                    baseSceneDiffuse, insertedDiffuse, targetDiffuse};
+                
+                %% Do the comparision2 rendering
                 innerModels = [insertShapes{:} insertLights{:}];
                 workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
                 
                 % generate scene files and render
                 workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
-                
-                % move on to save this recipe
+
                 break;
             end
         end

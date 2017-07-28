@@ -1,4 +1,4 @@
-function makeIlluminants(nIlluminances, folderToStore)
+function makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
 % makeIlluminants(nIlluminances, folderToStore)
 %
 % This script generates the illuminants for the base scenes. The
@@ -44,7 +44,7 @@ if ~exist(folderToStore)
 end
 
 
-illuminanceValues = 10.^(log10(1) + (log10(300)-log10(1)) * rand(1,nIlluminances));
+illuminanceValues = 10.^(log10(minMeanIlluminantLevel) + (log10(maxMeanIlluminantLevel)-log10(minMeanIlluminantLevel)) * rand(1,nIlluminances));
 
 for i = 1:nNewIlluminaces
     OK = false;
