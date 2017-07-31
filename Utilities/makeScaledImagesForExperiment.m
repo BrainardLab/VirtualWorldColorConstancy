@@ -1,4 +1,4 @@
-function makeScaledImagesForExperiment(pathToFolder, nStimuli)
+function makeScaledImagesForExperiment(outputName, nStimuli)
 %
 % makeScaledImagesForExperiment(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeName)
 %
@@ -13,6 +13,14 @@ function makeScaledImagesForExperiment(pathToFolder, nStimuli)
 % pathToFolder: The path to the job folder
 %
 
+%% Basic setup we don't want to expose as parameters.
+projectName = 'VirtualWorldColorConstancy';
+hints.renderer = 'Mitsuba';
+hints.isPlot = false;
+
+pathToFolder = fullfile(getpref(projectName, 'baseFolder'),outputName);
+
+%%
 toneMapFactor = 0;
 
 scaleFactor = 1;
