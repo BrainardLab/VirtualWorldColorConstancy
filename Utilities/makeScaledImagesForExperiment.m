@@ -54,20 +54,17 @@ for sceneIndex = 1:nStimuli
     
     %% Plot the unscaled figures while we are in this loop
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 600]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 440]);
     
-    %     standard = axes(hFig,'units','pixels','position',[150 350 150 100]);
-    subplot(2,2,1);
+    standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
     image(uint8(sRGBstandardImage));
     set(gca,'xtick',[],'ytick',[]);
     
-    %     comparision1 = axes(hFig,'units','pixels','position',[50 50 150 100]);
-    subplot(2,2,3);
+    comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
     image(uint8(sRGBComparision1Image));
     set(gca,'xtick',[],'ytick',[]);
     
-    %     comparision2 = axes(hFig,'units','pixels','position',[350 50 150 100]);
-    subplot(2,2,4);
+    comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
     image(uint8(sRGBComparision2Image));
     set(gca,'xtick',[],'ytick',[]);
 
@@ -103,20 +100,17 @@ for sceneIndex = 1:nStimuli
     
 %% Save the individual scaled iamges and the scaled stimuli for experiment
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 600]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 440]);
     
-    %     standard = axes(hFig,'units','pixels','position',[150 350 150 100]);
-    subplot(2,2,1);
+    standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
     image(uint8(sRGBstandardImage));
     set(gca,'xtick',[],'ytick',[]);
     
-    %     comparision1 = axes(hFig,'units','pixels','position',[50 50 150 100]);
-    subplot(2,2,3);
+    comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
     image(uint8(sRGBComparision1Image));
     set(gca,'xtick',[],'ytick',[]);
     
-    %     comparision2 = axes(hFig,'units','pixels','position',[350 50 150 100]);
-    subplot(2,2,4);
+    comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
     image(uint8(sRGBComparision2Image));
     set(gca,'xtick',[],'ytick',[]);
 

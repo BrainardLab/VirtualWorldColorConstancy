@@ -122,8 +122,9 @@ aioPrefs.locations = aioLocation( ...
     'baseDir', fullfile(vseaRoot(), 'examples'));
 
 %% save the lightness levels used for making the recipes
-nameOfFile = fullfile(getpref(projectName, 'baseFolder'),'lightnessLevels.mat');
+nameOfFile = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'lightnessLevels.mat');
 save(nameOfFile,'standardLightness','comparisionLightness1','comparisionLightness2');
+
 %% Choose base scene to pick from
 nBaseScenes = numel(baseSceneSet);
 baseScenes = cell(1, nBaseScenes);
