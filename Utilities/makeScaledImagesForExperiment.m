@@ -3,15 +3,16 @@ function makeScaledImagesForExperiment(outputName, nStimuli)
 % makeScaledImagesForExperiment(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeName)
 %
 % This function makes the images required for the psychophysics experiment.
-% We first find a common scale factor for all the stimuli and then make
-% individual sRGB images for display as well as an images that has the
-% standard and comparision images together. We will generate both a set of
-% stimuli that has the full image and a set that has the cropped image. The
-% scaling is done for the full image and the for the cropped image, the
-% scaling is done for the cropped image.
+% We first find a common scale factor for the three images that will be 
+% presented at a time. This scale factor is used to produce the three sRGB 
+% images to be displayed on the screen. We also generate the individual 
+% sRGB images and the unscaled sRGB image. 
 %
-% pathToFolder: The path to the job folder
+% The three images that will be displayed have the same scale. The scale
+% changes for every stimuli.
 %
+% outputName: Name of parent fodler where the multispectral images.
+% nStimuli: Total number of stimuli stored in the parent folder.
 
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
@@ -25,9 +26,9 @@ lightness = load(lightnessLevelFile);
 %%
 toneMapFactor = 0;
 
-scaleFactor = 1;
-
 for sceneIndex = 1:nStimuli
+    scaleFactor = 1;
+    
     recipeName = ['Stimuli-',num2str(sceneIndex)];
     pathToWorkingFolder = fullfile(pathToFolder,'Working');
     
@@ -81,10 +82,7 @@ for sceneIndex = 1:nStimuli
         recipeName,'images','unscaledStimuliWithLabels.pdf');
     save2pdf(unscaledImagesWithLabels);
     close;
-end
 
-
-for sceneIndex = 1:nStimuli
     recipeName = ['Stimuli-',num2str(sceneIndex)];
     pathToWorkingFolder = fullfile(pathToFolder,'Working');
     
