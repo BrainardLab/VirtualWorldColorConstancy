@@ -21,6 +21,7 @@ parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.2, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.8, @isnumeric);
 parser.addParameter('totalBoundingBoxPixels', 2601, @isnumeric);
+parser.addParameter('maskFileName','mask.mat',@ischar);
 parser.parse(recipe, varargin{:});
 recipe = parser.Results.recipe;
 imageWidth = parser.Results.imageWidth;
@@ -29,6 +30,7 @@ imageHeight = parser.Results.imageHeight;
 targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
 totalBoundingBoxPixels = parser.Results.totalBoundingBoxPixels;
+maskFileName = parser.Results.maskFileName;
 
 
 %% Do some rendering and analysis.
@@ -41,7 +43,7 @@ recipe.input.hints.whichConditions = 2;
 
 %% Check if we can see enough target pixels.
 maskFilename = fullfile(recipe.input.hints.workingFolder, ...
-    recipe.input.hints.recipeName,'renderings','Mitsuba','mask.mat');
+    recipe.input.hints.recipeName,'renderings','Mitsuba',maskFileName);
 targetMask = load(maskFilename);
 isTarget = 0 < sum(targetMask.multispectralImage, 3);
 targetPixelCount = sum(isTarget(:));

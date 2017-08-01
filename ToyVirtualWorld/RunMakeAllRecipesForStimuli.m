@@ -1,5 +1,5 @@
-function RunMakeComparisionRecipes(varargin)
-% function RunMakeComparisionRecipes(varargin)
+function RunMakeAllRecipesForStimuli(varargin)
+% RunMakeAllRecipesForStimuli(varargin)
 % 
 %
 % Run the script to make psychophysics experiment data
@@ -101,7 +101,7 @@ end
 %% Go through the steps for this combination of parameters.
 try
     % using one base scene and one object at a time
-    MakeComparisionRecipes( ...
+    MakeAllRecipesForStimuli( ...
         'outputName',parser.Results.outputName,...
         'imageWidth', imageWidth, ...
         'imageHeight', imageHeight, ...

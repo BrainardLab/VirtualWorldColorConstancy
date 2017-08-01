@@ -19,6 +19,8 @@ hints.renderer = 'Mitsuba';
 hints.isPlot = false;
 
 pathToFolder = fullfile(getpref(projectName, 'baseFolder'),outputName);
+lightnessLevelFile = fullfile(getpref(projectName, 'baseFolder'),outputName,'lightnessLevels.mat');
+lightness = load(lightnessLevelFile);
 
 %%
 toneMapFactor = 0;
@@ -54,24 +56,30 @@ for sceneIndex = 1:nStimuli
     
     %% Plot the unscaled figures while we are in this loop
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 440]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
     
     standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
-    image(uint8(sRGBstandardImage));
+    image(standard,uint8(sRGBstandardImage));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
-    image(uint8(sRGBComparision1Image));
+    image(comparision1,uint8(sRGBComparision1Image));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
-    image(uint8(sRGBComparision2Image));
+    image(comparision2,uint8(sRGBComparision2Image));
     set(gca,'xtick',[],'ytick',[]);
 
     unscaledImages = fullfile(pathToWorkingFolder,...
         recipeName,'images','unscaledStimuli.pdf');
-    set(gcf,'PaperPositionMode','auto');
+    set(gcf,'PaperPositionMode','auto');    
     save2pdf(unscaledImages);
+    xlabel(standard,num2str(lightness.standardLightness(sceneIndex),'%.4f'));
+    xlabel(comparision1,num2str(lightness.comparisionLightness1(sceneIndex),'%.4f'));
+    xlabel(comparision2,num2str(lightness.comparisionLightness2(sceneIndex),'%.4f'));
+    unscaledImagesWithLabels = fullfile(pathToWorkingFolder,...
+        recipeName,'images','unscaledStimuliWithLabels.pdf');
+    save2pdf(unscaledImagesWithLabels);
     close;
 end
 
@@ -100,28 +108,36 @@ for sceneIndex = 1:nStimuli
     
 %% Save the individual scaled iamges and the scaled stimuli for experiment
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 440]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
     
     standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
-    image(uint8(sRGBstandardImage));
+    image(standard,uint8(sRGBstandardImage));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
-    image(uint8(sRGBComparision1Image));
+    image(comparision1,uint8(sRGBComparision1Image));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
-    image(uint8(sRGBComparision2Image));
+    image(comparision2,uint8(sRGBComparision2Image));
     set(gca,'xtick',[],'ytick',[]);
 
     scaledStimuli = fullfile(pathToWorkingFolder,...
         recipeName,'images','scaledStimuli.pdf');
     set(gcf,'PaperPositionMode','auto');
     save2pdf(scaledStimuli);
+
+    xlabel(standard,num2str(lightness.standardLightness(sceneIndex),'%.4f'));
+    xlabel(comparision1,num2str(lightness.comparisionLightness1(sceneIndex),'%.4f'));
+    xlabel(comparision2,num2str(lightness.comparisionLightness2(sceneIndex),'%.4f'));
+    scaledImagesWithLabels = fullfile(pathToWorkingFolder,...
+        recipeName,'images','scaledStimuliWithLabels.pdf');
+    save2pdf(scaledImagesWithLabels);
+
     close;
         
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 400]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
     image(uint8(sRGBstandardImage));
     set(gca,'xtick',[],'ytick',[]);
     standardImage = fullfile(pathToWorkingFolder,...
@@ -131,7 +147,7 @@ for sceneIndex = 1:nStimuli
     close;
 
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 400]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
     image(uint8(sRGBComparision1Image));
     set(gca,'xtick',[],'ytick',[]);
     comparision1Image = fullfile(pathToWorkingFolder,...
@@ -141,7 +157,7 @@ for sceneIndex = 1:nStimuli
     close;
 
     hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 400]);
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
     image(uint8(sRGBComparision2Image));
     set(gca,'xtick',[],'ytick',[]);
     comparision2Image = fullfile(pathToWorkingFolder,...
