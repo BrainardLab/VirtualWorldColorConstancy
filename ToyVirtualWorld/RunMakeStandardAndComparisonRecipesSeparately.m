@@ -2,12 +2,11 @@ function RunMakeStandardAndComparisonRecipesSeparately(varargin)
 % RunMakeStandardAndComparisonRecipesSeparately(varargin)
 % 
 %
-% Run the script to make psychophysics experiment data
-%
-% The idea here is to specify the lightness levels of the standard and
-% comparison images and produce the images that will be compared. By
-% default, there the two comparison images will be identical except for the
-% target object reflectance.
+% This function is a more comprehensive version of RunMakeAllRecipesForStimuli
+% which only allows for spectral changes in the scenes. This functions
+% allows for both spectral and geometrical variations. The recipes are made
+% in two steps. First the standard, then the comparisons. Finally the
+% images are put together.
 %
 % Key/value pairs
 %   'outputName' - Output File Name, Default ExampleOutput
