@@ -56,6 +56,9 @@ for sceneIndex = 1:nStimuli
         scaleFactor = tempScaleFactor;
     end
     
+    sRGBDisplayMaxScalingImages = fullfile(pathToWorkingFolder,...
+        recipeName,'images','displayMaxScaling.mat');
+    save(sRGBDisplayMaxScalingImages,'sRGBstandardDisplayMax','sRGBComparision1DisplayMax','sRGBComparision2DisplayMax');
     %% Plot the unscaled stimuli, standard on top, two comparisons on bottom
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
@@ -148,6 +151,9 @@ for sceneIndex = 1:nStimuli
     [sRGBComparision2CommonScale, ~, ~, ~] = rtbMultispectralToSRGB(Comparision2File, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
     
+    sRGBCommonScalingImages = fullfile(pathToWorkingFolder,...
+        recipeName,'images','commonScaling.mat');
+    save(sRGBCommonScalingImages,'sRGBstandardCommonScale','sRGBComparision1CommonScale','sRGBComparision2CommonScale');
 %% Save stimuli with common scale, standard on top, two comparision on bottom side by side
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
@@ -177,8 +183,8 @@ for sceneIndex = 1:nStimuli
     save2pdf(stimuliCommonScaleWithLabels);
 
     close;
-
-    %% Save individual scaled images
+        
+    %% Save individual common scaled images
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
     image(uint8(sRGBstandardCommonScale));
