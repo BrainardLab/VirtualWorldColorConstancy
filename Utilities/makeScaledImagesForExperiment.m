@@ -27,6 +27,7 @@ lightness = load(lightnessLevelFile);
 toneMapFactor = 0;
 
 for sceneIndex = 1:nStimuli
+    %% Make image with display max scaling
     scaleFactor = 1;
     
     recipeName = ['Stimuli-',num2str(sceneIndex)];
@@ -35,19 +36,19 @@ for sceneIndex = 1:nStimuli
     pathToStandardFile = fullfile(pathToWorkingFolder,...
         recipeName,'renderings','Mitsuba','standard.mat');
     standardRadiance = parload(pathToStandardFile);
-    [sRGBstandardImage, ~, ~, standardFactor] = rtbMultispectralToSRGB(standardRadiance, ...
+    [sRGBstandardDisplayMax, ~, ~, standardFactor] = rtbMultispectralToSRGB(standardRadiance, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'isScale',true);
     
     pathToComparision1File = fullfile(pathToWorkingFolder,...
         recipeName,'renderings','Mitsuba','comparision1.mat');
     Comparision1File = parload(pathToComparision1File);
-    [sRGBComparision1Image, ~, ~, comparision1Factor] = rtbMultispectralToSRGB(Comparision1File, ...
+    [sRGBComparision1DisplayMax, ~, ~, comparision1Factor] = rtbMultispectralToSRGB(Comparision1File, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'isScale',true);
     
     pathToComparision2File = fullfile(pathToWorkingFolder,...
         recipeName,'renderings','Mitsuba','comparision2.mat');
     Comparision2File = parload(pathToComparision2File);
-    [sRGBComparision2Image, ~, ~, comparision2Factor] = rtbMultispectralToSRGB(Comparision2File, ...
+    [sRGBComparision2DisplayMax, ~, ~, comparision2Factor] = rtbMultispectralToSRGB(Comparision2File, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'isScale',true);
     
     tempScaleFactor = min([standardFactor comparision1Factor comparision2Factor]);
@@ -55,112 +56,156 @@ for sceneIndex = 1:nStimuli
         scaleFactor = tempScaleFactor;
     end
     
-    %% Plot the unscaled figures while we are in this loop
+    %% Plot the unscaled stimuli, standard on top, two comparisons on bottom
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
     
     standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
-    image(standard,uint8(sRGBstandardImage));
+    image(standard,uint8(sRGBstandardDisplayMax));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
-    image(comparision1,uint8(sRGBComparision1Image));
+    image(comparision1,uint8(sRGBComparision1DisplayMax));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
-    image(comparision2,uint8(sRGBComparision2Image));
+    image(comparision2,uint8(sRGBComparision2DisplayMax));
     set(gca,'xtick',[],'ytick',[]);
 
-    unscaledImages = fullfile(pathToWorkingFolder,...
-        recipeName,'images','unscaledStimuli.pdf');
+    stimuliDisplayMaxScaling = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliDisplayMaxScaling.pdf');
     set(gcf,'PaperPositionMode','auto');    
-    save2pdf(unscaledImages);
+    save2pdf(stimuliDisplayMaxScaling);
     xlabel(standard,num2str(lightness.standardLightness(sceneIndex),'%.4f'));
     xlabel(comparision1,num2str(lightness.comparisionLightness1(sceneIndex),'%.4f'));
     xlabel(comparision2,num2str(lightness.comparisionLightness2(sceneIndex),'%.4f'));
-    unscaledImagesWithLabels = fullfile(pathToWorkingFolder,...
-        recipeName,'images','unscaledStimuliWithLabels.pdf');
-    save2pdf(unscaledImagesWithLabels);
+    stimuliDisplayMaxScalingWithLabels = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliDisplayMaxScalingWithLabels.pdf');
+    save2pdf(stimuliDisplayMaxScalingWithLabels);
+    close;
+    
+    %% Plot the unscaled standard and comparison side by side
+    hFig = figure();
+    set(hFig,'units','pixels', 'Position', [1 1 600 240], 'Visible', 'off');
+    
+    standard = axes(hFig,'units','pixels','position',[40 40 240 160]);
+    image(standard,uint8(sRGBstandardDisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    
+    comparision1 = axes(hFig,'units','pixels','position',[320 40 240 160]);
+    image(comparision1,uint8(sRGBComparision1DisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    
+    stimuliSideBySideDisplayMax = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliSideBySideDisplayMax.pdf');
+    set(gcf,'PaperPositionMode','auto');    
+    save2pdf(stimuliSideBySideDisplayMax);
+    xlabel(standard,num2str(lightness.standardLightness(sceneIndex),'%.4f'));
+    xlabel(comparision1,num2str(lightness.comparisionLightness1(sceneIndex),'%.4f'));
+    stimuliSideBySideDisplayMaxWithLabels = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliSideBySideDisplayMaxWithLabels.pdf');
+    save2pdf(stimuliSideBySideDisplayMaxWithLabels);
     close;
 
-    recipeName = ['Stimuli-',num2str(sceneIndex)];
-    pathToWorkingFolder = fullfile(pathToFolder,'Working');
-    
-    pathToStandardFile = fullfile(pathToWorkingFolder,...
-        recipeName,'renderings','Mitsuba','standard.mat');
-    standardRadiance = parload(pathToStandardFile);
-    [sRGBstandardImage, ~, ~, ~] = rtbMultispectralToSRGB(standardRadiance, ...
+    %% save the individual unscaled images
+    hFig = figure();
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
+    image(uint8(sRGBstandardDisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    standardDisplayMax = fullfile(pathToWorkingFolder,...
+        recipeName,'images','standardDisplayMax.pdf');
+    set(gcf,'PaperPositionMode','auto');
+    save2pdf(standardDisplayMax);
+    close;
+
+    hFig = figure();
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
+    image(uint8(sRGBComparision1DisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    comparision1DisplayMax = fullfile(pathToWorkingFolder,...
+        recipeName,'images','comparision1DisplayMax.pdf');
+    set(gcf,'PaperPositionMode','auto');
+    save2pdf(comparision1DisplayMax);
+    close;
+
+    hFig = figure();
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
+    image(uint8(sRGBComparision2DisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    comparision2DisplayMax = fullfile(pathToWorkingFolder,...
+        recipeName,'images','comparision2DisplayMax.pdf');
+    set(gcf,'PaperPositionMode','auto');
+    save2pdf(comparision2DisplayMax);
+    close;
+
+    %% make sRGB images with common scaling
+    [sRGBstandardCommonScale, ~, ~, ~] = rtbMultispectralToSRGB(standardRadiance, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
     
-    pathToComparision1File = fullfile(pathToWorkingFolder,...
-        recipeName,'renderings','Mitsuba','comparision1.mat');
-    Comparision1File = parload(pathToComparision1File);
-    [sRGBComparision1Image, ~, ~, ~] = rtbMultispectralToSRGB(Comparision1File, ...
+    [sRGBComparision1CommonScale, ~, ~, ~] = rtbMultispectralToSRGB(Comparision1File, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
     
-    pathToComparision2File = fullfile(pathToWorkingFolder,...
-        recipeName,'renderings','Mitsuba','comparision2.mat');
-    Comparision2File = parload(pathToComparision2File);
-    [sRGBComparision2Image, ~, ~, ~] = rtbMultispectralToSRGB(Comparision2File, ...
+    [sRGBComparision2CommonScale, ~, ~, ~] = rtbMultispectralToSRGB(Comparision2File, ...
         [400,10,31], 'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
     
-%% Save the individual scaled iamges and the scaled stimuli for experiment
+%% Save stimuli with common scale, standard on top, two comparision on bottom side by side
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 440], 'Visible', 'off');
     
     standard = axes(hFig,'units','pixels','position',[180 240 240 160]);
-    image(standard,uint8(sRGBstandardImage));
+    image(standard,uint8(sRGBstandardCommonScale));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision1 = axes(hFig,'units','pixels','position',[40 40 240 160]);
-    image(comparision1,uint8(sRGBComparision1Image));
+    image(comparision1,uint8(sRGBComparision1CommonScale));
     set(gca,'xtick',[],'ytick',[]);
     
     comparision2 = axes(hFig,'units','pixels','position',[320 40 240 160]);
-    image(comparision2,uint8(sRGBComparision2Image));
+    image(comparision2,uint8(sRGBComparision2CommonScale));
     set(gca,'xtick',[],'ytick',[]);
 
-    scaledStimuli = fullfile(pathToWorkingFolder,...
-        recipeName,'images','scaledStimuli.pdf');
+    stimuliCommonScale = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliCommonScale.pdf');
     set(gcf,'PaperPositionMode','auto');
-    save2pdf(scaledStimuli);
+    save2pdf(stimuliCommonScale);
 
     xlabel(standard,num2str(lightness.standardLightness(sceneIndex),'%.4f'));
     xlabel(comparision1,num2str(lightness.comparisionLightness1(sceneIndex),'%.4f'));
     xlabel(comparision2,num2str(lightness.comparisionLightness2(sceneIndex),'%.4f'));
-    scaledImagesWithLabels = fullfile(pathToWorkingFolder,...
-        recipeName,'images','scaledStimuliWithLabels.pdf');
-    save2pdf(scaledImagesWithLabels);
+    stimuliCommonScaleWithLabels = fullfile(pathToWorkingFolder,...
+        recipeName,'images','stimuliCommonScaleWithLabels.pdf');
+    save2pdf(stimuliCommonScaleWithLabels);
 
     close;
-        
-    hFig = figure();
-    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
-    image(uint8(sRGBstandardImage));
-    set(gca,'xtick',[],'ytick',[]);
-    standardImage = fullfile(pathToWorkingFolder,...
-        recipeName,'images','standardImage.pdf');
-    set(gcf,'PaperPositionMode','auto');
-    save2pdf(standardImage);
-    close;
 
+    %% Save individual scaled images
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
-    image(uint8(sRGBComparision1Image));
+    image(uint8(sRGBstandardCommonScale));
     set(gca,'xtick',[],'ytick',[]);
-    comparision1Image = fullfile(pathToWorkingFolder,...
-        recipeName,'images','comparision1Image.pdf');
+    standardCommonScale = fullfile(pathToWorkingFolder,...
+        recipeName,'images','standardCommonScale.pdf');
     set(gcf,'PaperPositionMode','auto');
-    save2pdf(comparision1Image);
+    save2pdf(standardCommonScale);
     close;
 
     hFig = figure();
     set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
-    image(uint8(sRGBComparision2Image));
+    image(uint8(sRGBComparision1DisplayMax));
     set(gca,'xtick',[],'ytick',[]);
-    comparision2Image = fullfile(pathToWorkingFolder,...
-        recipeName,'images','comparision2Image.pdf');
+    comparision1CommonScale = fullfile(pathToWorkingFolder,...
+        recipeName,'images','comparision1CommonScale.pdf');
     set(gcf,'PaperPositionMode','auto');
-    save2pdf(comparision2Image);
+    save2pdf(comparision1CommonScale);
+    close;
+
+    hFig = figure();
+    set(hFig,'units','pixels', 'Position', [1 1 600 400], 'Visible', 'off');
+    image(uint8(sRGBComparision2DisplayMax));
+    set(gca,'xtick',[],'ytick',[]);
+    comparision2CommonScale = fullfile(pathToWorkingFolder,...
+        recipeName,'images','comparision2CommonScale.pdf');
+    set(gcf,'PaperPositionMode','auto');
+    save2pdf(comparision2CommonScale);
     close;
 end
