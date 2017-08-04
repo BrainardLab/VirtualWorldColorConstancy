@@ -3,7 +3,7 @@ function makeSameShapeReflectanceForExperiment(standard, comparision1, comparisi
 %
 %
 % Generate surface reflectance spectra of same shape at specified luminance
-% levels, making sure that the reflectance at every wavelength is lower 
+% levels, making sure that the reflectance at every wavelength is lower
 % than 1.
 %
 % 07/19/2017 vs  wrote it.
@@ -58,15 +58,15 @@ if ~exist(folderToStore)
     mkdir(folderToStore);
 end
 
-OK = false;
-while (~OK)
-    ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-    theReflectance = B*ran_wgts+sur_mean;
-    theLightToEye = theIlluminant.*theReflectance;
-    theLuminance = theLuminanceSensitivity*theLightToEye;
-    
-    for i = 1:length(standard)
-        % Make the standard reflectance 
+for i = 1:length(standard)
+    OK = false;
+    while (~OK)
+        ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
+        theReflectance = B*ran_wgts+sur_mean;
+        theLightToEye = theIlluminant.*theReflectance;
+        theLuminance = theLuminanceSensitivity*theLightToEye;
+        
+        % Make the standard reflectance
         theLuminanceTarget = standard(i);
         scaleFactor = theLuminanceTarget / theLuminance;
         theReflectanceScaled = scaleFactor * theReflectance;
@@ -95,7 +95,7 @@ while (~OK)
         fid = fopen(fullfile(folderToStore,reflectanceName),'w');
         fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
         fclose(fid);
-
+        
         % Make comparision 2
         theLuminanceTarget = comparision2(i);
         scaleFactor = theLuminanceTarget / theLuminance;
@@ -110,5 +110,5 @@ while (~OK)
         fid = fopen(fullfile(folderToStore,reflectanceName),'w');
         fprintf(fid,'%3d %3.6f\n',[theWavelengths,theReflectanceScaled]');
         fclose(fid);
-    end
+    end    
 end
