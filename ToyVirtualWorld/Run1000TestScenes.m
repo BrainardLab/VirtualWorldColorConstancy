@@ -47,7 +47,7 @@ function Run1000TestScenes
 
 % 07/08/17  dhb  Added a header comment, as far as I could.
 %           dhb  Change name to match conventions of this project.
-% 07/09/17  VS  Added more comments
+% 07/09/17  VS   Added more comments
 
 RunToyVirtualWorldRecipes('outputName','Set2Images1000Rotations10',...
     'imageWidth',320,...
