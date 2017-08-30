@@ -1,6 +1,9 @@
 function makeFigureForVisualization(coneResponse,archiveBase,workingFolder)
 
-% analysis params
+% This funciton is used with the ConeResponseToyVirtualWorldRecipes
+% function to make pdf files that give the summary of the images generated
+% in each recipe. 
+
 toneMapFactor = 10;
 isScale = true;
 filterWidth = 7;

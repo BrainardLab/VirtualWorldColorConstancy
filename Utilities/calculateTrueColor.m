@@ -1,11 +1,23 @@
 function trueColor = calculateTrueColor(targetLuminanceLevel, reflectanceNumber, recipeConds)
 
-% This function calcualtes the hue of the target material given the
-% luminance level and the reflectance number. The corresponding file is
-% read from the VirtualWorldColorConstancy/Resources/Reflectance folder and
-% the hue under standard D65 illumination is returned.
+% trueColor = calculateTrueColor(targetLuminanceLevel, reflectanceNumber, recipeConds)
 %
-% trueHue = calculateTrueHue(0.4, 501);
+% Usage: 
+%     trueHue = calculateTrueColor(0.4, 501);
+%
+% Description:
+%     This function calcualtes the color of the target material given the
+%     luminance level and the reflectance number. The corresponding file is
+%     read from the 
+%     VirtualWorldColorConstancy/Resources/Reflectance/TargetObjects folder
+%
+% Input:
+%   targetLuminanceLevel = target luminance level of the file(scalar)
+%   reflectanceNumber = reflectance number of the file (integer)
+%   recipeConds = recipe conditions
+%
+% Output:
+%   trueColor = 1x3 vector with the standard color of the reflectance file
 %
 % 11/03/2016    VS wrote it
 

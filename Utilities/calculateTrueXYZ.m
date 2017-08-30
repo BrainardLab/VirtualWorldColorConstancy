@@ -1,14 +1,28 @@
 function trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder)
 
-% This function calcualtes the XYZ co ordiantes of the target material 
-% given the luminance level and the reflectance number. 
-% The corresponding file is read from the 
-% VirtualWorldColorConstancy/Resources/Reflectance folder and
-% the hue under standard D65 illumination is returned.
+% trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder)
 %
-% trueHue = calculateTrueXYZ(0.4, 501, );
+% Usage: 
+%     trueXYZ = calculateTrueXYZ(0.2, 1, pathToTargetReflectanceFolder)
+%
+% Description:
+%     This function calcualtes the true XYZ color lables of the target 
+%     materials given the luminance levels and the reflectance numbers. The
+%     funciton calculates the XYZ of all the files specified by the
+%     luminanceLevels and reflectanceNumbers and returns one matrix with
+%     all the XYZ valyues.
+%
+% Input:
+%   luminanceLevels = luminance levels for which the XYZ is calcualted
+%   reflectanceNumber = reflectance number for which the XYZ is calcualted
+%   pathToTargetReflectanceFolder = path to folder where the reflectance
+%                   sepctra is stored
+%
+% Output:
+%   trueXYZ = (luminanceLevels*reflectanceNumbers)x3 vector with the XYZ
 %
 % 04/06/2017    VS wrote it
+
 trueXYZ = zeros(3,length(luminanceLevels)*length(reflectanceNumbers));
 
 for ii = 1:length(luminanceLevels)

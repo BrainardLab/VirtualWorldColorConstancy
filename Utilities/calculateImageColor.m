@@ -1,8 +1,20 @@
 function imageColor = calculateImageColor(XYZImage)
-% This function calcualtes the luminance, chroma and the hue of every pixel
-% in the image fromt the XYZ values of the multispectral image provided as 
-% the input. We compare the XYZImage values to the XYZ of standard daylight
-% as a reference to obtain the imageHue
+% imageColor = calculateImageColor(XYZImage)
+%
+% Usage: 
+%     imageColor = calculateImageColor(XYZImage)
+%
+% Description:
+%     This function calcualtes the luminance, chroma and the hue of every 
+%     pixel in the image from the XYZ values of the multispectral image 
+%     provided as the input. We compare the XYZImage values to the XYZ of 
+%     standard daylight as a reference to obtain the imageHue.
+%
+% Input:
+%   XYZImage = ImageSz x ImageSz x 3 matrix of XYZ values
+%
+% Output:
+%   imageColor = ImageSz x ImageSz x 3 matrix of HSL values
 %
 % 11/03/2016    VS wrote it
 %

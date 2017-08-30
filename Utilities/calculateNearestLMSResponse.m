@@ -1,10 +1,28 @@
 function allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,howManyNN)
-
-% This funciton calculates the LMS cone response for the cones that are
-% closest to the center pixel. The cones are not guaranteed to be on the
-% target object.
-% 
-% numLMSCones = vector 
+%
+% CAUTION :: This function probably does not work now. This is because the
+% convention of the LMS positions was changed in the main file. Check
+% before using.
+%
+% allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,howManyNN)
+%
+% Usage: 
+%     allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,9)
+%
+% Description:
+%   This funciton calculates the LMS cone response for the cones that are
+%   closest to the center pixel. The cones are not guaranteed to be on the
+%   target object.
+%
+% Input:
+%   numLMSCones = 1 x 3 vector having the number of LMS cones
+%   allLMSPositions = positions of the cones
+%   allLMSResponses = LMS cone responses
+%   howManyNN = scalar number of nearest neighbors to get the cone responses from
+%
+% Output:
+%   allNNLMS = matrix with NN cone responses
+%
 %Allocate space
 allNNLMS = zeros(howManyNN*3,size(allLMSResponses,2));
 

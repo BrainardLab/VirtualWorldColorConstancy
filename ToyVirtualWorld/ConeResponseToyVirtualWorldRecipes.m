@@ -127,7 +127,6 @@ parfor ii = 1:nRecipes
         
         %% Represent the LMS response as a vector and save it for AMA
         numLMSCones(ii,:) = sum(coneResponse.coneIndicator);
-        %         [LMSResponseVector, LMSPositions] = ConeResponseVectorAMA(coneResponse);
         allLMSResponses(:,ii) = coneResponse.isomerizationsVector(:);
         allLMSPositions(:,:,ii) = coneResponse.conePositions;
         allLMSIndicator(:,:,ii) = coneResponse.coneIndicator;
@@ -189,10 +188,10 @@ numLMSCones=numLMSCones(1,:);
 allLMSPositions=allLMSPositions(:,:,1);
 coneRescalingFactors=coneRescalingFactors(:,1);
 allLMSIndicator = allLMSIndicator(:,:,1);
-allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
+% allNNLMS = calculateNearestLMSResponse(numLMSCones,allLMSPositions,allLMSResponses,3);
 
 
 save(fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'stimulusAMA.mat'),...
     'luminanceLevel','ctgInd','numLMSCones',...
-    'allNNLMS','allLMSResponses','allLMSPositions','coneRescalingFactors',...
+    'allLMSResponses','allLMSPositions','coneRescalingFactors',...
     'allDemosaicResponse','allLMSIndicator','trueXYZ','-v7.3');
