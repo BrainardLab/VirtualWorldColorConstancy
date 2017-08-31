@@ -1,5 +1,5 @@
 function MakeAllRecipesForStimuli(varargin)
-%% Make a set of comparison images for performing the threshold experiment
+% Make a set of standard and comparison images for performing the threshold experiment
 %
 % The idea here is to generate two comarison images for each standard image
 % that has been generate elsewhere. The recipe conditions should be the
