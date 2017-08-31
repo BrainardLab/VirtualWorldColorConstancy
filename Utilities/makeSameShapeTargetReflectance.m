@@ -1,10 +1,30 @@
 function makeSameShapeTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
-% makeSameShapeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+% makeSameShapeTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
 %
+% Usage: 
+%     makeSameShapeTargetReflectance([0.2 0.6], [1:5], 'ExampleFolderName')
 %
-% Generate surface reflectance spectra of same shape at specified luminance
-% levels, making sure that the reflectance at every wavelength is lower 
-% than 1.
+% Description:
+%    This function makes the reflectance spectra for the target objects of
+%    virtual world. We makes sure that all the spectra have the same shape.
+%
+%    The spectrum are generated using the nickerson and the 
+%    vrhel libraries. These libraries should be a part of
+%    RenderToolbox. To generate the spectra, we first find out the pricipal
+%    components of the spectra in the library. Then we choose the
+%    directions corresponding to the largest six eigenvalues. We project
+%    the spectra along these six directions and find out the mean and the
+%    variance of this distribution. These are then used along with a
+%    multinormal random distribution to generate new random spectra. The
+%    new spectra are scaled such that the luminance equals the desired
+%    luminance levels. Finally, we make sure that the reflectance spectra 
+%    values are between 0 and 1 at all frequencies.
+%
+% Input:
+%   luminanceLevels = luminance levels for which the spectra are generated
+%   reflectanceNumbers = reflectance numbers for naming the files
+%   folderToStore = folder where the new spectra should be stored
+%
 %
 % 07/19/2017 vs  wrote it.
 

@@ -1,8 +1,18 @@
 function makeFlatTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
-% makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+% makeFlatTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
 %
-% Generate reflectances at particluar luminance levels. The spectrum is
-% spectrally flat for each luminance level.
+% Usage: 
+%     makeFlatTargetReflectance([0.2 0.6], [1:5], targetObjectFolder);
+%
+% Description:
+%     Generate spectrally flat target object reflectance spectra at 
+%     particluar values of the luminance levels. 
+%
+% Input:
+%   luminanceLevels = luminance levels of the desired spectrum
+%   reflectanceNumbers = index to for filename at the desired luminanceLevel
+%   folderToStore = folder where the spectra should be stored
+%
 %
 % 02/02/2017 VS  Wrote it.
 

@@ -1,11 +1,19 @@
-function saveRecipesConditionsTogether(p)
-
-% This function saves the recipe conditions specified in the fieldNames
-% variable below and saves it to the Cases/Cases.txt file in the
-% VirtualWorldColorConstancy folder. 
-% If /Cases/Cases.txt does not exits this creates the corresponding file
-% and directory and saves the recipe data. Otherwise it appends the
-% information to the existing file.
+function saveRecipesConditionsTogether(parser)
+%saveRecipesConditionsTogether(parser)
+%
+% Usage: 
+%     saveRecipesConditionsTogether(parser)
+%
+% Description:
+%   This function saves the recipe conditions specified in the fieldNames
+%   variable below and saves it to the Cases/Cases.txt file in the
+%   VirtualWorldColorConstancy folder. 
+%   If /Cases/Cases.txt does not exits this creates the corresponding file
+%   and directory and saves the recipe data. Otherwise it appends the
+%   information to the existing file.
+%
+% Input:
+%   parser = struct with the recipe information
 %
 % Written by VS 02/02/2017
 
@@ -56,7 +64,7 @@ else
 end
 
 for numFields = 1 : numel(fieldNames)
-    subFields = p.Results.(fieldNames{numFields});
+    subFields = parser.Results.(fieldNames{numFields});
     switch fieldNames{numFields}
         case {'outputName'}
             fprintf(fid, '%20s\t', subFields);

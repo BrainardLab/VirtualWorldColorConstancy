@@ -1,19 +1,24 @@
 function makeScaledImagesForExperiment(outputName, nStimuli)
+% makeScaledImagesForExperiment(outputName, nStimuli)
 %
-% makeScaledImagesForExperiment(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeName)
+% Usage: 
+%   makeScaledImagesForExperiment('outputName',length(standardLightness))
 %
-% This function makes the images required for the psychophysics experiment.
-% We first find a common scale factor for the three images that will be 
-% presented at a time. This scale factor is used to produce the three sRGB 
-% images to be displayed on the screen. We also generate the individual 
-% sRGB images and the unscaled sRGB image. 
+% Description:
+%   This function makes the images required for the psychophysics 
+%   experiment. We first find a common scale factor for the three images 
+%   that will be presented on the screen. This scale factor is used to 
+%   produce the three sRGB images to be displayed on the screen. We also 
+%   generate the individual sRGB images and the unscaled sRGB image.
 %
-% The three images that will be displayed have the same scale. The scale
-% changes for every stimuli.
+%   The three images that will be displayed have the same scale. The scale
+%   changes for every set of stimuli.
 %
-% outputName: Name of parent fodler where the multispectral images.
-% nStimuli: Total number of stimuli stored in the parent folder.
-
+% Input:
+%   outputName: Name of parent fodler where the multispectral images.
+%   nStimuli: Total number of stimuli stored in the parent folder.
+%
+% VS wrote this
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
 hints.renderer = 'Mitsuba';

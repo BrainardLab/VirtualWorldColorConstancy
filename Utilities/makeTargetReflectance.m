@@ -1,8 +1,28 @@
 function makeTargetReflectance(luminanceLevels,reflectanceNumbers, folderToStore)
-% makeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+% makeTargetReflectance(luminanceLevels, reflectanceNumbers, folderToStore)
 %
-% Generate reflectances at particluar luminance levels, making sure that the
-% reflectance at every wavelength is lower than 1.
+% Usage: 
+%     makeTargetReflectance([0.2 0.6], [1:5], 'ExampleFolderName')
+%
+% Description:
+%    This function makes the reflectance spectra for the target objects of
+%    virtual world. The spectrum are generated using the nickerson and the 
+%    vrhel libraries. These libraries should be a part of
+%    RenderToolbox. To generate the spectra, we first find out the pricipal
+%    components of the spectra in the library. Then we choose the
+%    directions corresponding to the largest six eigenvalues. We project
+%    the spectra along these six directions and find out the mean and the
+%    variance of this distribution. These are then used along with a
+%    multinormal random distribution to generate new random spectra. The
+%    new spectra are scaled such that the luminance equals the desired
+%    luminance levels. Finally, we make sure that the reflectance spectra 
+%    values are between 0 and 1 at all frequencies.
+%
+% Input:
+%   luminanceLevels = luminance levels for which the spectra are generated
+%   reflectanceNumbers = reflectance numbers for naming the files
+%   folderToStore = folder where the new spectra should be stored
+%
 %
 % 8/10/16  vs, vs  Wrote it.
 

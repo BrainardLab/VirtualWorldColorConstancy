@@ -1,9 +1,27 @@
 function makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
-% makeIlluminants(nIlluminances, folderToStore)
+% makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
 %
-% This script generates the illuminants for the base scenes. The
-% illuminace spectra are generated using the library obtained from the
-% granada daylight spectra.
+% Usage: 
+%     makeIlluminants(10,'Illuminants', 10, 100);
+%
+% Description:
+%   This function generates the illuminants for the base scenes. The
+%   illuminace spectra are generated using the granada daylight library. We
+%   first rescale each spectrum by the mean value of the spectrum over its 
+%   wavelenght. Then we find the principal components of the rescaled 
+%   spectrum. We choose the directions corresponding to the six largest 
+%   eigenvalues. We sample new spectra from a multivariate random gaussian 
+%   whose mean and variance correspond to the projection of the rescaled
+%   spectra along the first six PCA directions. Finally each spectrum is
+%   rescaled by a random number.
+%
+% Input:
+%   nIlluminances = how many illuminants to generate
+%   folderToStore = fodler where the illuminants are stored
+%   minMeanIlluminantLevel = min value with which the spectrum is rescaled
+%   maxMeanIlluminantLevel = max value with which the spectrum is rescaled
+%
+% VS wrote this
 
 % Desired wl sampling
 rescaling = 1;  % O no rescaling

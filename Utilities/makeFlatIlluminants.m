@@ -1,7 +1,22 @@
 function makeFlatIlluminants(nIlluminances, folderToStore, minValue, maxValue)
-% makeFlatIlluminants(nIlluminances, folderToStore)
+
+% makeFlatIlluminants(nIlluminances, folderToStore, minValue, maxValue)
 %
-% This script generates spectrally flat illuminants for the base scenes.
+% Usage: 
+%     makeFlatIlluminants(100,pwd, 150, 150);
+%
+% Description:
+%     This script generates spectrally flat illuminants for the base scenes
+%
+% Input:
+%   nIlluminances = number of spectra to be generated
+%   folderToStore = folder where the spectra should be stored
+%   minValue = minimum value of the spectra
+%   maxValue = maximum value of the spectra
+%
+% VS wrote this
+%
+
 if ~exist(folderToStore)
     mkdir(folderToStore);
 end

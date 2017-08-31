@@ -1,10 +1,39 @@
 function makeSameShapeReflectanceForExperiment(standard, comparision1, comparision2, folderToStore)
-% makeSameShapeTargetReflectance(luminanceLevels,nSurfaceAtEachLuminace, folderToStore)
+% makeSameShapeReflectanceForExperiment(standard, comparision1, comparision2, folderToStore)
 %
+% Usage: 
+%     makeSameShapeReflectanceForExperiment([0.2 0.4] ,[0.3 0.6], [0.1 0.4], 'ExampleFolderName')
 %
-% Generate surface reflectance spectra of same shape at specified luminance
-% levels, making sure that the reflectance at every wavelength is lower
-% than 1.
+% Description:
+%     This function generates target object reflectances for the
+%     psychophysics experiment. It generates one set of standard
+%     reflectance spectra and two set of comparison reflectnace spectra.
+%     The function makes sure that the shape of spectra is the same at for
+%     each index of the standard and the comparisons, i.e., the first
+%     standard, the first comparison1 and first comparison 2 spetra have
+%     the same shape. Similarly for the second, third, etc. Thus the
+%     spectra differ only in their luminance levels
+%     The luminance levels at which the spectra the spectra are generated
+%     is provided as the input.
+%
+%    The spectrum are generated using the nickerson and the 
+%    vrhel libraries. These libraries should be a part of
+%    RenderToolbox. To generate the spectra, we first find out the pricipal
+%    components of the spectra in the library. Then we choose the
+%    directions corresponding to the largest six eigenvalues. We project
+%    the spectra along these six directions and find out the mean and the
+%    variance of this distribution. These are then used along with a
+%    multinormal random distribution to generate new random spectra. The
+%    new spectra are scaled such that the luminance equals the desired
+%    luminance levels. Finally, we make sure that the reflectance spectra 
+%    values are between 0 and 1 at all frequencies.
+%
+% Input:
+%   standard = luminance level values of standard spectra
+%   comparision1 = luminance level values of comparison 1 spectra
+%   comparision2 = luminance level values of comparison 2 spectra
+%   folderToStore = folder where the spectra should be stored
+%
 %
 % 07/19/2017 vs  wrote it.
 

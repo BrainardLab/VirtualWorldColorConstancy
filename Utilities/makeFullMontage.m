@@ -1,22 +1,21 @@
 function makeFullMontage(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeName)
+% makeFullMontage(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeConditions,varargin)
 %
-% makeFullMontageByCase(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeConditions,varargin)
+% Usage: 
+%     makeFullMontage(fullfile('/Volumes/OWSHD','Dropbox (Aguirre-Brainard Lab)','/IBIO_analysis/VirtualWorldColorConstancy/ExampleOutput'),[0.2 0.4 0.6], [1:5],[])
 %
-% This function returns the montage of full image, cropped image scaled and
-% the statistics of luminance, hue and saturation for the set of images
-% provided by the input
-% pathToFolder: The path to the job folder
-% luminanceLevels : The luminance levels to be used
-% reflectanceNumbers : the reflectance numbers to be used
-% RecipeConditions : The conditions used for this recipe, if left empty
-%                   this output will have unspecified for all the columns.
-%                   This should be given as a cell array with columns 
-% {'Base Scene', 'Target Object','Target position', 'Illuminant Position',...
-% 'Target Size', 'Illuminat Size', 'Other Object Spectra', 'Target Spectra',...
-% ' Illuminant Spectra '}
+% Description:
+%     This function returns the montage of full image, cropped image and 
+%     the scaled cropped image.
 %
-% Example: 
-% makeFullMontageByCase('/Volumes/OWSHD/Dropbox (Aguirre-Brainard Lab)/IBIO_analysis/VirtualWorldColorConstancy/FixedTargetShapeFixedIlluminantFixedBkGnd',[0.2:0.4/9:0.6],[1:5],25,[]);
+% Input:
+%   pathToFolder = path to the base folder that contains the working folder
+%   luminanceLevels = luminance levels for which the images are shown
+%   reflectanceNumber = reflectance numbers of the images that are shown
+%   RecipeName = Recipe name to set the title of the image
+%
+% VS wrote this
+%
 
 toneMapFactor = 0;
 
