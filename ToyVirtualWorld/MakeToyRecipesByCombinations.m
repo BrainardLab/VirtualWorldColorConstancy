@@ -158,7 +158,8 @@ else
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, 150, 150);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, , ...
+                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     end
 end
 
