@@ -19,17 +19,35 @@ function RunToyVirtualWorldRecipes(varargin)
 %   'imageHeight'  - MakeToyRecipesByCombinations height, Should be kept
 %                  small to keep redering time low for rejected recipes
 %   'cropImageHalfSize'  - crop size for MakeToyRecipesByCombinations
-%   'analyzeCropImageHalfSize' - crop image size for analysis, default is
-%                    50, twice of cropImageHalfSize default
+%   'nOtherObjectSurfaceReflectance' - Number of spectra to be generated
+%                   for choosing background surface reflectance (max 999)
 %   'luminanceLevels' - Luminance levels of target object
 %   'reflectanceNumbers' - A row vetor containing Reflectance Numbers of 
 %                   target object. These are just dummy variables to give a
 %                   unique name to each random spectra.
-%   'mosaicHalfSize' - Cone mosaic half size
+%   'nInsertedLights' - Number of inserted lights
+%   'nInsertObjects' - Number of inserted objects (other than target object)
+%   'maxAttempts' - maximum number of attempts to find the right recipe
+%   'targetPixelThresholdMin' - minimum fraction of target pixels that
+%                 should be present in the cropped image.
+%   'targetPixelThresholdMax' - maximum fraction of target pixels that
+%                 should be present in the cropped image.
 %   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
 %                   background objects is random or not. Default true
 %   'illuminantSpectraRandom' - boolean to specify if spectra of 
 %                   illuminant is random or not. Default true
+%   'illuminantSpectrumNotFlat' - boolean to specify illumination spectra 
+%                   shape to be not flat, i.e. random, (true= random)
+%   'minMeanIlluminantLevel' - Min of mean value of ilumination spectrum
+%   'maxMeanIlluminantLevel' - Max of mean value of ilumination spectrum
+%   'targetSpectrumNotFlat' - boolean to specify arget spectra 
+%                   shape to be not flat, i.e. random, (true= random)
+%   'allTargetSpectrumSameShape' - boolean to specify all target spectrum 
+%                   to be of same shape
+%   'targetReflectanceScaledCopies' - boolean to specify target reflectance
+%                   shape to be same at each reflectance number. This will
+%                   create multiple hue, but the same hue will be repeated
+%                   at each luminance level
 %   'lightPositionRandom' - boolean to specify illuminant position is fixed
 %                   or not. Default is true. False will only work for 
 %                   library-bigball case.
@@ -44,6 +62,7 @@ function RunToyVirtualWorldRecipes(varargin)
 %                  base scenes is used for each rendering
 %   'shapeSet'  - Shapes of the object that can be used for target
 %                      object, illuminant and other inserted objects
+%   'mosaicHalfSize' - Cone mosaic half size
 %   'nRandomRotations'  - Number of random rotations applied to the
 %                   rendered image to get new set of cone responses
 
@@ -71,7 +90,8 @@ parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('minMeanIlluminantLevel', 10, @isnumeric);
 parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
-parser.addParameter('targetSpectrumSameShape', false, @islogical);
+parser.addParameter('allTargetSpectrumSameShape', false, @islogical);
+parser.addParameter('targetReflectanceScaledCopies', false, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -121,7 +141,8 @@ try
         'minMeanIlluminantLevel', parser.Results.minMeanIlluminantLevel,...
         'maxMeanIlluminantLevel', parser.Results.maxMeanIlluminantLevel,...
         'targetSpectrumNotFlat',parser.Results.targetSpectrumNotFlat,...
-        'targetSpectrumSameShape',parser.Results.targetSpectrumSameShape,...
+        'allTargetSpectrumSameShape',parser.Results.allTargetSpectrumSameShape,...
+        'targetReflectanceScaledCopies',parser.Results.targetReflectanceScaledCopies,...
         'lightPositionRandom',parser.Results.lightPositionRandom,...
         'lightScaleRandom',parser.Results.lightScaleRandom,...
         'targetPositionRandom',parser.Results.targetPositionRandom,...
