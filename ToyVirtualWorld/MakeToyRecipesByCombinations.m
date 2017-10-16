@@ -51,6 +51,8 @@ function MakeToyRecipesByCombinations(varargin)
 %                   library-bigball case.
 %   'targetScaleRandom' - boolean to specify target scale/size is fixed or
 %                   not. Default is true.
+%   'targetRotationRandom' - boolean to specify target angular position is 
+%                   fixed or not. Default is true. False will only work for 
 %   'baseSceneSet'  - Base scenes to be used for renderings. One of these
 %                  base scenes is used for each rendering
 %   'shapeSet'  - Shapes of the object that can be used for target
@@ -85,6 +87,7 @@ parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
 parser.addParameter('targetScaleRandom', true, @islogical);
+parser.addParameter('targetRotationRandom', true, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -293,26 +296,34 @@ parfor sceneIndex = 1:nScenes
             
             targetShape = shapes{targetShapeIndex};
             
-            targetRotationX = randi([0, 359]);
-            targetRotationY = randi([0, 359]);
-            targetRotationZ = randi([0, 359]);
+            if parser.Results.targetPositionRandom
+                targetRotationX = randi([0, 359]);
+                targetRotationY = randi([0, 359]);
+                targetRotationZ = randi([0, 359]);
+            else
+                % this was chosen for the mill-ringtoy case by Vijay Singh
+                targetRotationX = 0;
+                targetRotationY = 233;
+                targetRotationZ = 183;
+            end
+
             if parser.Results.targetPositionRandom
                 targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
             else
                 % using fixed object position that works for the Library base scene
 %              targetPosition = [ -0.010709 4.927981 0.482899]; % BigBall-Library Case 1  
-             targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
+%              targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
 %              targetPosition = [ -0.510709 0.0527981 0.482899]; % BigBall-Library Case 3
-%              targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
+             targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
             end
             
             if parser.Results.targetScaleRandom
                 targetScale = 0.3 + rand()/2;
             else
 %               targetScale =  1; % BigBall-Library Case 1  
-              targetScale =  1; % BigBall-Library Case 2  
+%               targetScale =  1; % BigBall-Library Case 2  
 %               targetScale =  0.5; % BigBall-Library Case 3
-%               targetScale =  1; % BigBall-Mill Case 4
+              targetScale =  1; % BigBall-Mill Case 4
             end            
             
             transformation = mexximpScale(targetScale) ...

@@ -58,6 +58,9 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   library-bigball case.
 %   'targetScaleRandom' - boolean to specify target scale/size is fixed or 
 %                   not. Default is true.
+%   'targetRotationRandom' - boolean to specify target angular position is 
+%                   fixed or not. Default is true. False will only work for 
+%                   Mill-Ringtoy case.
 %   'baseSceneSet'  - Base scenes to be used for renderings. One of these
 %                  base scenes is used for each rendering
 %   'shapeSet'  - Shapes of the object that can be used for target
@@ -96,6 +99,7 @@ parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
 parser.addParameter('targetScaleRandom', true, @islogical);
+parser.addParameter('targetRotationRandom', true, @islogical);
 parser.addParameter('shapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
@@ -147,6 +151,7 @@ try
         'lightScaleRandom',parser.Results.lightScaleRandom,...
         'targetPositionRandom',parser.Results.targetPositionRandom,...
         'targetScaleRandom',parser.Results.targetScaleRandom,...
+        'targetRotationRandom',parser.Results.targetRotationRandom,...
         'shapeSet', parser.Results.shapeSet, ...
         'baseSceneSet', parser.Results.baseSceneSet);
         
