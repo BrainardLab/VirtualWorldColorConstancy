@@ -1,8 +1,18 @@
 function PutCroppedImagesTogether(varargin)
-%% Locate, unpack, and execute many WardLand recipes created earlier.
+% PutCroppedImagesTogether('outputName','FixedTargetShapeFixedIlluminantFixedBkGnd')
 %
-% Use this script to get cone responses.
+% USAGE: This function makes a struct with fields multispectralImages,
+%   lightnessLevels, reflectanceNumbers and some other filename informations
+%   about the images for a particular case and saves the struct as a .mat
+%   file in the parent directory provided in the input field 'outputname'.
+% Input: 
+%    outputName     : Name of base folder that contains the stimuli
+%    luminanceLevels: The luminance levels to make the struct
+%    reflectanceNumbers : Reflectance number of the image files
 %
+
+% Oct 16 2017, VS wrote this
+
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
