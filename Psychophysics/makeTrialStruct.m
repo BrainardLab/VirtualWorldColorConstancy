@@ -1,5 +1,5 @@
 function S = makeTrialStruct(S, varargin)
-% Make the structure for doing experiment trials
+% Make the structure for doing color comparison experiment
 %
 % Usage: 
 %   makeTrialStruct(S);
@@ -7,14 +7,15 @@ function S = makeTrialStruct(S, varargin)
 % Description:
 %   Use the strucutre with fields multispectral image, lightness levels and
 %   reflectance number, (and maybe additional fields), to create a
-%   strucutre for running the experiment. This will return a struct with
-%   additional fields, like the standard and comparison lightness levels.
-%   The images that would be used in each trail. The lightness levels of
-%   the standard and comparison images for each trail, etc.
+%   strucutre for running the experiment. This will return the same struct 
+%   with additional fields, like the standard and comparison lightness 
+%   levels. The images that would be used in each trail. The lightness 
+%   levels of the standard and comparison images for each trail, etc.
 %
 % Input:
 %    S : Struct with fields multispectralImage, lightnessLevels and
 %           reflectanceNumbers
+%  Optional:
 %    nTrails : Number of trials
 %    stdY : Standard lightness level
 %    cmpY : Comparison lightness level
@@ -24,9 +25,9 @@ function S = makeTrialStruct(S, varargin)
 %    trialCmpIndex, stdY, cmpY, stdYInTrial, cmpYInTrial.
 %
 % S.nTrials : Number of trials
-% S.trialStdIndex : Index of standard image used in the trial
-% S.trialCmpIndex : Index of comparison image used in the trial, should be
-%               same as S.trailStdIndex 
+% S.trialStdIndex : Index of standard image to be used in the trials
+% S.trialCmpIndex : Index of comparison image to be used in the trial, 
+%               should be the same as S.trailStdIndex 
 % S.stdY : standard lightness level
 % S.cmpY : comparison lightness levels
 % S.stdYInTrial : std lightness for each trial
@@ -44,7 +45,7 @@ nTrials = parser.Results.nTrials;
 stdY = parser.Results.stdY;
 cmpY = parser.Results.cmpY;
 
-smallNumber = 10^(-6);
+smallNumber = 10^(-4);
 
 S.stdY = stdY;
 S.cmpY = cmpY;
