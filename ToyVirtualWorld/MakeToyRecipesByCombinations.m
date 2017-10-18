@@ -55,8 +55,8 @@ function MakeToyRecipesByCombinations(varargin)
 %                   fixed or not. Default is true. False will only work for 
 %   'baseSceneSet'  - Base scenes to be used for renderings. One of these
 %                  base scenes is used for each rendering
-%   'shapeSet'  - Shapes of the object that can be used for target
-%                      object, illuminant and other inserted objects
+%   'objectShapeSet'  - Shapes of the target object other inserted objects
+%   'lightShapeSet'  - Shapes of the inserted illuminants
 
 %% Want each run to start with its own random seed
 rng('shuffle');
@@ -88,7 +88,9 @@ parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
 parser.addParameter('targetScaleRandom', true, @islogical);
 parser.addParameter('targetRotationRandom', true, @islogical);
-parser.addParameter('shapeSet', ...
+parser.addParameter('objectShapeSet', ...
+    {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
+parser.addParameter('lightShapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
     {'CheckerBoard', 'IndoorPlant', 'Library', 'Mill', 'TableChairs', 'Warehouse'}, @iscellstr);
@@ -102,7 +104,8 @@ reflectanceNumbers = parser.Results.reflectanceNumbers;
 maxAttempts = parser.Results.maxAttempts;
 targetPixelThresholdMin = parser.Results.targetPixelThresholdMin;
 targetPixelThresholdMax = parser.Results.targetPixelThresholdMax;
-shapeSet = parser.Results.shapeSet;
+objectShapeSet = parser.Results.objectShapeSet;
+lightShapeSet = parser.Results.lightShapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
@@ -148,12 +151,22 @@ end
 
 %% Choose shapes to insert.
 
-% this will load models, like above
-nShapes = numel(shapeSet);
-shapes = cell(1, nShapes);
-for ss = 1:nShapes
-    name = shapeSet{ss};
-    shapes{ss} = VseModel.fromAsset('Objects', name, ...
+% this will load object models, like above
+nObjectShapes = numel(objectShapeSet);
+objectShapes = cell(1, nObjectShapes);
+for ss = 1:nObjectShapes
+    name = objectShapeSet{ss};
+    objectShapes{ss} = VseModel.fromAsset('Objects', name, ...
+        'aioPrefs', aioPrefs, ...
+        'nameFilter', 'blend$');
+end
+
+% this will load light models, like above
+nLightShapes = numel(lightShapeSet);
+lightShapes = cell(1, nLightShapes);
+for ss = 1:nLightShapes
+    name = lightShapeSet{ss};
+    lightShapes{ss} = VseModel.fromAsset('Objects', name, ...
         'aioPrefs', aioPrefs, ...
         'nameFilter', 'blend$');
 end
@@ -277,8 +290,8 @@ parfor sceneIndex = 1:nScenes
             
             
             %% Pick the target object randomly.
-            targetShapeIndex = randi(nShapes, 1);
-            targetShapeName = shapeSet{targetShapeIndex};
+            targetShapeIndex = randi(nObjectShapes, 1);
+            targetShapeName = objectShapeSet{targetShapeIndex};
             
             %% Choose a unique name for this recipe.
             recipeName = FormatRecipeName( ...
@@ -289,12 +302,12 @@ parfor sceneIndex = 1:nScenes
             workingRecord.hints.recipeName = recipeName;
             
             %% Pick other objects and Light shapes to insert
-            shapeIndexes = randi(nShapes, [1, nInsertObjects+1]);
+            shapeIndexes = randi(nObjectShapes, [1, nInsertObjects+1]);
             
             %% For each shape insert, choose a random spatial transformation.
             insertShapes = cell(1, nInsertObjects+1);
             
-            targetShape = shapes{targetShapeIndex};
+            targetShape = objectShapes{targetShapeIndex};
             
             if parser.Results.targetPositionRandom
                 targetRotationX = randi([0, 359]);
@@ -364,7 +377,7 @@ parfor sceneIndex = 1:nScenes
 
             
             for sss = 2:(nInsertObjects+1)
-                shape = shapes{shapeIndexes(sss)};
+                shape = objectShapes{shapeIndexes(sss)};
                 
                 rotationX = randi([0, 359]);
                 rotationY = randi([0, 359]);
@@ -413,11 +426,11 @@ parfor sceneIndex = 1:nScenes
             sceneData.model.rootNode.children(isCameraNode).transformation = lookAt;
             
             %% For each light insert, choose a random spatial transformation.
-            lightIndexes = randi(nShapes, [1, nInsertedLights]);
+            lightIndexes = randi(nLightShapes, [1, nInsertedLights]);
             
             insertLights = cell(1, nInsertedLights);
             for ll = 1:nInsertedLights
-                light = shapes{lightIndexes(ll)};
+                light = lightShapes{lightIndexes(ll)};
                 
                 rotationX = randi([0, 359]);
                 rotationY = randi([0, 359]);

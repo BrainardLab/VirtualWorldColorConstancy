@@ -27,7 +27,8 @@ filename = fullfile(getpref(projectName, 'baseFolder'),'Cases','Cases.txt');
 fieldNames = {
     'outputName'
     'baseSceneSet'
-    'shapeSet'
+    'objectShapeSet'
+    'lightShapeSet'
     'illuminantSpectraRandom'
     'otherObjectReflectanceRandom'    
     'lightPositionRandom'
@@ -74,11 +75,17 @@ for numFields = 1 : numel(fieldNames)
             else
                 fprintf(fid, '%20s\t', [num2str(numel(subFields)),' Scenes']);
             end
-        case {'shapeSet'}
+        case {'objectShapeSet'}
             if (numel(subFields) == 1)
                 fprintf(fid, '%20s\t', subFields{:});
             else
                 fprintf(fid, '%20s\t', [num2str(numel(subFields)),' Objects']);
+            end
+        case {'lightShapeSet'}
+            if (numel(subFields) == 1)
+                fprintf(fid, '%20s\t', subFields{:});
+            else
+                fprintf(fid, '%20s\t', [num2str(numel(subFields)),' Light']);
             end
         case {'luminanceLevels', 'reflectanceNumbers'}
             subFields = num2str(subFields);
