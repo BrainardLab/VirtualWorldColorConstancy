@@ -30,7 +30,7 @@ shapeSet = parser.Results.shapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 
 %% Overall Setup.
-
+smallNumber = 10^(-4);
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
 recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Originals');
@@ -71,6 +71,8 @@ S = struct(...
     'multispectralImage',zeros(31,(2*cropImageHalfSize+1)^2,nScenes),...
     'luminanceLevels', zeros(1,nScenes),...
     'reflectanceNumber', zeros(1,nScenes),...
+    'uniqueLuminanceLevels', [],...
+    'ctgInd', zeros(1,nScenes),...
     'cropImageSize',2*cropImageHalfSize+1,...
     'wavelengths',[400 10 31]);
 
@@ -105,6 +107,10 @@ parfor ii = 1:nScenes
     
 end
 S.luminanceLevels = round(luminanceLevels*10000)/10000;
+S.uniqueLuminanceLevels = unique(S.luminanceLevels);
+for ii = 1:10
+    S.ctgInd(abs(S.luminanceLevels-S.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
+end
 S.reflectanceNumber = reflectanceNumber;
 S.multispectralImage = multispectralImage;
 S.baseFolderName = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName);

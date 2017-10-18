@@ -65,5 +65,7 @@ for ii = 1 : nTrials
     S.trialCmpIndex(ii) = indexOfCmpImages(tempStdIndex);
     S.cmpYInTrial(ii) = S.luminanceLevels(S.trialCmpIndex(ii));
 end
-    
+    S.cmpInterval = zeros(1,nTrials);
+    tempIndex = randperm(nTrials);
+    S.cmpInterval(tempIndex(1:ceil(nTrials/2))) = 1;
 
