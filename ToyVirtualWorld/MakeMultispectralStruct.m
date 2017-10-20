@@ -2,11 +2,11 @@ function MakeMultispectralStruct(varargin)
 %%MakeMultispectralStruct Make the struct with cropped multispctral images
 %
 % Usage:
-%   makeMultispectralStruct('outputName','FixedTargetShapeFixedIlluminantFixedBkGnd')
+%   makeMultispectralStruct('folderName','FixedTargetShapeFixedIlluminantFixedBkGnd')
 %
 % Description: 
 %   This function makes a struct with fields multispectralImages,
-%   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, ctgInd,
+%   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, luminanceCategoryIndex,
 %   cropSize, wavelengths, fullImageHeight, fullImageWidth, baseFolderName,
 %   and pathToFullMultispectralimage. The struct is saved as a .mat
 %   file in the parent directory provided in the input field 'outputname', which
@@ -19,36 +19,36 @@ function MakeMultispectralStruct(varargin)
 %    None.
 %
 % Optional key/value pairs:
-%    'outputFolder' : (string) Name of output folder inside of the base dir (default 'ExampleOutput').
+%    'folderName' : (string) Name of folder inside of the base dir from where the images will be selected (default 'ExampleOutput').
 %    'luminanceLevels' : (numerical vector) Luminance levels of images to be selected for struct (defalult [0.2 0.6])
 %    'reflectanceNumbers' : (scalar) reflectnace numbers to be used for struct (default [1 2])
 %    'cropImageHalfSize : (integer) Size of cropped image (default 25)
-%    'shapeSet': Name of target object shape (default '\w+')
+%    'targetShape': Name of target object targetShape (default '\w+')
 %    'baseSceneSet': Name of baseScene (default '\w+')
 
 % Oct 16 2017, VS wrote this
 
 %% Get inputs and defaults.
 parser = inputParser();
-parser.addParameter('outputName','ExampleOutput',@ischar);
+parser.addParameter('folderName','ExampleOutput',@ischar);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
-parser.addParameter('shape', '\w+', @ischar);
+parser.addParameter('targetShape', '\w+', @ischar);
 parser.addParameter('baseScene', '\w+', @ischar);
 parser.parse(varargin{:});
 
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
-shape = parser.Results.shape;
+targetShape = parser.Results.targetShape;
 baseScene = parser.Results.baseScene;
 
 %% Overall Setup.
 smallNumber = 10^(-4);
 % location of packed-up recipes
 projectName = 'VirtualWorldColorConstancy';
-recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName, 'Originals');
+recipeFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.folderName, 'Originals');
 if ~exist(recipeFolder, 'dir')
     disp(['Recipe folder not found: ' recipeFolder]);
 end
@@ -58,7 +58,7 @@ end
 %     parser.Results.outputName,'Data','Reflectances','TargetObjects');
 
 % edit some batch renderer options
-hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Working');
+hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.folderName,'Working');
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nReflectances = length(reflectanceNumbers);
@@ -82,23 +82,23 @@ for ll = 1:nLuminanceLevels
 end
 
 % Outputs for AMA
-S = struct(...
+multispectralStruct = struct(...
     'multispectralImage',zeros(31,(2*cropImageHalfSize+1)^2,nScenes),...
     'luminanceLevels', zeros(1,nScenes),...
     'reflectanceNumber', zeros(1,nScenes),...
     'uniqueLuminanceLevels', [],...
-    'ctgInd', zeros(1,nScenes),...
+    'luminanceCategoryIndex', zeros(1,nScenes),...
     'cropImageSize',2*cropImageHalfSize+1,...
     'wavelengths',[400 10 31]);
 
 recipeName = FormatRecipeName(targetLuminanceLevel(1), reflectanceNumber(1), ...
-    shape, baseScene);
+    targetShape, baseScene);
 recipePattern = fullfile(recipeName,'ConeResponse.mat');
 pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
 tempRecipe = parloadConeResponse(pathToRecipe{1});
 
-S.fullImageHeight = tempRecipe.input.hints.imageHeight;
-S.fullImageWidth = tempRecipe.input.hints.imageWidth;
+multispectralStruct.fullImageHeight = tempRecipe.input.hints.imageHeight;
+multispectralStruct.fullImageWidth = tempRecipe.input.hints.imageWidth;
 
 parfor ii = 1:nScenes
     workingRecord = sceneRecord(ii);
@@ -108,7 +108,7 @@ parfor ii = 1:nScenes
         try
     % get the recipe
     recipeName = FormatRecipeName(targetLuminanceLevel, tempReflectanceNumber, ...
-        shape, baseScene);
+        targetShape, baseScene);
     recipePattern = fullfile(recipeName,'ConeResponse.mat');
     pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
     recipe = parloadConeResponse(pathToRecipe{1});
@@ -121,16 +121,16 @@ parfor ii = 1:nScenes
         end
     
 end
-S.luminanceLevels = round(luminanceLevels*10000)/10000;
-S.uniqueLuminanceLevels = unique(S.luminanceLevels);
+multispectralStruct.luminanceLevels = round(luminanceLevels*10000)/10000;
+multispectralStruct.uniqueLuminanceLevels = unique(multispectralStruct.luminanceLevels);
 for ii = 1:10
-    S.ctgInd(abs(S.luminanceLevels-S.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
+    multispectralStruct.luminanceCategoryIndex(abs(multispectralStruct.luminanceLevels-multispectralStruct.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
 end
-S.reflectanceNumber = reflectanceNumber;
-S.multispectralImage = multispectralImage;
-S.baseFolderName = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName);
-S.pathToFullMultispectralImage = pathToFullImage;
+multispectralStruct.reflectanceNumber = reflectanceNumber;
+multispectralStruct.multispectralImage = multispectralImage;
+multispectralStruct.baseFolderName = fullfile(getpref(projectName, 'baseFolder'),parser.Results.folderName);
+multispectralStruct.pathToFullMultispectralImage = pathToFullImage;
 
 save(fullfile(getpref(projectName, 'baseFolder'),...
-    parser.Results.outputName,'multispectralStruct.mat'),...
-    'S','-v7.3');
+    parser.Results.folderName,'multispectralStruct.mat'),...
+    'multispectralStruct','-v7.3');
