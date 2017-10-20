@@ -1,15 +1,29 @@
-function PutCroppedImagesTogether(varargin)
-% PutCroppedImagesTogether('outputName','FixedTargetShapeFixedIlluminantFixedBkGnd')
+function makeMultispectralStruct(varargin)
+%%makeMultispectralStruct Make the struct with cropped multispctral images
 %
-% USAGE: This function makes a struct with fields multispectralImages,
-%   lightnessLevels, reflectanceNumbers and some other filename informations
-%   about the images for a particular case and saves the struct as a .mat
+% Usage:
+%   makeMultispectralStruct('outputName','FixedTargetShapeFixedIlluminantFixedBkGnd')
+%
+% Description: 
+%   This function makes a struct with fields multispectralImages,
+%   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, ctgInd,
+%   cropSize, wavelengths, fullImageHeight, fullImageWidth, baseFolderName,
+%   and pathToFullMultispectralimage. The struct is saved as a .mat
 %   file in the parent directory provided in the input field 'outputname'.
+%
 % Input:
 %    outputName     : Name of base folder that contains the stimuli
 %    luminanceLevels: The luminance levels to make the struct
 %    reflectanceNumbers : Reflectance number of the image files
 %
+% Output:
+%
+% Optional key/value pairs:
+%    'luminanceLevels' : (numerical vector) Luminance levels of images to be selected for struct (defalult [0.2 0.6])
+%    'reflectanceNumbers' : (scalar) reflectnace numbers to be used for struct (default [1 2])
+%    'cropImageHalfSize : (integer) Size of cropped image (default 25)
+%    'shapeSet': Name of target object shape (default '\w+')
+%    'baseSceneSet': Name of baseScene (default '\w+')
 
 % Oct 16 2017, VS wrote this
 
@@ -19,15 +33,15 @@ parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
-parser.addParameter('shapeSet', '\w+', @ischar);
-parser.addParameter('baseSceneSet', '\w+', @ischar);
+parser.addParameter('shape', '\w+', @ischar);
+parser.addParameter('baseScene', '\w+', @ischar);
 parser.parse(varargin{:});
 
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
-shapeSet = parser.Results.shapeSet;
-baseSceneSet = parser.Results.baseSceneSet;
+shape = parser.Results.shape;
+baseScene = parser.Results.baseScene;
 
 %% Overall Setup.
 smallNumber = 10^(-4);
@@ -77,7 +91,7 @@ S = struct(...
     'wavelengths',[400 10 31]);
 
 recipeName = FormatRecipeName(targetLuminanceLevel(1), reflectanceNumber(1), ...
-    shapeSet, baseSceneSet);
+    shape, baseScene);
 recipePattern = fullfile(recipeName,'ConeResponse.mat');
 pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
 tempRecipe = parloadConeResponse(pathToRecipe{1});
@@ -93,7 +107,7 @@ parfor ii = 1:nScenes
         try
     % get the recipe
     recipeName = FormatRecipeName(targetLuminanceLevel, tempReflectanceNumber, ...
-        shapeSet, baseSceneSet);
+        shape, baseScene);
     recipePattern = fullfile(recipeName,'ConeResponse.mat');
     pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
     recipe = parloadConeResponse(pathToRecipe{1});
@@ -117,5 +131,5 @@ S.baseFolderName = fullfile(getpref(projectName, 'baseFolder'),parser.Results.ou
 S.pathToFullMultispectralImage = pathToFullImage;
 
 save(fullfile(getpref(projectName, 'baseFolder'),...
-    parser.Results.outputName,'croppedMultiSpectralStimulus.mat'),...
+    parser.Results.outputName,'multispectralStruct.mat'),...
     'S','-v7.3');
