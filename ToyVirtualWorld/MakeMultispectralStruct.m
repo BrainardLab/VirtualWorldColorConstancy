@@ -1,5 +1,5 @@
-function makeMultispectralStruct(varargin)
-%%makeMultispectralStruct Make the struct with cropped multispctral images
+function MakeMultispectralStruct(varargin)
+%%MakeMultispectralStruct Make the struct with cropped multispctral images
 %
 % Usage:
 %   makeMultispectralStruct('outputName','FixedTargetShapeFixedIlluminantFixedBkGnd')
@@ -9,16 +9,17 @@ function makeMultispectralStruct(varargin)
 %   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, ctgInd,
 %   cropSize, wavelengths, fullImageHeight, fullImageWidth, baseFolderName,
 %   and pathToFullMultispectralimage. The struct is saved as a .mat
-%   file in the parent directory provided in the input field 'outputname'.
+%   file in the parent directory provided in the input field 'outputname', which
+%   itself goes underneath 
 %
 % Input:
-%    outputName     : Name of base folder that contains the stimuli
-%    luminanceLevels: The luminance levels to make the struct
-%    reflectanceNumbers : Reflectance number of the image files
+%    None.
 %
 % Output:
+%    None.
 %
 % Optional key/value pairs:
+%    'outputFolder' : (string) Name of output folder inside of the base dir (default 'ExampleOutput').
 %    'luminanceLevels' : (numerical vector) Luminance levels of images to be selected for struct (defalult [0.2 0.6])
 %    'reflectanceNumbers' : (scalar) reflectnace numbers to be used for struct (default [1 2])
 %    'cropImageHalfSize : (integer) Size of cropped image (default 25)
