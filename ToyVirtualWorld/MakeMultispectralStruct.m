@@ -4,13 +4,13 @@ function MakeMultispectralStruct(varargin)
 % Usage:
 %   makeMultispectralStruct('folderName','FixedTargetShapeFixedIlluminantFixedBkGnd')
 %
-% Description: 
+% Description:
 %   This function makes a struct with fields multispectralImages,
 %   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, luminanceCategoryIndex,
 %   cropSize, wavelengths, fullImageHeight, fullImageWidth, baseFolderName,
 %   and pathToFullMultispectralimage. The struct is saved as a .mat
 %   file in the parent directory provided in the input field 'outputname', which
-%   itself goes underneath 
+%   itself goes underneath
 %
 % Input:
 %    None.
@@ -97,8 +97,13 @@ multispectralStruct = struct(...
 recipeName = FormatRecipeName(targetLuminanceLevel(1), reflectanceNumber(1), ...
     targetShape, baseScene);
 recipePattern = fullfile(recipeName,'ConeResponse.mat');
-pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
-tempRecipe = parloadConeResponse(pathToRecipe{1});
+if (strcmp(targetShape,'\w+') || strcmp(baseScene, '\w+'))
+    pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
+    tempRecipe = parloadConeResponse(pathToRecipe{1});
+else
+    pathToRecipe = fullfile(hints.workingFolder, recipePattern);
+    tempRecipe = parloadConeResponse(pathToRecipe);
+end
 
 multispectralStruct.fullImageHeight = tempRecipe.input.hints.imageHeight;
 multispectralStruct.fullImageWidth = tempRecipe.input.hints.imageWidth;
@@ -108,20 +113,26 @@ parfor ii = 1:nScenes
     targetLuminanceLevel = workingRecord.targetLuminanceLevel;
     tempReflectanceNumber = workingRecord.reflectanceNumber;
     
-        try
-    % get the recipe
-    recipeName = FormatRecipeName(targetLuminanceLevel, tempReflectanceNumber, ...
-        targetShape, baseScene);
-    recipePattern = fullfile(recipeName,'ConeResponse.mat');
-    pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
-    recipe = parloadConeResponse(pathToRecipe{1});
-    luminanceLevels(ii) = recipe.input.sceneRecord.targetLuminanceLevel;
-    reflectanceNumber(ii) = recipe.input.sceneRecord.reflectanceNumber;
-    multispectralImage(:,:,ii) = ImageToCalFormat(recipe.processing.croppedImage);
-    pathToFullImage{ii} = recipe.rendering.radianceDataFiles{2};
-        catch err
-            SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
-        end
+    try
+        % get the recipe
+        recipeName = FormatRecipeName(targetLuminanceLevel, tempReflectanceNumber, ...
+            targetShape, baseScene);
+        recipePattern = fullfile(recipeName,'ConeResponse.mat');
+        if (strcmp(targetShape,'\w+') || strcmp(baseScene, '\w+'))
+            pathToRecipe = rtbFindFiles('root', hints.workingFolder, 'filter', recipePattern);
+            recipe = parloadConeResponse(pathToRecipe{1});
+        else
+            pathToRecipe = fullfile(hints.workingFolder, recipePattern);
+            recipe = parloadConeResponse(pathToRecipe);
+        end        
+        
+        luminanceLevels(ii) = recipe.input.sceneRecord.targetLuminanceLevel;
+        reflectanceNumber(ii) = recipe.input.sceneRecord.reflectanceNumber;
+        multispectralImage(:,:,ii) = ImageToCalFormat(recipe.processing.croppedImage);
+        pathToFullImage{ii} = recipe.rendering.radianceDataFiles{2};
+    catch err
+        SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
+    end
     
 end
 multispectralStruct.luminanceLevels = round(luminanceLevels*10000)/10000;
