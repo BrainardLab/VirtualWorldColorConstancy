@@ -2,11 +2,11 @@ function MakeMultispectralStruct(varargin)
 %%MakeMultispectralStruct Make the struct with cropped multispctral images
 %
 % Usage:
-%   makeMultispectralStruct('folderName','FixedTargetShapeFixedIlluminantFixedBkGnd')
+%   MakeMultispectralStruct('folderName','FixedTargetShapeFixedIlluminantFixedBkGnd')
 %
 % Description:
 %   This function makes a struct with fields multispectralImages,
-%   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, luminanceCategoryIndex,
+%   lightnessLevels, reflectanceNumbers, uniqueLuminanceLevels, luminanceLevelIndex,
 %   cropSize, wavelengths, fullImageHeight, fullImageWidth, baseFolderName,
 %   and pathToFullMultispectralimage. The struct is saved as a .mat
 %   file in the parent directory provided in the input field 'outputname', which
@@ -89,7 +89,7 @@ multispectralStruct = struct(...
     'luminanceLevels', zeros(1,nScenes),...
     'reflectanceNumber', zeros(1,nScenes),...
     'uniqueLuminanceLevels', [],...
-    'luminanceCategoryIndex', zeros(1,nScenes),...
+    'luminanceLevelIndex', zeros(1,nScenes),...
     'cropImageSizeX',2*cropImageHalfSizeX+1,...
     'cropImageSizeY',2*cropImageHalfSizeY+1,...
     'S',[400 10 31]);
@@ -114,7 +114,7 @@ parfor ii = 1:nScenes
     tempReflectanceNumber = workingRecord.reflectanceNumber;
     
     try
-        % get the recipe
+%         get the recipe
         recipeName = FormatRecipeName(targetLuminanceLevel, tempReflectanceNumber, ...
             targetShape, baseScene);
         recipePattern = fullfile(recipeName,'ConeResponse.mat');
@@ -137,8 +137,8 @@ parfor ii = 1:nScenes
 end
 multispectralStruct.luminanceLevels = round(luminanceLevels*10000)/10000;
 multispectralStruct.uniqueLuminanceLevels = unique(multispectralStruct.luminanceLevels);
-for ii = 1:10
-    multispectralStruct.luminanceCategoryIndex(abs(multispectralStruct.luminanceLevels-multispectralStruct.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
+for ii = 1:lenght(multispectralStruct.uniqueLuminanceLevels)
+    multispectralStruct.luminanceLevelIndex(abs(multispectralStruct.luminanceLevels-multispectralStruct.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
 end
 multispectralStruct.reflectanceNumber = reflectanceNumber;
 multispectralStruct.multispectralImage = multispectralImage;
