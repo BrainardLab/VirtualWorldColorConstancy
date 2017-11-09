@@ -137,7 +137,7 @@ parfor ii = 1:nScenes
 end
 multispectralStruct.luminanceLevels = round(luminanceLevels*10000)/10000;
 multispectralStruct.uniqueLuminanceLevels = unique(multispectralStruct.luminanceLevels);
-for ii = 1:lenght(multispectralStruct.uniqueLuminanceLevels)
+for ii = 1:length(multispectralStruct.uniqueLuminanceLevels)
     multispectralStruct.luminanceLevelIndex(abs(multispectralStruct.luminanceLevels-multispectralStruct.uniqueLuminanceLevels(ii)) < smallNumber) = ii;
 end
 multispectralStruct.reflectanceNumber = reflectanceNumber;
