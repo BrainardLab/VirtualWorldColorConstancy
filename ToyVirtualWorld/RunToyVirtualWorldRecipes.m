@@ -48,6 +48,10 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   shape to be same at each reflectance number. This will
 %                   create multiple hue, but the same hue will be repeated
 %                   at each luminance level
+%   'baseSceneReflectancesSameForReflectanceIndex' - option to keep the
+%       basescene reflectance have the same shape. Needed for psychophysics.
+%   'otherObjectReflectancesSameForReflectanceIndex' - option to keep the
+%       other object reflectance same shape. Needed for psychophysics.
 %   'lightPositionRandom' - boolean to specify illuminant position is fixed
 %                   or not. Default is true. False will only work for 
 %                   library-bigball case.
@@ -95,6 +99,8 @@ parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
 parser.addParameter('allTargetSpectrumSameShape', false, @islogical);
 parser.addParameter('targetReflectanceScaledCopies', false, @islogical);
+parser.addParameter('baseSceneReflectancesSameForReflectanceIndex', false, @islogical);
+parser.addParameter('otherObjectReflectancesSameForReflectanceIndex', false, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -149,6 +155,8 @@ try
         'targetSpectrumNotFlat',parser.Results.targetSpectrumNotFlat,...
         'allTargetSpectrumSameShape',parser.Results.allTargetSpectrumSameShape,...
         'targetReflectanceScaledCopies',parser.Results.targetReflectanceScaledCopies,...
+        'baseSceneReflectancesSameForReflectanceIndex', parser.Results.baseSceneReflectancesSameForReflectanceIndex,...
+        'otherObjectReflectancesSameForReflectanceIndex', parser.Results.otherObjectReflectancesSameForReflectanceIndex,...
         'lightPositionRandom',parser.Results.lightPositionRandom,...
         'lightScaleRandom',parser.Results.lightScaleRandom,...
         'targetPositionRandom',parser.Results.targetPositionRandom,...

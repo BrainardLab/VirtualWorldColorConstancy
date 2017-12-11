@@ -41,6 +41,10 @@ function MakeToyRecipesByCombinations(varargin)
 %                   shape to be same at each reflectance number. This will
 %                   create multiple hue, but the same hue will be repeated
 %                   at each luminance level
+%   'baseSceneReflectancesSameForReflectanceIndex' - option to keep the
+%       basescene reflectance have the same shape. Needed for psychophysics.
+%   'otherObjectReflectancesSameForReflectanceIndex' - option to keep the
+%       other object reflectance same shape. Needed for psychophysics.
 %   'lightPositionRandom' - boolean to specify illuminant position is fixed
 %                   or not. Default is true. False will only work for 
 %                   library-bigball case.
@@ -83,6 +87,8 @@ parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
 parser.addParameter('allTargetSpectrumSameShape', false, @islogical);
 parser.addParameter('targetReflectanceScaledCopies', false, @islogical);
+parser.addParameter('baseSceneReflectancesSameForReflectanceIndex', false, @islogical);
+parser.addParameter('otherObjectReflectancesSameForReflectanceIndex', false, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -108,6 +114,8 @@ objectShapeSet = parser.Results.objectShapeSet;
 lightShapeSet = parser.Results.lightShapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
+baseSceneReflectancesSameForReflectanceIndex = parser.Results.baseSceneReflectancesSameForReflectanceIndex;
+otherObjectReflectancesSameForReflectanceIndex = parser.Results.otherObjectReflectancesSameForReflectanceIndex;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 nInsertedLights = parser.Results.nInsertedLights;
@@ -233,6 +241,16 @@ otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'fullPaths', false);
 baseSceneReflectances = otherObjectReflectances;
 
+
+%% Predefine random orders for the case where the two intervals on a trial have the same background reflectances
+for ii = 1:nReflectances
+    baseSceneReflectanceRandomOrder(ii,:) = randperm(length(otherObjectReflectances));
+end
+
+for ii = 1:nReflectances
+    otherObjectReflectanceRandomOrder(ii,:) = randperm(length(otherObjectReflectances));
+end
+
 %% Choose Reflectance for target object overall
 targetLocations.config.baseDir = dataBaseDir;
 targetLocations.name = 'ToyVirtualWorldTarget';
@@ -265,6 +283,7 @@ for ll = 1:nLuminanceLevels
         sceneIndex = rr + (ll-1)*nReflectances;
         sceneRecord(sceneIndex).targetLuminanceLevel = targetLuminanceLevel;
         sceneRecord(sceneIndex).reflectanceNumber = reflectanceNumber;
+        sceneRecord(sceneIndex).reflectanceIndex = rr;
     end
 end
 
@@ -276,6 +295,7 @@ parfor sceneIndex = 1:nScenes
     try
         targetLuminanceLevel = workingRecord.targetLuminanceLevel;
         reflectanceNumber = workingRecord.reflectanceNumber;
+        reflectanceIndex = workingRecord.reflectanceIndex;
         
         for attempt = 1:maxAttempts
             
@@ -583,7 +603,11 @@ parfor sceneIndex = 1:nScenes
                     'applyToInnerModels', false);
                 baseSceneDiffuse.resourceFolder = dataBaseDir;
                 if otherObjectReflectanceRandom
-                    tempBaseSceneReflectances = baseSceneReflectances((randperm(length(baseSceneReflectances))));
+                    if baseSceneReflectancesSameForReflectanceIndex
+                        tempBaseSceneReflectances = baseSceneReflectances(baseSceneReflectanceRandomOrder(reflectanceIndex,:));
+                    else
+                        tempBaseSceneReflectances = baseSceneReflectances((randperm(length(baseSceneReflectances))));
+                    end
                 else
                     tempBaseSceneReflectances = baseSceneReflectances;
                 end
@@ -596,7 +620,11 @@ parfor sceneIndex = 1:nScenes
                     'applyToOuterModels', false);
                 insertedDiffuse.resourceFolder = dataBaseDir;
                 if otherObjectReflectanceRandom
-                    tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
+                    if otherObjectReflectancesSameForReflectanceIndex
+                        tempOtherObjectReflectances = otherObjectReflectances(otherObjectReflectanceRandomOrder(reflectanceIndex,:));
+                    else
+                        tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
+                    end
                 else
                     tempOtherObjectReflectances = otherObjectReflectances;
                 end
