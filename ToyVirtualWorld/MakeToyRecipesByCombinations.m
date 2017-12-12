@@ -41,9 +41,9 @@ function MakeToyRecipesByCombinations(varargin)
 %                   shape to be same at each reflectance number. This will
 %                   create multiple hue, but the same hue will be repeated
 %                   at each luminance level
-%   'baseSceneReflectancesSameForReflectanceIndex' - option to keep the
+%   'baseSceneReflectancesSameAcrossInterval' - option to keep the
 %       basescene reflectance have the same shape. Needed for psychophysics.
-%   'otherObjectReflectancesSameForReflectanceIndex' - option to keep the
+%   'otherObjectReflectancesSameAcrossInterval' - option to keep the
 %       other object reflectance same shape. Needed for psychophysics.
 %   'lightPositionRandom' - boolean to specify illuminant position is fixed
 %                   or not. Default is true. False will only work for 
@@ -87,8 +87,8 @@ parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
 parser.addParameter('allTargetSpectrumSameShape', false, @islogical);
 parser.addParameter('targetReflectanceScaledCopies', false, @islogical);
-parser.addParameter('baseSceneReflectancesSameForReflectanceIndex', false, @islogical);
-parser.addParameter('otherObjectReflectancesSameForReflectanceIndex', false, @islogical);
+parser.addParameter('baseSceneReflectancesSameAcrossInterval', false, @islogical);
+parser.addParameter('otherObjectReflectancesSameAcrossInterval', false, @islogical);
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
@@ -114,8 +114,8 @@ objectShapeSet = parser.Results.objectShapeSet;
 lightShapeSet = parser.Results.lightShapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
-baseSceneReflectancesSameForReflectanceIndex = parser.Results.baseSceneReflectancesSameForReflectanceIndex;
-otherObjectReflectancesSameForReflectanceIndex = parser.Results.otherObjectReflectancesSameForReflectanceIndex;
+baseSceneReflectancesSameAcrossInterval = parser.Results.baseSceneReflectancesSameAcrossInterval;
+otherObjectReflectancesSameAcrossInterval = parser.Results.otherObjectReflectancesSameAcrossInterval;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 nInsertedLights = parser.Results.nInsertedLights;
@@ -603,7 +603,7 @@ parfor sceneIndex = 1:nScenes
                     'applyToInnerModels', false);
                 baseSceneDiffuse.resourceFolder = dataBaseDir;
                 if otherObjectReflectanceRandom
-                    if baseSceneReflectancesSameForReflectanceIndex
+                    if baseSceneReflectancesSameAcrossInterval
                         tempBaseSceneReflectances = baseSceneReflectances(baseSceneReflectanceRandomOrder(reflectanceIndex,:));
                     else
                         tempBaseSceneReflectances = baseSceneReflectances((randperm(length(baseSceneReflectances))));
@@ -620,7 +620,7 @@ parfor sceneIndex = 1:nScenes
                     'applyToOuterModels', false);
                 insertedDiffuse.resourceFolder = dataBaseDir;
                 if otherObjectReflectanceRandom
-                    if otherObjectReflectancesSameForReflectanceIndex
+                    if otherObjectReflectancesSameAcrossInterval
                         tempOtherObjectReflectances = otherObjectReflectances(otherObjectReflectanceRandomOrder(reflectanceIndex,:));
                     else
                         tempOtherObjectReflectances = otherObjectReflectances((randperm(length(otherObjectReflectances))));
