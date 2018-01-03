@@ -1,6 +1,5 @@
 function trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder)
-
-% trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder)
+%trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToTargetReflectanceFolder)
 %
 % Usage: 
 %     trueXYZ = calculateTrueXYZ(0.2, 1, pathToTargetReflectanceFolder)
@@ -8,7 +7,7 @@ function trueXYZ = calculateTrueXYZ(luminanceLevels, reflectanceNumbers, pathToT
 % Description:
 %     This function calcualtes the true XYZ color lables of the target 
 %     materials given the luminance levels and the reflectance numbers. The
-%     funciton calculates the XYZ of all the files specified by the
+%     function calculates the XYZ of all the files specified by the
 %     luminanceLevels and reflectanceNumbers and returns one matrix with
 %     all the XYZ valyues.
 %
