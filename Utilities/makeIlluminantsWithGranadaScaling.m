@@ -1,4 +1,4 @@
-function makeIlluminantsWithGranadaScaling(nIlluminances, folderToStore, scaling)
+function makeIlluminantsWithGranadaScaling(nIlluminances, folderToStore, scaleFactor)
 % makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
 %
 % Usage: 
@@ -18,8 +18,11 @@ function makeIlluminantsWithGranadaScaling(nIlluminances, folderToStore, scaling
 % Input:
 %   nIlluminances = how many illuminants to generate
 %   folderToStore = fodler where the illuminants are stored
-%   minMeanIlluminantLevel = min value with which the spectrum is rescaled
-%   maxMeanIlluminantLevel = max value with which the spectrum is rescaled
+%   scaleFactor = scaleFactor to determine the mean value of of output spectra
+%                 0 -> no scaling
+%                 1 -> distribution of mean will be similar to Granada 
+%                 other number  -> distribution will be same as Granada
+%                 multiplied by this factor
 %
 % VS wrote this
 
@@ -68,9 +71,9 @@ for i = 1:nNewIlluminaces
         ran_ill = B*ran_wgts+meandaylightGranadaRescaled;
         if (all(ran_ill >= 0))
             newIlluminance(:,newIndex) = ran_ill;
-            if scaling
+            if (scaleFactor ~= 0)
                 newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*...
-                        (meanDaylightGranada(randi(length(meanDaylightGranada))));
+                        (meanDaylightGranada(randi(length(meanDaylightGranada))))*scaleFactor;
             end
             newIndex = newIndex+1;
             OK = true;

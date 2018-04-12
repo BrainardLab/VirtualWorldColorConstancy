@@ -84,6 +84,7 @@ parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('minMeanIlluminantLevel', 10, @isnumeric);
 parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
+parser.addParameter('illuminantScaling', 0, @isnumeric);
 parser.addParameter('targetSpectrumNotFlat', true, @islogical);
 parser.addParameter('allTargetSpectrumSameShape', false, @islogical);
 parser.addParameter('targetReflectanceScaledCopies', false, @islogical);
@@ -185,21 +186,29 @@ illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 999;
-        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+%         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
+            parser.Results.illuminantScaling);
     else
         totalRandomLightSpectra = 10;
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+%         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
+            parser.Results.illuminantScaling);
     end
 else
     totalRandomLightSpectra = 1;
     if (illuminantSpectrumNotFlat)
-        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+%         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
+            parser.Results.illuminantScaling);
     else
-        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+%         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
+        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
+            parser.Results.illuminantScaling);
     end
 end
 
