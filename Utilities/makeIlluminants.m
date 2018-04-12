@@ -1,8 +1,8 @@
-function makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
-% makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, maxMeanIlluminantLevel)
+function makeIlluminants(nIlluminances, folderToStore, scaleFactor)
+% makeIlluminants(nIlluminances, folderToStore, scaleFactor
 %
 % Usage: 
-%     makeIlluminants(10,'Illuminants', 10, 100);
+%     makeIlluminants(10,'Illuminants', 0);
 %
 % Description:
 %   This function generates the illuminants for the base scenes. The
@@ -12,16 +12,21 @@ function makeIlluminants(nIlluminances, folderToStore, minMeanIlluminantLevel, m
 %   spectrum. We choose the directions corresponding to the six largest 
 %   eigenvalues. We sample new spectra from a multivariate random gaussian 
 %   whose mean and variance correspond to the projection of the rescaled
-%   spectra along the first six PCA directions. Finally each spectrum is
-%   rescaled by a random number.
+%   spectra along the first six PCA directions. 
+%   If the scaling option is 1, then each spectrum is scaled by the mean
+%   spectrum value of a randomly sampled Granada spectrum.
 %
 % Input:
 %   nIlluminances = how many illuminants to generate
 %   folderToStore = fodler where the illuminants are stored
-%   minMeanIlluminantLevel = min value with which the spectrum is rescaled
-%   maxMeanIlluminantLevel = max value with which the spectrum is rescaled
+%   scaleFactor = scaleFactor to determine the mean value of of output spectra
+%                 0 -> no scaling
+%                 1 -> distribution of mean will be similar to Granada 
+%                 other number  -> distribution will be same as Granada
+%                 multiplied by this factor
 %
 % VS wrote this
+% April 12, 2018
 
 % Desired wl sampling
 rescaling = 1;  % O no rescaling
@@ -61,9 +66,6 @@ if ~exist(folderToStore)
     mkdir(folderToStore);
 end
 
-
-illuminanceValues = 10.^(log10(minMeanIlluminantLevel) + (log10(maxMeanIlluminantLevel)-log10(minMeanIlluminantLevel)) * rand(1,nIlluminances));
-
 for i = 1:nNewIlluminaces
     OK = false;
     while (~OK)
@@ -71,14 +73,17 @@ for i = 1:nNewIlluminaces
         ran_ill = B*ran_wgts+meandaylightGranadaRescaled;
         if (all(ran_ill >= 0))
             newIlluminance(:,newIndex) = ran_ill;
-            newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*(rand*max(meanDaylightGranada));
+            if (scaleFactor ~= 0)
+                newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*...
+                        (meanDaylightGranada(randi(length(meanDaylightGranada))))*scaleFactor;
+            end
             newIndex = newIndex+1;
             OK = true;
         end        
     end
     filename = sprintf('illuminance_%03d.spd',i);
     fid = fopen(fullfile(folderToStore,filename),'w');
-    fprintf(fid,'%3d %3.6f\n',[theWavelengths,illuminanceValues(i)*newIlluminance(:,i)]');
+    fprintf(fid,'%3d %3.6f\n',[theWavelengths,newIlluminance(:,i)]');
     fclose(fid);
 end
 

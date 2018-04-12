@@ -40,6 +40,8 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   shape to be not flat, i.e. random, (true= random)
 %   'minMeanIlluminantLevel' - Min of mean value of ilumination spectrum
 %   'maxMeanIlluminantLevel' - Max of mean value of ilumination spectrum
+%   'illuminantScaling' - Boolean to specify if the mean value of the 
+%                         illuminant spectra are scaled or not
 %   'targetSpectrumNotFlat' - boolean to specify arget spectra 
 %                   shape to be not flat, i.e. random, (true= random)
 %   'allTargetSpectrumSameShape' - boolean to specify all target spectrum 

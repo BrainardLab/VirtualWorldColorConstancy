@@ -33,6 +33,8 @@ function MakeToyRecipesByCombinations(varargin)
 %                   shape to be not flat, i.e. random, (true= random)
 %   'minMeanIlluminantLevel' - Min of mean value of ilumination spectrum
 %   'maxMeanIlluminantLevel' - Max of mean value of ilumination spectrum
+%   'illuminantScaling' - Boolean to specify if the mean value of the 
+%                         illuminant spectra are scaled or not
 %   'targetSpectrumNotFlat' - boolean to specify arget spectra 
 %                   shape to be not flat, i.e. random, (true= random)
 %   'allTargetSpectrumSameShape' - boolean to specify all target spectrum to
@@ -186,29 +188,19 @@ illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 999;
-%         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
-        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
-            parser.Results.illuminantScaling);
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0);
     else
         totalRandomLightSpectra = 10;
-%         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
-        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
-            parser.Results.illuminantScaling);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     end
 else
     totalRandomLightSpectra = 1;
     if (illuminantSpectrumNotFlat)
-%         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
-        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
-            parser.Results.illuminantScaling);
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0);
     else
-%         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
-%                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
-        makeIlluminantsWithGranadaScaling(totalRandomLightSpectra,illuminantsFolder, ...
-            parser.Results.illuminantScaling);
+        makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
+                parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     end
 end
 
@@ -270,6 +262,16 @@ targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
     'aioPrefs', targetAioPrefs, ...
     'fullPaths', false);
 
+%% Predefine scalings for the illuminants in each scene
+% If the iluminants are scaled to match the variations in the mean value of
+% the spectra to natural scenes, we have decided to scale all the spectra
+% in the base scene with the same scale factor. This is chosen here.
+if parser.Results.illuminantScaling
+    scales = generateIlluminantsScalesForScene(nLuminanceLevels * nReflectances);
+else
+    scales = ones(1,nLuminanceLevels * nReflectances);
+end
+
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;
 sceneRecord = struct( ...
@@ -293,6 +295,7 @@ for ll = 1:nLuminanceLevels
         sceneRecord(sceneIndex).targetLuminanceLevel = targetLuminanceLevel;
         sceneRecord(sceneIndex).reflectanceNumber = reflectanceNumber;
         sceneRecord(sceneIndex).reflectanceIndex = rr;
+        sceneRecord(sceneIndex).scales = scales(rr);
     end
 end
 
@@ -593,10 +596,28 @@ parfor sceneIndex = 1:nScenes
                     'pluginType', 'area', ...
                     'propertyName', 'radiance');
                 %areaLightSpectra.spectra = emitterSpectra;
-                areaLightSpectra.resourceFolder = dataBaseDir;
+                
+                % If scaling =1, scale all the illuminant spectra in the
+                % base scene by the same scale factor. To do this the
+                % pre-selected illuminants are rewritten in the resource
+                % folder of the recipe with the scaling and the paths are
+                % appropiately changed.
+                
                 if illuminantSpectraRandom
-                    tempIlluminantSpectra = illuminantSpectra((randperm(length(illuminantSpectra))));
+                    tempIlluminantIndex = randperm(length(illuminantSpectra),nBaseLights+nInsertedLights);
+                    for iterTempIlluminantIndex = 1:length(tempIlluminantIndex)
+                        tempSpectrumFileName = fullfile(dataBaseDir,'Illuminants','BaseScene',...
+                            illuminantSpectra(tempIlluminantIndex(iterTempIlluminantIndex)));
+                        [tempWavelengths, tempMagnitudes] = rtbReadSpectrum(tempSpectrumFileName{1});
+                        resourceFolder = fullfile(workingRecord.hints.workingFolder,recipeName,'resources');
+                        tempFileName = fullfile(resourceFolder,'Illuminants','BaseScene',...
+                            illuminantSpectra(tempIlluminantIndex(iterTempIlluminantIndex)));
+                        rtbWriteSpectrumFile(tempWavelengths,workingRecord.scales*tempMagnitudes,tempFileName{1});
+                    end
+                    tempIlluminantSpectra = illuminantSpectra(tempIlluminantIndex);
+                    areaLightSpectra.resourceFolder = resourceFolder;                    
                 else
+                    areaLightSpectra.resourceFolder = dataBaseDir;
                     tempIlluminantSpectra = illuminantSpectra;
                 end
                 areaLightSpectra.addManySpectra(tempIlluminantSpectra);
