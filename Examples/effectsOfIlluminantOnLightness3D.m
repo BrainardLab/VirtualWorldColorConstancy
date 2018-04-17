@@ -1,4 +1,4 @@
-function actualLuminance = effectsOfIlluminantOnLightness
+function actualLuminance = effectsOfIlluminantOnLightness3D
 % This script makes random reflectance spectra at specified luminance
 % levels. The luminance levels are assigned as if the object with this
 % reflectnace spectrum was observed by an average human observer under
@@ -7,11 +7,11 @@ function actualLuminance = effectsOfIlluminantOnLightness
 % Vijay Singh
 % April 10, 2018
 
-colors={'r', 'b', 'g', 'k', 'm', 'c', 'k', 'g', 'b'};
+colors={'-*r', '-*b', '-*g', '-*k', '-*m', '-*c', '-*k', '-*g', '-*b'};
 % Choose some luminance levels
-luminanceLevels = linspace(0.2, 0.6, 9);
+XYZLevels = [1 2];
 reflectanceNumbers = [1:100];
-nSamples = length(luminanceLevels)*length(reflectanceNumbers);
+nSamples = size(XYZLevels,2)*length(reflectanceNumbers);
 % Desired wl sampling
 S = [400 5 61];
 theWavelengths = SToWls(S);
@@ -19,7 +19,7 @@ theWavelengths = SToWls(S);
 %% Load in spectral weighting function for luminance
 % This is the 1931 CIE standard
 theXYZData = load('T_xyz1931');
-theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931(2,:),theWavelengths);
+theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931,theWavelengths);
 
 %% Load in a standard daylight as our reference spectrum
 %
@@ -28,34 +28,31 @@ theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931(2,
 % studying.
 theIlluminantData = load('spd_D65');
 D65 = SplineSpd(theIlluminantData.S_D65,theIlluminantData.spd_D65,theWavelengths);
-D65 = D65/(theLuminanceSensitivity*D65);
+D65 = D65/(theLuminanceSensitivity(2,:)*D65);
+
 
 %% Generate some reflectances at the target luminance levels
-targetReflectances = getReflectances(luminanceLevels, reflectanceNumbers, theWavelengths, S);
-
-targetReflectancesReshaped = reshape(targetReflectances, ...
-    [], length(luminanceLevels)*length(reflectanceNumbers));
+targetReflectances = getReflectances(XYZLevels, reflectanceNumbers, theWavelengths, S);
 
 % Check by plotting that the luminance levels were properly assigned
-for ii = 1:nSamples
-    actualLuminance(ii) = ...
-        returnLuminanceFromSpectra(targetReflectancesReshaped(:,ii), D65, theLuminanceSensitivity);
-end
+actualXYZ = theLuminanceSensitivity*diag(D65)*targetReflectances;
 
 Fig1=figure;
 set(Fig1,'units','pixels', 'Position', [1, 1000, 800, 880]);
 subplot(2,2,1);
 hold on;
-title('Luminance under D65');
+title('XYZ under D65');
 box on;
-for jj = 1:length(luminanceLevels)
-    plot([(jj-1)*length(reflectanceNumbers)+1:jj*length(reflectanceNumbers)], ...
-        actualLuminance((jj-1)*length(reflectanceNumbers)+1:jj*length(reflectanceNumbers)), colors{jj});
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
+    plot3(actualXYZ(1,thisLevelIndices),actualXYZ(2,thisLevelIndices),actualXYZ(3,thisLevelIndices),colors{ii});
 end
-xlabel('Rflectance Index');
-ylabel('Actual Luminance');
-ylim([0.15 0.65]);
-axis square;
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+xlim([0 1]);
+ylim([0 1]);
+zlim([0 1]);
 set(gca,'FontSize',15)
 
 %% Generate a random illuminant spectrum
@@ -68,110 +65,78 @@ newIlluminance = generateRandomIlluminant(S, scaleFactor, nIlluminant);
 
 %% Get the value of luminance under fixed random spectrum
 fixedIlluminant = newIlluminance(:,randi(nSamples));
-for ii = 1:nSamples
-    newLuminanceFixedIlluminant(ii) = returnLuminanceFromSpectra(targetReflectancesReshaped(:,ii), ...
-                fixedIlluminant, theLuminanceSensitivity);
-end
-newLuminanceFixedIlluminant = reshape(newLuminanceFixedIlluminant, ...
-                    length(reflectanceNumbers), length(luminanceLevels));
-meanLuminanceFixedIlluminant = mean(newLuminanceFixedIlluminant);
-stdLuminanceFixedIlluminant = std(newLuminanceFixedIlluminant);
+
+XYZFixedIlluminant = theLuminanceSensitivity*diag(fixedIlluminant)*targetReflectances;
 
 % Plot these luminances
 subplot(2,2,2);
 hold on;
-title('Fixed Random Illuminant');
+title('XYZ random illuminant');
 box on;
-for jj = 1:length(luminanceLevels)
-    tempMean = meanLuminanceFixedIlluminant(jj);
-    tempStd = stdLuminanceFixedIlluminant(jj);
-    
-    xx = linspace(tempMean-3*tempStd,tempMean+3*tempStd,100);
-    yy = exp(-(xx-tempMean).^2/2/(tempStd.^2))/(sqrt(2*pi*tempStd));
-    
-    plot(xx, yy, colors{jj});
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
+    plot3(XYZFixedIlluminant(1,thisLevelIndices),XYZFixedIlluminant(2,thisLevelIndices),...
+        XYZFixedIlluminant(3,thisLevelIndices),colors{ii});
 end
-xlabel('L');
-ylabel('P(L)');
-% ylim([0.15 0.65]);
-axis square;
-set(gca,'FontSize',15)
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+set(gca,'FontSize',15);
 
 %% Get the value of luminance under random spectrum
 % Each reflectance spectrum is evaluated under a different random
 % illuminant
 for ii = 1:nSamples
-    newLuminanceRandomIlluminant(ii) = returnLuminanceFromSpectra(targetReflectancesReshaped(:,ii), ...
-                        newIlluminance(:,ii), theLuminanceSensitivity);
+    XYZRandomIlluminant(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
 end
-
-newLuminanceRandomIlluminant = reshape(newLuminanceRandomIlluminant, ...
-                    length(reflectanceNumbers), length(luminanceLevels));
-meanLuminanceRandomIlluminant = mean(newLuminanceRandomIlluminant);
-stdLuminanceRandomIlluminant = std(newLuminanceRandomIlluminant);
 
 % Plot these luminances
 subplot(2,2,3);
 hold on;
-title('Random Illuminant (Isomerization)');
+title('Random illuminant (Isomerization)');
 box on;
-for jj = 1:length(luminanceLevels)
-    tempMean = meanLuminanceRandomIlluminant(jj);
-    tempStd = stdLuminanceRandomIlluminant(jj);
-    
-    xx = linspace(tempMean-3*tempStd,tempMean+3*tempStd,100);
-    yy = exp(-(xx-tempMean).^2/2/(tempStd.^2))/(sqrt(2*pi*tempStd));
-    
-    plot(xx, yy, colors{jj});
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
+    plot3(XYZRandomIlluminant(1,thisLevelIndices),XYZRandomIlluminant(2,thisLevelIndices),...
+        XYZRandomIlluminant(3,thisLevelIndices),colors{ii});
 end
-xlabel('L');
-ylabel('P(L)');
-% ylim([0.15 0.65]);
-axis square;
-set(gca,'FontSize',15)
+plot3(XYZRandomIlluminant(1,:),XYZRandomIlluminant(2,:),XYZRandomIlluminant(3,:),'.');
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+set(gca,'FontSize',15);
 
 %% Get the value of luminance under random spectrum through contrast calculation
 % Each reflectance spectrum is evaluated under a different random
 % illuminant
 for ii = 1:nSamples
-    newLuminanceRandomIlluminantContrast(ii) = returnLuminanceThroughContrast(S, ...
-        targetReflectancesReshaped(:,ii), newIlluminance(:,ii), theLuminanceSensitivity);
+    XYZRandomIlluminantContrast(:,ii) = returnLuminanceThroughContrast(S, ...
+        targetReflectances(:,ii), newIlluminance(:,ii), theLuminanceSensitivity);
 end
-
-newLuminanceRandomIlluminantContrast = reshape(newLuminanceRandomIlluminantContrast, ...
-                    length(reflectanceNumbers), length(luminanceLevels));
-meanLuminanceFixedIlluminantContrast = mean(newLuminanceRandomIlluminantContrast);
-stdLuminanceFixedIlluminantContrast = std(newLuminanceRandomIlluminantContrast);
 
 % Plot these luminances
 subplot(2,2,4);
 hold on;
-title('Random Illuminant (Contrast)');
+title('Random illuminant (Contrast)');
 box on;
-for jj = 1:length(luminanceLevels)
-    tempMean = meanLuminanceFixedIlluminantContrast(jj);
-    tempStd = stdLuminanceFixedIlluminantContrast(jj);
-    
-    xx = linspace(tempMean-3*tempStd,tempMean+3*tempStd,100);
-    yy = exp(-(xx-tempMean).^2/2/(tempStd.^2))/(sqrt(2*pi*tempStd));
-    
-    plot(xx, yy, colors{jj});
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
+    plot3(XYZRandomIlluminantContrast(1,thisLevelIndices),XYZRandomIlluminantContrast(2,thisLevelIndices),...
+        XYZRandomIlluminantContrast(3,thisLevelIndices),colors{ii});
 end
-xlabel('L');
-ylabel('P(L)');
-axis square;
-set(gca,'FontSize',15)
+plot3(XYZRandomIlluminantContrast(1,:),XYZRandomIlluminantContrast(2,:),XYZRandomIlluminantContrast(3,:),'.');
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+set(gca,'FontSize',15);
 
 end
 
-function targetReflectances = getReflectances(luminanceLevels,reflectanceNumbers, theWavelengths, S)
+function targetReflectances = getReflectances(nXYZValues, reflectanceNumbers, theWavelengths, S)
 % This function makes the target reflectances at the desired luminance levels
-
-nSurfaceAtEachLuminace = numel(reflectanceNumbers);
 
 %% Load surfaces
 % These are in the Psychtoolbox.
-
 % Munsell surfaces
 load sur_nickerson
 sur_nickerson = SplineSrf(S_nickerson,sur_nickerson,S);
@@ -195,7 +160,7 @@ cov_wgts = cov(sur_all_wgts');
 %% Load in spectral weighting function for luminance
 % This is the 1931 CIE standard
 theXYZData = load('T_xyz1931');
-theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931(2,:),theWavelengths);
+theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931,theWavelengths);
 
 %% Load in a standard daylight as our reference spectrum
 %
@@ -204,33 +169,37 @@ theLuminanceSensitivity = SplineCmf(theXYZData.S_xyz1931,theXYZData.T_xyz1931(2,
 % studying.
 theIlluminantData = load('spd_D65');
 theIlluminant = SplineSpd(theIlluminantData.S_D65,theIlluminantData.spd_D65,theWavelengths);
-theIlluminant = theIlluminant/(theLuminanceSensitivity*theIlluminant);
+theIlluminant = theIlluminant/(theLuminanceSensitivity(2,:)*theIlluminant);
+
+%% Get the null space
+nullSpace = null(theLuminanceSensitivity*diag(theIlluminant)*B);
 
 %% Generate new surfaces
-newSurfaces = zeros(S(3),size(luminanceLevels,2)*nSurfaceAtEachLuminace);
-newIndex = 1;
+nsurfacePerXYZ = length(reflectanceNumbers);
+newSurfaces = zeros(S(3),size(nXYZValues,2)*nsurfacePerXYZ);
+newIndex =0;
 
-m=0;
-for i = 1:(size(luminanceLevels,2)*nSurfaceAtEachLuminace)
+for ii = 1:size(nXYZValues,2)
+    m=0;
+    ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
+    theReflectance = B*ran_wgts+sur_mean;
+
+    %Generate nReflectance surfaces for this random weight set
+while (m < nsurfacePerXYZ)
     m=m+1;
     OK = false;
     while (~OK)
-        ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-        theReflectance = B*ran_wgts+sur_mean;
-        theLightToEye = theIlluminant.*theReflectance;
-        theLuminance = theLuminanceSensitivity*theLightToEye;
-        theLuminanceTarget = luminanceLevels(ceil(i/nSurfaceAtEachLuminace));
-        scaleFactor = theLuminanceTarget / theLuminance;
-        theReflectanceScaled = scaleFactor * theReflectance;
-        if (all(theReflectanceScaled >= 0) & all(theReflectanceScaled <= 1))
-            newSurfaces(:,newIndex) = theReflectanceScaled;
+        newWeights = ran_wgts + nullSpace*rand(3,1);
+        newReflectance = B*newWeights+sur_mean;
+        if (all(newReflectance(:) >= 0) & all(newReflectance(:) <= 1))
             newIndex = newIndex+1;
+            newSurfaces(:,newIndex) = newReflectance;
             OK = true;
         end
     end
-    if (m==numel(reflectanceNumbers)) m=0; end
 end
-targetReflectances = reshape(newSurfaces,S(3),size(luminanceLevels,2),nSurfaceAtEachLuminace);
+end
+targetReflectances = newSurfaces;
 end
 
 function objectReflectances = getObjectReflectances(nSurfaces, S)
@@ -321,7 +290,7 @@ for i = 1:nNewIlluminaces
 end
 
 end
-function luminance = returnLuminanceFromSpectra(theReflectance, theIlluminant, theLuminanceSensitivity)
+function luminance = returnLuminanceXYZFromSpectra(theReflectance, theIlluminant, theLuminanceSensitivity)
 
 theLightToEye = theIlluminant.*theReflectance;
 luminance = theLuminanceSensitivity*theLightToEye;
@@ -330,18 +299,16 @@ end
 
 function luminance = returnLuminanceThroughContrast(S, theReflectance, theIlluminant, theLuminanceSensitivity)
 
-theLightToEye = theIlluminant.*theReflectance;
-luminance = theLuminanceSensitivity*theLightToEye;
+luminance = theLuminanceSensitivity*diag(theIlluminant)*theReflectance;
 
 nSurfaces = 100;
 objectReflectances = getObjectReflectances(nSurfaces, S);
 
 % Get the average luminance over random surfaces under this light
 for ii = 1:nSurfaces
-    theLightToEyeTemp = theIlluminant.*objectReflectances(:,ii);
-    luminanceOfRandomSurface(ii) = theLuminanceSensitivity*theLightToEyeTemp;
+    luminanceOfRandomSurface(:,ii) = theLuminanceSensitivity*diag(theIlluminant)*objectReflectances(:,ii);
 end
-luminanceOfRandomSurface(nSurfaces+1) = luminance;
-averageLuminance = mean(luminanceOfRandomSurface);
-luminance = luminance/averageLuminance;
+luminanceOfRandomSurface(:,nSurfaces+1) = luminance;
+averageLuminance = mean(luminanceOfRandomSurface,2);
+luminance = luminance./averageLuminance;
 end
