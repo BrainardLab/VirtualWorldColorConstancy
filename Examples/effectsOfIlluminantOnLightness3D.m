@@ -53,7 +53,8 @@ zlabel('Z');
 xlim([0 1]);
 ylim([0 1]);
 zlim([0 1]);
-set(gca,'FontSize',15)
+set(gca,'FontSize',15);
+drawnow;
 
 %% Generate a random illuminant spectrum
 scaleFactor = 1; % 0 = Don't scale the mean value of the new spectra
@@ -82,6 +83,7 @@ xlabel('X');
 ylabel('Y');
 zlabel('Z');
 set(gca,'FontSize',15);
+drawnow;
 
 %% Get the value of luminance under random spectrum
 % Each reflectance spectrum is evaluated under a different random
@@ -105,14 +107,27 @@ xlabel('X');
 ylabel('Y');
 zlabel('Z');
 set(gca,'FontSize',15);
+drawnow;
 
 %% Get the value of luminance under random spectrum through contrast calculation
 % Each reflectance spectrum is evaluated under a different random
 % illuminant
+% for ii = 1:nSamples
+%     XYZRandomIlluminantContrast(:,ii) = returnLuminanceThroughContrast(S, ...
+%         targetReflectances(:,ii), newIlluminance(:,ii), theLuminanceSensitivity);
+% end
+
+% This is the model of the mean reflectance
+meanReflectance = getObjectReflectances(0, S);
+
+XYZOfMeanReflectance =zeros(3,nSamples);
+XYZRandomIlluminantContrast =zeros(3,nSamples);
+
 for ii = 1:nSamples
-    XYZRandomIlluminantContrast(:,ii) = returnLuminanceThroughContrast(S, ...
-        targetReflectances(:,ii), newIlluminance(:,ii), theLuminanceSensitivity);
+    XYZOfMeanReflectance(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*meanReflectance;
+    XYZRandomIlluminantContrast(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
 end
+XYZRandomIlluminantContrast = 1./(1+XYZOfMeanReflectance./XYZRandomIlluminantContrast);
 
 % Plot these luminances
 subplot(2,2,4);
@@ -129,6 +144,7 @@ xlabel('X');
 ylabel('Y');
 zlabel('Z');
 set(gca,'FontSize',15);
+drawnow;
 
 end
 
@@ -227,23 +243,8 @@ sur_all_wgts = B\sur_all_mean_centered;
 mean_wgts = mean(sur_all_wgts,2);
 cov_wgts = cov(sur_all_wgts');
 
-%% Generate new surfaces
-newSurfaces = zeros(S(3),nSurfaces);
-newIndex = 1;
+objectReflectances = B*mean_wgts+sur_mean;
 
-for i = 1:nSurfaces
-    OK = false;
-    while (~OK)
-        ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-        ran_sur = B*ran_wgts+sur_mean;
-        if (all(ran_sur >= 0) & all(ran_sur <= 1))
-            newSurfaces(:,newIndex) = ran_sur;
-            newIndex = newIndex+1;
-            OK = true;
-        end
-    end
-end    
-objectReflectances = newSurfaces;
 end
 
 function newIlluminance = generateRandomIlluminant(S, scaleFactor, nIlluminances)
@@ -271,6 +272,9 @@ nNewIlluminaces = nIlluminances;
 newIlluminance = zeros(S(3),nNewIlluminaces);
 newIndex = 1;
 
+mm = minmax(meanDaylightGranada);
+scales = 10.^(log10(mm(1)) + (log10(mm(2))-log10(mm(1))) * rand(1,nNewIlluminaces));
+
 for i = 1:nNewIlluminaces
     OK = false;
     while (~OK)
@@ -280,8 +284,7 @@ for i = 1:nNewIlluminaces
             newIlluminance(:,newIndex) = ran_ill;
             if (scaleFactor ~= 0)
                 newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*...
-                    (meanDaylightGranada(randi(length(meanDaylightGranada))))* ...
-                    meandaylightGranadaRescaled(randi(length(meandaylightGranadaRescaled)));
+                    (meanDaylightGranada(randi(length(meanDaylightGranada))))*scales(i);
             end
             newIndex = newIndex+1;
             OK = true;
@@ -289,26 +292,4 @@ for i = 1:nNewIlluminaces
     end
 end
 
-end
-function luminance = returnLuminanceXYZFromSpectra(theReflectance, theIlluminant, theLuminanceSensitivity)
-
-theLightToEye = theIlluminant.*theReflectance;
-luminance = theLuminanceSensitivity*theLightToEye;
-
-end
-
-function luminance = returnLuminanceThroughContrast(S, theReflectance, theIlluminant, theLuminanceSensitivity)
-
-luminance = theLuminanceSensitivity*diag(theIlluminant)*theReflectance;
-
-nSurfaces = 100;
-objectReflectances = getObjectReflectances(nSurfaces, S);
-
-% Get the average luminance over random surfaces under this light
-for ii = 1:nSurfaces
-    luminanceOfRandomSurface(:,ii) = theLuminanceSensitivity*diag(theIlluminant)*objectReflectances(:,ii);
-end
-luminanceOfRandomSurface(:,nSurfaces+1) = luminance;
-averageLuminance = mean(luminanceOfRandomSurface,2);
-luminance = luminance./averageLuminance;
 end
