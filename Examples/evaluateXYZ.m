@@ -1,22 +1,31 @@
-function effectsOfIlluminantOnLightness3D
+function [correctClassificationTest, estimatedXYZTest, actualTestXYZ, ...
+            correctClassificationTrain, estimatedXYZTrain, actualTrainXYZ] = evaluateXYZ
 % This function produces some random illuminants at a few values of XYZ
 % under D65. Then it genreates some random illuminants. Then assuming that
 % the average reflectance over all surfaces in the world is known, it
-% calcuates the XYZ under any arbitrary light. The results are plotted in
-% the figures.
-% The first subplot (top left) gives the XYZ under D65.
-% The second subplot (top right) gives the XYZ under fixed random illuminant.
-% The third subplot (bottom left) gives the XYZ under random illuminant.
-% The fourth subplot (bottom right) gives the XYZ under fixed random
-% illuminant, evalued assuming a contrast definition.
+% calcuates the XYZ of the reflectances under any arbitrary light. The XYZ
+% is calculated using a contrast definition, where the contrast is
+% calculated using the average reflectances. Using these contrasts
+% calcuated under arbitrary light, the matlab classify function is used to
+% assign the D65 XYZ.
+% 
+% The results are plotted in the figures.
+% The first subplot (top left) gives the actual XYZ under D65 for training set.
+% The second subplot (top right) gives the actual XYZ under D65 for test set.
+% The third subplot (bottom left) gives the estimated XYZ under D65 for training set.
+% The fourth subplot (bottom right) gives the estimated XYZ under D65 for test set.
 %
 % Vijay Singh
 % April 19, 2018
 
+
 colors={'-*r', '-*b', '-*g', '-*k', '-*m', '-*c', '-*k', '-*g', '-*b'};
 % Choose some luminance levels
 XYZLevels = [1 2];
-reflectanceNumbers = [1:100];
+trainReflectanceNumbers = [1:90];
+testReflectanceNumbers = [91:100];
+reflectanceNumbers = [trainReflectanceNumbers testReflectanceNumbers];
+
 nSamples = size(XYZLevels,2)*length(reflectanceNumbers);
 % Desired wl sampling
 S = [400 5 61];
@@ -40,18 +49,32 @@ D65 = D65/(theLuminanceSensitivity(2,:)*D65);
 %% Generate some reflectances at the target luminance levels
 targetReflectances = getReflectances(XYZLevels, reflectanceNumbers, theWavelengths, S);
 
+trainIndex = [];
+testIndex = [];
+trainingLabels = [];
+testLabels = [];
+for ii = 1:size(XYZLevels,2)
+    trainIndex = [trainIndex (ii-1)*length(reflectanceNumbers)+trainReflectanceNumbers];
+    testIndex = [testIndex (ii-1)*length(reflectanceNumbers)+testReflectanceNumbers];
+    trainingLabels = [trainingLabels ii*ones(size(trainReflectanceNumbers))];
+    testLabels = [testLabels ii*ones(size(testReflectanceNumbers))];
+end
+    targetReflectancesTrain = targetReflectances(:,trainIndex);
+    targetReflectancesTest = targetReflectances(:,testIndex);
+
 % Check by plotting that the luminance levels were properly assigned
-actualXYZ = theLuminanceSensitivity*diag(D65)*targetReflectances;
+actualTrainXYZ = theLuminanceSensitivity*diag(D65)*targetReflectancesTrain;
+actualTestXYZ = theLuminanceSensitivity*diag(D65)*targetReflectancesTest;
 
 Fig1=figure;
 set(Fig1,'units','pixels', 'Position', [1, 1000, 800, 880]);
 subplot(2,2,1);
 hold on;
-title('XYZ under D65');
+title('XYZ under D65 (Training Set)');
 box on;
 for ii = 1:size(XYZLevels,2)
-    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
-    plot3(actualXYZ(1,thisLevelIndices),actualXYZ(2,thisLevelIndices),actualXYZ(3,thisLevelIndices),colors{ii});
+    thisLevelIndices = (ii-1)*length(trainReflectanceNumbers)+1:ii*length(trainReflectanceNumbers);
+    plot3(actualTrainXYZ(1,thisLevelIndices),actualTrainXYZ(2,thisLevelIndices),actualTrainXYZ(3,thisLevelIndices),colors{ii});
 end
 xlabel('X');
 ylabel('Y');
@@ -63,6 +86,25 @@ set(gca,'FontSize',15);
 view(120, 30);
 drawnow;
 
+
+subplot(2,2,2);
+hold on;
+title('XYZ under D65 (Test Set)');
+box on;
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(testReflectanceNumbers)+1:ii*length(testReflectanceNumbers);
+    plot3(actualTestXYZ(1,thisLevelIndices),actualTestXYZ(2,thisLevelIndices),actualTestXYZ(3,thisLevelIndices),colors{ii});
+end
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+xlim([0 1]);
+ylim([0 1]);
+zlim([0 1]);
+view(120, 30);
+set(gca,'FontSize',15);
+drawnow;
+
 %% Generate a random illuminant spectrum
 scaleFactor = 1; % 0 = Don't scale the mean value of the new spectra
                  % 1 = Scale the mean value of the new spectra to match
@@ -71,91 +113,73 @@ scaleFactor = 1; % 0 = Don't scale the mean value of the new spectra
 nIlluminant = nSamples; % Generate nIlluminant spectrum
 newIlluminance = generateRandomIlluminant(S, scaleFactor, nIlluminant);
 
-%% Get the value of luminance under fixed random spectrum
-fixedIlluminant = newIlluminance(:,randi(nSamples));
-
-XYZFixedIlluminant = theLuminanceSensitivity*diag(fixedIlluminant)*targetReflectances;
-
-% Plot these luminances
-subplot(2,2,2);
-hold on;
-title('XYZ random illuminant');
-box on;
-for ii = 1:size(XYZLevels,2)
-    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
-    plot3(XYZFixedIlluminant(1,thisLevelIndices),XYZFixedIlluminant(2,thisLevelIndices),...
-        XYZFixedIlluminant(3,thisLevelIndices),colors{ii});
-end
-xlabel('X');
-ylabel('Y');
-zlabel('Z');
-set(gca,'FontSize',15);
-view(120, 30);
-drawnow;
-
-%% Get the value of luminance under random spectrum
-% Each reflectance spectrum is evaluated under a different random
-% illuminant
-for ii = 1:nSamples
-    XYZRandomIlluminant(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
-end
-
-% Plot these luminances
-subplot(2,2,3);
-hold on;
-title('Random illuminant (Isomerization)');
-box on;
-for ii = 1:size(XYZLevels,2)
-    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
-    plot3(XYZRandomIlluminant(1,thisLevelIndices),XYZRandomIlluminant(2,thisLevelIndices),...
-        XYZRandomIlluminant(3,thisLevelIndices),colors{ii});
-end
-plot3(XYZRandomIlluminant(1,:),XYZRandomIlluminant(2,:),XYZRandomIlluminant(3,:),'.');
-xlabel('X');
-ylabel('Y');
-zlabel('Z');
-set(gca,'FontSize',15);
-view(120, 30);
-drawnow;
-
 %% Get the value of luminance under random spectrum through contrast calculation
-% Each reflectance spectrum is evaluated under a different random
-% illuminant
-% for ii = 1:nSamples
-%     XYZRandomIlluminantContrast(:,ii) = returnLuminanceThroughContrast(S, ...
-%         targetReflectances(:,ii), newIlluminance(:,ii), theLuminanceSensitivity);
-% end
-
 % This is the model of the mean reflectance
 for ii = 1: nSamples
     meanReflectance(:,ii) = getObjectReflectances(10, S);
 end
 
 XYZOfMeanReflectance =zeros(3,nSamples);
-XYZRandomIlluminantContrast =zeros(3,nSamples);
+estimatedXYZTemp =zeros(3,nSamples);
 
 for ii = 1:nSamples
     XYZOfMeanReflectance(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*meanReflectance(:,ii);
-    XYZRandomIlluminantContrast(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
+    estimatedXYZTemp(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
 end
-XYZRandomIlluminantContrast = 1./(1+XYZOfMeanReflectance./XYZRandomIlluminantContrast);
+estimatedXYZTemp = 1./(1+XYZOfMeanReflectance./estimatedXYZTemp);
+
+estimatedXYZTrainTemp = estimatedXYZTemp(:,trainIndex);
+estimatedXYZTestTemp = estimatedXYZTemp(:,testIndex);
+
+estimatedTrainLabel = classify(estimatedXYZTrainTemp',estimatedXYZTrainTemp',trainingLabels');
+estimatedTestLabel = classify(estimatedXYZTestTemp',estimatedXYZTrainTemp',trainingLabels');
+
+for ii = 1:length(estimatedTrainLabel)
+    estimatedXYZTrain(:,ii) = actualTrainXYZ(:,find(trainingLabels == estimatedTrainLabel(ii),1));
+end
+
+for ii = 1:length(estimatedTestLabel)
+    estimatedXYZTest(:,ii) = actualTrainXYZ(:,find(trainingLabels == estimatedTestLabel(ii),1));
+end
+
+correctClassificationTrain = sum(estimatedTrainLabel == trainingLabels');
+correctClassificationTest = sum(estimatedTestLabel == testLabels');
 
 % Plot these luminances
-subplot(2,2,4);
+subplot(2,2,3);
 hold on;
-title('Random illuminant (Contrast)');
+title('Estimated XYZ (Training Set)');
 box on;
 for ii = 1:size(XYZLevels,2)
-    thisLevelIndices = (ii-1)*length(reflectanceNumbers)+1:ii*length(reflectanceNumbers);
-    plot3(XYZRandomIlluminantContrast(1,thisLevelIndices),XYZRandomIlluminantContrast(2,thisLevelIndices),...
-        XYZRandomIlluminantContrast(3,thisLevelIndices),colors{ii});
+    thisLevelIndices = (ii-1)*length(trainReflectanceNumbers)+1:ii*length(trainReflectanceNumbers);
+    plot3(estimatedXYZTrain(1,thisLevelIndices),estimatedXYZTrain(2,thisLevelIndices),estimatedXYZTrain(3,thisLevelIndices),colors{ii});
 end
-plot3(XYZRandomIlluminantContrast(1,:),XYZRandomIlluminantContrast(2,:),XYZRandomIlluminantContrast(3,:),'.');
 xlabel('X');
 ylabel('Y');
 zlabel('Z');
-set(gca,'FontSize',15);
+xlim([0 1]);
+ylim([0 1]);
+zlim([0 1]);
 view(120, 30);
+set(gca,'FontSize',15);
+drawnow;
+
+subplot(2,2,4);
+hold on;
+title('Estimated XYZ (Test Set)');
+box on;
+for ii = 1:size(XYZLevels,2)
+    thisLevelIndices = (ii-1)*length(testReflectanceNumbers)+1:ii*length(testReflectanceNumbers);
+    plot3(estimatedXYZTest(1,thisLevelIndices),estimatedXYZTest(2,thisLevelIndices),estimatedXYZTest(3,thisLevelIndices),colors{ii});
+end
+xlabel('X');
+ylabel('Y');
+zlabel('Z');
+xlim([0 1]);
+ylim([0 1]);
+zlim([0 1]);
+view(120, 30);
+set(gca,'FontSize',15);
 drawnow;
 
 end
