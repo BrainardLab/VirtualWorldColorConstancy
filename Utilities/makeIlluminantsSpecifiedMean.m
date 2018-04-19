@@ -71,7 +71,7 @@ for i = 1:nNewIlluminaces
         ran_ill = B*ran_wgts+meandaylightGranadaRescaled;
         if (all(ran_ill >= 0))
             newIlluminance(:,newIndex) = ran_ill;
-            newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*(rand*max(meanDaylightGranada));
+            newIlluminance(:,newIndex) = newIlluminance(:,newIndex);
             newIndex = newIndex+1;
             OK = true;
         end        
