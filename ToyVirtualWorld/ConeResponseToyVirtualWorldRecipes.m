@@ -10,6 +10,7 @@ parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
 parser.addParameter('nAnnularRegions', 25, @isnumeric);
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
+parser.addParameter('integrationTime', 5/1000, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nRandomRotations', 0, @isnumeric);
 parser.addParameter('isomerizationNoise', 'frozen', @ischar);
@@ -18,6 +19,7 @@ luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 nAnnularRegions = parser.Results.nAnnularRegions;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
+integrationTime = parser.Results.integrationTime;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
 isomerizationNoise = parser.Results.isomerizationNoise;
 
@@ -97,14 +99,15 @@ parfor ii = 1:nRecipes
             [coneResponse.isomerizationsVector(:,iterRotations), coneResponse.coneIndicator, coneResponse.conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, ...
                 coneResponse.processingOptions, coneResponse.visualizationInfo{iterRotations}, coneEfficiencyBasedResponseScalars] = ...
                 isomerizationMapFromRadiance(croppedImage, wave, ...
-                'meanLuminance', 0, ...                       % mean luminance in c/m2, meanLuminance = 0 means no rescaling
+                'meanLuminance', 0, ...                         % mean luminance in c/m2, meanLuminance = 0 means no rescaling
                 'horizFOV', 1, ...                              % horizontal field of view in degrees
                 'distance', 1.0, ...                            % distance to object in meters
                 'coneStride', 3, ...                            % how to sub-sample the full mosaic: stride = 1: full mosaic
                 'coneEfficiencyBasedReponseScaling', 'area',... % response scaling, choose one of {'none', 'peak', 'area'} (peak = equal amplitude cone efficiency), (area=equal area cone efficiency)
                 'isomerizationNoise', isomerizationNoise, ...   % whether to add isomerization noise or not
-                'responseInstances', 1, ...                   % number of response instances to compute (only when isomerizationNoise = true)
-                'mosaicHalfSize', mosaicHalfSize, ...                       % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+                'responseInstances', 1, ...                     % number of response instances to compute (only when isomerizationNoise = true)
+                'mosaicHalfSize', mosaicHalfSize, ...           % the subsampled mosaic will have (2*mosaicHalfSize+1)^2 cones
+                'integrationTime', integrationTime, ...         % the integration time for the cones
                 'lowPassFilter', lowPassFilter,...              % the low-pass filter type to use
                 'randomSeed', randomSeed, ...                   % the random seed to use
                 'skipOTF', false ...                            % when set to true, we only have diffraction-limited optics

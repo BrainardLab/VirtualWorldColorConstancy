@@ -116,6 +116,7 @@ parser.addParameter('lightShapeSet', ...
 parser.addParameter('baseSceneSet', ...
     {'CheckerBoard', 'IndoorPlant', 'Library', 'Mill', 'TableChairs', 'Warehouse'}, @iscellstr);
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
+parser.addParameter('integrationTime', 5/1000, @isnumeric);
 parser.addParameter('nRandomRotations', 0, @isnumeric);
 
 parser.parse(varargin{:});
@@ -125,6 +126,7 @@ cropImageHalfSize = parser.Results.cropImageHalfSize;
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
+integrationTime = parser.Results.integrationTime;
 saveRecipesConditionsTogether(parser);
 
 %% Set up ful-sized parpool if available.
@@ -176,6 +178,7 @@ try
         'reflectanceNumbers', reflectanceNumbers, ...
         'nAnnularRegions', 25, ...
         'mosaicHalfSize', mosaicHalfSize,...
+        'integrationTime', integrationTime, ...
         'cropImageHalfSize',cropImageHalfSize,...
         'nRandomRotations',parser.Results.nRandomRotations);
     

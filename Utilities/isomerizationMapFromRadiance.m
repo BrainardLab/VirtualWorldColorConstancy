@@ -10,7 +10,8 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     defaultConeEfficiencyBasedReponseScaling = 'none';
     defaultIsomerizationNoise = 'none';
     defaultResponseInstances = 1;
-    defaultMosaicHalfSize = 5; 
+    defaultintegrationTime = 5/1000; % 5ms
+    defaultMosaicHalfSize = 5;
     defaultConeStride = 15;
     defaultLowPassFilter = 'none';
     defaultRandomSeed =  242352352;
@@ -22,6 +23,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     parser.addParamValue('horizFOV',                            defaultHorizFOV,                            @isnumeric);
     parser.addParamValue('distance',                            defaultDistance,                            @isnumeric);
     parser.addParamValue('mosaicHalfSize',                      defaultMosaicHalfSize,                      @isnumeric);
+    parser.addParamValue('integrationTime',                     defaultintegrationTime,                     @isnumeric);
     parser.addParamValue('coneLMSdensities',                    defaultConeLMSdensities,                    @isvector);
     parser.addParamValue('coneEfficiencyBasedReponseScaling',   defaultConeEfficiencyBasedReponseScaling,   @ischar);
     parser.addParamValue('isomerizationNoise',                  defaultIsomerizationNoise,                  @ischar);
@@ -135,6 +137,7 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     desiredMosaicFOVinDeg = desiredMosaicFOVinMeters * humanConeMosaic.fov(1)/humanConeMosaic.width;
     humanConeMosaic.setSizeToFOV(desiredMosaicFOVinDeg);
     humanConeMosaic.noiseFlag = p.isomerizationNoise;
+    humanConeMosaic.integrationTime = p.integrationTime;
     
     
     % Subsample the mosaic pattern

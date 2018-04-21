@@ -272,7 +272,8 @@ if parser.Results.illuminantScaling
     % scales = generateIlluminantsScalesForScene(nLuminanceLevels * nReflectances);
     
     % Scales sampled uniformaly over Granda mean value range
-    scales = generateLogUniformScalesOfGranada(nLuminanceLevels * nReflectances);    
+    scales = generateLogUniformScales(nLuminanceLevels * nReflectances, ...
+                parser.Results.maxMeanIlluminantLevel, parser.Results.minMeanIlluminantLevel);
 else
     scales = ones(1,nLuminanceLevels * nReflectances);
 end
@@ -300,7 +301,7 @@ for ll = 1:nLuminanceLevels
         sceneRecord(sceneIndex).targetLuminanceLevel = targetLuminanceLevel;
         sceneRecord(sceneIndex).reflectanceNumber = reflectanceNumber;
         sceneRecord(sceneIndex).reflectanceIndex = rr;
-        sceneRecord(sceneIndex).scales = scales(rr);
+        sceneRecord(sceneIndex).scales = scales(sceneIndex);
     end
 end
 
