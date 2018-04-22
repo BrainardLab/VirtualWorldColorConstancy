@@ -1,4 +1,4 @@
-function effectsOfIlluminantOnLightness3D
+function effectsOfIlluminantOnXYZ2
 % This function produces some random illuminants at a few values of XYZ
 % under D65. Then it genreates some random illuminants. Then assuming that
 % the average reflectance over all surfaces in the world is known, it
@@ -15,7 +15,8 @@ function effectsOfIlluminantOnLightness3D
 
 colors={'-*r', '-*b', '-*g', '-*k', '-*m', '-*c', '-*k', '-*g', '-*b'};
 % Choose some luminance levels
-XYZLevels = [1 2];
+% XYZLevels = [0.3 0.3 0.3; 0.4 0.4 0.4; 0.5 0.5 0.5; 0.6 0.6 0.6]';
+XYZLevels = [0.4 0.4 0.4; 0.5 0.5 0.5]';
 reflectanceNumbers = [1:100];
 nSamples = size(XYZLevels,2)*length(reflectanceNumbers);
 % Desired wl sampling
@@ -160,7 +161,7 @@ drawnow;
 
 end
 
-function targetReflectances = getReflectances(nXYZValues, reflectanceNumbers, theWavelengths, S)
+function targetReflectances = getReflectances(XYZValues, reflectanceNumbers, theWavelengths, S)
 % This function makes the target reflectances at the desired luminance levels
 
 %% Load surfaces
@@ -204,20 +205,20 @@ nullSpace = null(theLuminanceSensitivity*diag(theIlluminant)*B);
 
 %% Generate new surfaces
 nsurfacePerXYZ = length(reflectanceNumbers);
-newSurfaces = zeros(S(3),size(nXYZValues,2)*nsurfacePerXYZ);
+newSurfaces = zeros(S(3),size(XYZValues,2)*nsurfacePerXYZ);
 newIndex =0;
 
-for ii = 1:size(nXYZValues,2)
+for ii = 1:size(XYZValues,2)
     m=0;
-    ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-    theReflectance = B*ran_wgts+sur_mean;
+    ww(:,ii) = (theLuminanceSensitivity*diag(theIlluminant)*B)\...
+        (XYZValues(:,ii) - theLuminanceSensitivity*diag(theIlluminant)*sur_mean);
 
     %Generate nReflectance surfaces for this random weight set
 while (m < nsurfacePerXYZ)
     m=m+1;
     OK = false;
     while (~OK)
-        newWeights = ran_wgts + nullSpace*rand(3,1);
+        newWeights = ww(:,ii) + nullSpace*(0.95*norm(ww(:,ii)))*rand(3,1);
         newReflectance = B*newWeights+sur_mean;
         if (all(newReflectance(:) >= 0) & all(newReflectance(:) <= 1))
             newIndex = newIndex+1;
