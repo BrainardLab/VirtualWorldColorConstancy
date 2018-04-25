@@ -70,6 +70,7 @@ rng('shuffle');
 %% Get inputs and defaults.
 parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
+parser.addParameter('XYZorLuminance','luminance',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
@@ -103,7 +104,9 @@ parser.addParameter('lightShapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
     {'CheckerBoard', 'IndoorPlant', 'Library', 'Mill', 'TableChairs', 'Warehouse'}, @iscellstr);
+
 parser.parse(varargin{:});
+XYZorLuminance = parser.Results.XYZorLuminance;
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
@@ -213,8 +216,10 @@ if (parser.Results.targetSpectrumNotFlat)
         makeSameShapeTargetReflectance(luminanceLevels,reflectanceNumbers, targetObjectFolder);
     elseif (parser.Results.targetReflectanceScaledCopies)
         makeTargetReflectanceScaledCopies(luminanceLevels,reflectanceNumbers, targetObjectFolder)
-    else
+    elseif (strcmp(XYZorLuminance,'luminance'))
         makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+    else
+        makeTargetReflectanceXYZ(luminanceLevels, reflectanceNumbers, targetObjectFolder);
     end
 else
     makeFlatTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
