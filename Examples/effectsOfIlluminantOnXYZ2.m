@@ -16,7 +16,7 @@ function effectsOfIlluminantOnXYZ2
 colors={'-*r', '-*b', '-*g', '-*k', '-*m', '-*c', '-*k', '-*g', '-*b'};
 % Choose some luminance levels
 % XYZLevels = [0.3 0.3 0.3; 0.4 0.4 0.4; 0.5 0.5 0.5; 0.6 0.6 0.6]';
-XYZLevels = [0.4 0.4 0.4; 0.5 0.5 0.5]';
+XYZLevels = [1 1 1]'*[0.1:0.1:0.7];
 reflectanceNumbers = [1:100];
 nSamples = size(XYZLevels,2)*length(reflectanceNumbers);
 % Desired wl sampling

@@ -21,7 +21,7 @@ function [correctClassificationTest, estimatedXYZTest, actualTestXYZ, ...
 
 colors={'-*r', '-*b', '-*g', '-*k', '-*m', '-*c', '-*k', '-*g', '-*b'};
 % Choose some luminance levels
-XYZLevels = [0.4 0.4 0.4; 0.5 0.5 0.5 ; 0.6 0.6 0.6]';
+XYZLevels = [1 1 1]'*[0.1:0.1:0.7];
 trainReflectanceNumbers = [1:90];
 testReflectanceNumbers = [91:100];
 reflectanceNumbers = [trainReflectanceNumbers testReflectanceNumbers];
