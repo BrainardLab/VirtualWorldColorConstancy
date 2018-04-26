@@ -7,6 +7,8 @@ function MakeToyRecipesByCombinations(varargin)
 %
 % Key/value pairs
 %   'outputName' - Output File Name, Default ExampleOutput
+%   'XYZorLuminance' - The labels are passed as XYZ color coordinates or
+%                   luminance values. Default 'luminance'
 %   'imageWidth' - image width, Should be kept small to keep redering time
 %                   low for rejected recipes
 %   'imageHeight'- image height, Should be kept small to keep redering time
@@ -34,7 +36,11 @@ function MakeToyRecipesByCombinations(varargin)
 %   'minMeanIlluminantLevel' - Min of mean value of ilumination spectrum
 %   'maxMeanIlluminantLevel' - Max of mean value of ilumination spectrum
 %   'illuminantScaling' - Boolean to specify if the mean value of the 
-%                         illuminant spectra are scaled or not
+%                         illuminant spectra should be scaled or not.
+%                         0 -> No scaling. The spectra varies only in shape
+%                         1 -> The mean value is chosen randomly with
+%                         logarithmic spacing in the range
+%                         [minMeanIlluminantLevel maxMeanIlluminantLevel]
 %   'targetSpectrumNotFlat' - boolean to specify arget spectra 
 %                   shape to be not flat, i.e. random, (true= random)
 %   'allTargetSpectrumSameShape' - boolean to specify all target spectrum to

@@ -8,16 +8,14 @@ parser = inputParser();
 parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
 parser.addParameter('reflectanceNumbers', [1 2], @isnumeric);
-parser.addParameter('nAnnularRegions', 25, @isnumeric);
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
-parser.addParameter('integrationTime', 5/1000, @isnumeric);
+parser.addParameter('integrationTime', 100/1000, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nRandomRotations', 0, @isnumeric);
 parser.addParameter('isomerizationNoise', 'frozen', @ischar);
 parser.parse(varargin{:});
 luminanceLevels = parser.Results.luminanceLevels;
 reflectanceNumbers = parser.Results.reflectanceNumbers;
-nAnnularRegions = parser.Results.nAnnularRegions;
 mosaicHalfSize = parser.Results.mosaicHalfSize;
 integrationTime = parser.Results.integrationTime;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
@@ -56,7 +54,6 @@ archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflect
 nRecipes = numel(archiveFiles);
 
 % Outputs for AMA
-allAverageAnnularResponses = zeros(3*nAnnularRegions, nRecipes);
 luminanceLevel = zeros(1,nRecipes);
 ctgInd = zeros(1,nRecipes);
 allLMSResponses = [];

@@ -23,14 +23,14 @@ if isempty(luminanceLevels) || isempty(reflectanceNumbers)
     
 else
     % look for recipes by name
-    nLuminanceLevels = numel(luminanceLevels);
+    nLuminanceLevels = size(luminanceLevels,2);
     nReflectances = numel(reflectanceNumbers);
     nScenes = nLuminanceLevels * nReflectances;
     archiveFiles = cell(1, nScenes);
     isFound = false(1, nScenes);
     
     for ll = 1:nLuminanceLevels
-        targetLuminanceLevel = luminanceLevels(ll);
+        targetLuminanceLevel = luminanceLevels(1,ll);
         for rr = 1:nReflectances
             reflectanceNumber = reflectanceNumbers(rr);
             
