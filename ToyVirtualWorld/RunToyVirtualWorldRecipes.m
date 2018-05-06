@@ -80,6 +80,8 @@ function RunToyVirtualWorldRecipes(varargin)
 %   'mosaicHalfSize' - Cone mosaic half size
 %   'nRandomRotations'  - Number of random rotations applied to the
 %                   rendered image to get new set of cone responses
+%   'maxDepth'  - Number of reflections from the light source. Default: 10
+%                   No reflection -> 1, single reflection -> 2
 
 %% Want each run to start with its own random seed
 rng('shuffle');
@@ -125,6 +127,7 @@ parser.addParameter('baseSceneSet', ...
 parser.addParameter('mosaicHalfSize', 25, @isnumeric);
 parser.addParameter('integrationTime', 100/1000, @isnumeric);
 parser.addParameter('nRandomRotations', 0, @isnumeric);
+parser.addParameter('maxDepth', 10, @isnumeric);
 
 parser.parse(varargin{:});
 imageWidth = parser.Results.imageWidth;
@@ -178,7 +181,8 @@ try
         'targetRotationRandom',parser.Results.targetRotationRandom,...
         'objectShapeSet', parser.Results.objectShapeSet, ...
         'lightShapeSet', parser.Results.lightShapeSet, ...
-        'baseSceneSet', parser.Results.baseSceneSet);
+        'baseSceneSet', parser.Results.baseSceneSet, ...
+        'maxDepth', parser.Results.maxDepth);
         
     ConeResponseToyVirtualWorldRecipes(...
         'outputName',parser.Results.outputName,...

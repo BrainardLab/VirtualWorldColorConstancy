@@ -110,6 +110,7 @@ parser.addParameter('lightShapeSet', ...
     {'Barrel', 'BigBall', 'ChampagneBottle', 'RingToy', 'SmallBall', 'Xylophone'}, @iscellstr);
 parser.addParameter('baseSceneSet', ...
     {'CheckerBoard', 'IndoorPlant', 'Library', 'Mill', 'TableChairs', 'Warehouse'}, @iscellstr);
+parser.addParameter('maxDepth', 10, @isnumeric);
 
 parser.parse(varargin{:});
 XYZorLuminance = parser.Results.XYZorLuminance;
@@ -132,6 +133,7 @@ illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
 nInsertedLights = parser.Results.nInsertedLights;
 nInsertObjects = parser.Results.nInsertObjects;
+maxDepth = parser.Results.maxDepth;
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
 
@@ -578,7 +580,7 @@ parfor sceneIndex = 1:nScenes
                 fullRendering = VwccMitsubaRenderingQuality( ...
                     'integratorPluginType', 'path', ...
                     'samplerPluginType', 'ldsampler');
-                fullRendering.addIntegratorProperty('maxDepth', 'integer', 10);
+                fullRendering.addIntegratorProperty('maxDepth', 'integer', maxDepth);
                 fullRendering.addSamplerProperty('sampleCount', 'integer', 512);
                 
                 % bless specific meshes in the base scene as area lights
