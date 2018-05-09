@@ -1,4 +1,4 @@
-function effectsOfIlluminantOnXYZ2
+function [XYZLevels, XYZRandomIlluminantContrast] = effectsOfIlluminantOnXYZ2
 % This function produces some random illuminants at a few values of XYZ
 % under D65. Then it genreates some random illuminants. Then assuming that
 % the average reflectance over all surfaces in the world is known, it
@@ -128,18 +128,20 @@ drawnow;
 % end
 
 % This is the model of the mean reflectance
-for ii = 1: nSamples
-    meanReflectance(:,ii) = getObjectReflectances(10, S);
-end
+% for ii = 1: nSamples
+%     [meanReflectanceEst(:,ii) ,meanReflectance] = getObjectReflectances(100, S);
+% end
+[~ ,meanReflectance] = getObjectReflectances(10, S);
 
 XYZOfMeanReflectance =zeros(3,nSamples);
 XYZRandomIlluminantContrast =zeros(3,nSamples);
 
 for ii = 1:nSamples
-    XYZOfMeanReflectance(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*meanReflectance(:,ii);
+%     XYZOfMeanReflectance(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*meanReflectanceEst(:,ii);
+    XYZOfMeanReflectance(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*meanReflectance;
     XYZRandomIlluminantContrast(:,ii) = theLuminanceSensitivity*diag(newIlluminance(:,ii))*targetReflectances(:,ii);
 end
-XYZRandomIlluminantContrast = 1./(1+XYZOfMeanReflectance./XYZRandomIlluminantContrast);
+XYZRandomIlluminantContrast = XYZRandomIlluminantContrast./XYZOfMeanReflectance;
 
 % Plot these luminances
 subplot(2,2,4);
@@ -231,7 +233,7 @@ end
 targetReflectances = newSurfaces;
 end
 
-function objectReflectances = getObjectReflectances(nSurfaces, S)
+function [objectReflectances, sur_mean] = getObjectReflectances(nSurfaces, S)
 
 %% Load surfaces
 % These are in the Psychtoolbox.
