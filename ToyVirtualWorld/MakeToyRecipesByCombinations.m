@@ -280,13 +280,17 @@ targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
 % the spectra to natural scenes, we have decided to scale all the spectra
 % in the base scene with the same scale factor. This is chosen here.
 if parser.Results.illuminantScaling
-
+    if illuminantSpectraRandom
     % Scales sampled from true Granda mean value distribution
     % scales = generateIlluminantsScalesForScene(nLuminanceLevels * nReflectances);
     
     % Scales sampled uniformaly over Granda mean value range
     scales = generateLogUniformScales(nLuminanceLevels * nReflectances, ...
                 parser.Results.maxMeanIlluminantLevel, parser.Results.minMeanIlluminantLevel);
+    else
+        scales = generateLogUniformScales(1, parser.Results.maxMeanIlluminantLevel, ...
+            parser.Results.minMeanIlluminantLevel)*ones(1,nLuminanceLevels * nReflectances);
+    end
 else
     scales = ones(1,nLuminanceLevels * nReflectances);
 end
