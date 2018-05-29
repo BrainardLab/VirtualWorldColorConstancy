@@ -30,28 +30,28 @@ scaleFactor = 1;
 whichLuminaceForMosaic = [1 2 3];
 whichReflectancesForMosaic = [1:5];
 
-for ii = 1:size(luminanceLevels,2)
-    for jj = 1:size(reflectanceNumbers,2)
-        
-        % Get the path corresponding to the luminance level and reflectance
-        namePattern = FormatRecipeName(luminanceLevels(ii),reflectanceNumbers(jj), '*', '*');        
-        pathToWorkingFolder = fullfile(pathToFolder,'Working');
-        infoRecipe = dir(fullfile(pathToWorkingFolder,namePattern));
-        pathtoFullImage = fullfile(pathToWorkingFolder,infoRecipe.name,'renderings/Mitsuba/normal.mat');
-        FullImageData   = load(pathtoFullImage);
-        imageData   = FullImageData.multispectralImage;
-        croppedImage = imageData(380:580,540:740,:);
+% for ii = 1:size(luminanceLevels,2)
+%     for jj = 1:size(reflectanceNumbers,2)
+%         
+%         % Get the path corresponding to the luminance level and reflectance
+%         namePattern = FormatRecipeName(luminanceLevels(ii),reflectanceNumbers(jj), '*', '*');        
+%         pathToWorkingFolder = fullfile(pathToFolder,'Working');
+%         infoRecipe = dir(fullfile(pathToWorkingFolder,namePattern));
+%         pathtoFullImage = fullfile(pathToWorkingFolder,infoRecipe.name,'renderings/Mitsuba/normal.mat');
+%         FullImageData   = load(pathtoFullImage);
+%         imageData   = FullImageData.multispectralImage;
+% %         croppedImage = imageData(380:580,540:740,:);
 %         croppedImage = imageData(100:140,140:180,:);
-        [sRGBCroppedImage, ~, ~, tempScaleFactor] = rtbMultispectralToSRGB(croppedImage,[400,10,31],...
-            'toneMapFactor',toneMapFactor, 'isScale',true);
-        if tempScaleFactor < scaleFactor
-            scaleFactor = tempScaleFactor;
-        end
-                
-    end
-end
+%         [sRGBCroppedImage, ~, ~, tempScaleFactor] = rtbMultispectralToSRGB(croppedImage,[400,10,31],...
+%             'toneMapFactor',toneMapFactor, 'isScale',true);
+%         if tempScaleFactor < scaleFactor
+%             scaleFactor = tempScaleFactor;
+%         end
+%                 
+%     end
+% end
 
-
+scaleFactor = 0.003;
 %% Now plot the cropped image            
 for ii = 1:size(whichLuminaceForMosaic,2)
     for jj = 1:size(whichReflectancesForMosaic,2)
@@ -73,17 +73,25 @@ for ii = 1:size(whichLuminaceForMosaic,2)
             [(jj-1)*95+40 (ii-1)*95+40 90 90]);
         image(uint8(sRGBCropped));
         if (ii ==1)
-            xlabel(num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))));
+            if (jj==3)
+                xlabel({num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))),'Image index'});
+            else
+                xlabel(num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))));
+            end
         end
         axis square;
         set(gca,'xtick',[],'ytick',[]);
         if (jj == 1)
-            ylabel(str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii)))));
+            if ii ==2
+                ylabel([{'LRV',str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii))))}]);
+            else
+                ylabel(str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii)))));
+            end
         end                
     end
 end
 
-figFullMontage = fullfile(pathToFolder,'CroppedImageMontage.eps');
+figFullMontage = fullfile(pathToFolder,'CroppedImageMontage_Scale_0_3.eps');
 set(gcf,'PaperPositionMode','auto');
 save2eps(figFullMontage,gcf,600);
 close;

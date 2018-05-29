@@ -389,7 +389,7 @@ parfor sceneIndex = 1:nScenes
                 targetScale = 0.3 + rand()/2;
             else
 %               targetScale =  1; % BigBall-Library Case 1  
-              targetScale =  1; % BigBall-Library Case 2  
+                targetScale =  1; % BigBall-Library Case 2  
 %               targetScale =  0.5; % BigBall-Library Case 3
 %               targetScale =  1; % BigBall-Mill Case 4
             end            
