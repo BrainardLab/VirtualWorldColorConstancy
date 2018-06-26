@@ -8,7 +8,7 @@
 
     Read the function descriptions for the input options.
 
-2. To make sure that everything is was installed properly in Matlab do:
+2. To make sure that everything was installed properly type:
 
     RunToyVirtualWorldRecipes()
 
@@ -17,7 +17,7 @@
 
 3. The script to render images for the 3 conditions used in the luminance 
    constancy paper are given in this folder. These are named Condition1.m, 
-   Condition2.m, etc.
+   Condition2.m, Condition3.m.
 
 4. There are some additional scripts in this folder to illustrate how VWCC works.
 
@@ -34,13 +34,13 @@
 
     RunToyVirtualWorldRecipes('targetReflectanceScaledCopies',true);
 
-6. To make cropped image montage like in Figure 5, use the function:
+6. To make cropped image montage as in Figure 5, use the function:
     makeCroppedImageMontage
 
-    An example call for the case with luminance levels [0.2 0.4 0.6] each with 5 images would be
+    Example: For luminance levels [0.2 0.4 0.6] each with 5 images:
+
     makeCroppedImageMontage('pathToFolder',[0.2 0.4 0.6], [1:5],0.005);
+
+    Where 'pathToFolder' is the path to the condition fodler.
     The montage would be saved in 'pathToFolder' as a .eps file.
-
-7. To get Figure 6, 7 and 8. Use the functions:
-
 
