@@ -1,8 +1,8 @@
-function makeCroppedImageMontage(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeName)
+function makeCroppedImageMontage(pathToFolder, luminanceLevels, reflectanceNumbers, scaleFactor)
 % makeCroppedImageMontage(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeConditions,varargin)
 %
 % Usage: 
-%     makeCroppedImageMontage(fullfile('/Volumes/OWSHD','Dropbox (Aguirre-Brainard Lab)','/IBIO_analysis/VirtualWorldColorConstancy/ExampleOutput'),[0.2 0.4 0.6], [1:5],[])
+%     makeCroppedImageMontage(fullfile('/Volumes/OWSHD','Dropbox (Aguirre-Brainard Lab)','/IBIO_analysis/VirtualWorldColorConstancy/ExampleOutput'),[0.2 0.4 0.6], [1:5],0.005)
 %
 % Description:
 %     This function returns the montage of scaled cropped images.
@@ -25,8 +25,6 @@ hFig2 = figure();
 set(hFig2,'units','pixels', 'Position', [1 1 550 360]);
 
 % We need the scale factor for sRGB images. Lets do this.
-
-scaleFactor = 1;
 whichLuminaceForMosaic = [1 2 3];
 whichReflectancesForMosaic = [1:5];
 
@@ -51,7 +49,6 @@ whichReflectancesForMosaic = [1:5];
 %     end
 % end
 
-scaleFactor = 0.005;
 %% Now plot the cropped image            
 for ii = 1:size(whichLuminaceForMosaic,2)
     for jj = 1:size(whichReflectancesForMosaic,2)
@@ -64,8 +61,8 @@ for ii = 1:size(whichLuminaceForMosaic,2)
         pathtoFullImage = fullfile(pathToWorkingFolder,infoRecipe.name,'renderings/Mitsuba/normal.mat');
         FullImageData   = load(pathtoFullImage);
         imageData   = FullImageData.multispectralImage;
-        croppedImage = imageData(380:580,540:740,:);
-%         croppedImage = imageData(100:140,140:180,:);
+%         croppedImage = imageData(380:580,540:740,:);
+        croppedImage = imageData(100:140,140:180,:);
         [sRGBCropped, ~, ~, ~] = rtbMultispectralToSRGB(croppedImage,[400,10,31],...
             'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
 
@@ -91,7 +88,7 @@ for ii = 1:size(whichLuminaceForMosaic,2)
     end
 end
 
-figFullMontage = fullfile(pathToFolder,'CroppedImageMontage_Scale_0_5.eps');
+figFullMontage = fullfile(pathToFolder,['CroppedImageMontage_Scale_',num2str(scaleFactor,'%.4f'),'.eps']);
 set(gcf,'PaperPositionMode','auto');
 save2eps(figFullMontage,gcf,600);
 close;

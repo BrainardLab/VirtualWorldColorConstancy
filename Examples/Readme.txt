@@ -34,5 +34,13 @@
 
     RunToyVirtualWorldRecipes('targetReflectanceScaledCopies',true);
 
-6. 
+6. To make cropped image montage like in Figure 5, use the function:
+    makeCroppedImageMontage
+
+    An example call for the case with luminance levels [0.2 0.4 0.6] each with 5 images would be
+    makeCroppedImageMontage('pathToFolder',[0.2 0.4 0.6], [1:5],0.005);
+    The montage would be saved in 'pathToFolder' as a .eps file.
+
+7. To get Figure 6, 7 and 8. Use the functions:
+
 
