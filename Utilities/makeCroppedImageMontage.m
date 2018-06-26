@@ -22,7 +22,7 @@ toneMapFactor = 0;
 
 % First make a figure
 hFig2 = figure();
-set(hFig2,'units','pixels', 'Position', [1 1 550 350]);
+set(hFig2,'units','pixels', 'Position', [1 1 550 360]);
 
 % We need the scale factor for sRGB images. Lets do this.
 
@@ -51,7 +51,7 @@ whichReflectancesForMosaic = [1:5];
 %     end
 % end
 
-scaleFactor = 0.003;
+scaleFactor = 0.005;
 %% Now plot the cropped image            
 for ii = 1:size(whichLuminaceForMosaic,2)
     for jj = 1:size(whichReflectancesForMosaic,2)
@@ -70,28 +70,28 @@ for ii = 1:size(whichLuminaceForMosaic,2)
             'toneMapFactor',toneMapFactor, 'scaleFactor', scaleFactor);
 
         first=axes(hFig2,'units','pixels','position', ...
-            [(jj-1)*95+40 (ii-1)*95+40 90 90]);
+            [(jj-1)*95+60 (ii-1)*95+70 90 90]);
         image(uint8(sRGBCropped));
         if (ii ==1)
             if (jj==3)
-                xlabel({num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))),'Image index'});
+                xlabel({num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))),'Image index'},'FontSize',20);
             else
-                xlabel(num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))));
+                xlabel(num2str(reflectanceNumbers(whichReflectancesForMosaic(jj))),'FontSize',20);
             end
         end
         axis square;
         set(gca,'xtick',[],'ytick',[]);
         if (jj == 1)
             if ii ==2
-                ylabel([{'LRV',str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii))))}]);
+                ylabel([{'LRV',str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii))))}],'FontSize',20);
             else
-                ylabel(str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii)))));
+                ylabel(str2double(sprintf('%.2f',luminanceLevels(whichLuminaceForMosaic(ii)))),'FontSize',20);
             end
         end                
     end
 end
 
-figFullMontage = fullfile(pathToFolder,'CroppedImageMontage_Scale_0_3.eps');
+figFullMontage = fullfile(pathToFolder,'CroppedImageMontage_Scale_0_5.eps');
 set(gcf,'PaperPositionMode','auto');
 save2eps(figFullMontage,gcf,600);
 close;

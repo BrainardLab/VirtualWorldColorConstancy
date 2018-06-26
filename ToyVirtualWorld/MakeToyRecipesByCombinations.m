@@ -149,7 +149,7 @@ if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
 end
 
-%% HERE IS WHAT I THINK.  THIS CODE WILL CHANGE THE SIZE OF THE IMAGE.
+%% Set the size of the image
 
 hints.imageHeight = imageHeight;
 hints.imageWidth = imageWidth;

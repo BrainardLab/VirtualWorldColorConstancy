@@ -3,10 +3,11 @@ Project to estimate scene illuminants and surfaces within a virtual world genera
 
 VirtualWorldColorConstancy is a Matlab toolbox to generate multi-spectral images of virtual 3D scenes.
 
-Installation (### Needs to be Tested ###): 
+Installation: 
 1. Install ToolboxToolbox https://github.com/ToolboxHub/ToolboxToolbox
-2. Install Docker.
-3. tbUseProject('VirtualWorldColorConstancy')
+2. Install Docker (https://www.docker.com/)
+3. In Matlab do: tbUseProject('VirtualWorldColorConstancy').
+4. The example files for render images are in Examples folder.
 
 
 
