@@ -22,25 +22,13 @@
 4. There are some additional scripts in this folder to illustrate how VWCC works.
 
     a. RenderABaseScene: This function can be used to render one of 6 base scenes.
-    b. RunToyVirtualWorldRecipes has options to insert objects in the base scene.
-       For example, 
-    RunToyVirtualWorldRecipes('baseScenseSet',{'Library'},'objectShapeSet',{'RingToy'});
-    will insert the object RingToy in the basescene library. 
-    Similarly, one can add additional lights.
 
-5. To generate images at multiple luminance levels with the same relative shape of target 
-    object reflectance spectrum (similar to Figure 5:Condition 1-3 in the paper) use the option
-    targetReflectanceScaledCopies.
-
-    RunToyVirtualWorldRecipes('targetReflectanceScaledCopies',true);
-
-6. To make cropped image montage as in Figure 5, use the function:
-    makeCroppedImageMontage
-
-    Example: For luminance levels [0.2 0.4 0.6] each with 5 images:
-
-    makeCroppedImageMontage('pathToFolder',[0.2 0.4 0.6], [1:5],0.005);
-
-    Where 'pathToFolder' is the path to the condition fodler.
-    The montage would be saved in 'pathToFolder' as a .eps file.
+    b. To change the shape of target object use the option 'objectShapeSet' in RunToyVirtualWorldRecipes.
+       Similarly, one can change the shape of inserted light source. If more than one option are provided
+       the shape is chosen randomly. 
+       To have more than one inserted object/lights, use the option nInsertedObjects/nInsertedLights.
+    
+    c. Target object position, size and orientation can be set to random using 
+       the options targetPositionRandom, targetScaleRandom, targetRotationRandom.
+       Similarly, light position and scale can be set to random using lightPositionRandom and lightScaleRandom.
 

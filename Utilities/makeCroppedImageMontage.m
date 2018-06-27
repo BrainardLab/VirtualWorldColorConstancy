@@ -1,4 +1,4 @@
-function makeCroppedImageMontage(pathToFolder, luminanceLevels, reflectanceNumbers, scaleFactor)
+function makeCroppedImageMontage(folderName, luminanceLevels, reflectanceNumbers, scaleFactor)
 % makeCroppedImageMontage(pathToFolder,luminanceLevels,reflectanceNumbers,RecipeConditions,varargin)
 %
 % Usage: 
@@ -19,7 +19,7 @@ function makeCroppedImageMontage(pathToFolder, luminanceLevels, reflectanceNumbe
 %
 
 toneMapFactor = 0;
-
+projectName = 'VirtualWorldColorConstancy';
 % First make a figure
 hFig2 = figure();
 set(hFig2,'units','pixels', 'Position', [1 1 550 360]);
@@ -28,27 +28,6 @@ set(hFig2,'units','pixels', 'Position', [1 1 550 360]);
 whichLuminaceForMosaic = [1 2 3];
 whichReflectancesForMosaic = [1:5];
 
-% for ii = 1:size(luminanceLevels,2)
-%     for jj = 1:size(reflectanceNumbers,2)
-%         
-%         % Get the path corresponding to the luminance level and reflectance
-%         namePattern = FormatRecipeName(luminanceLevels(ii),reflectanceNumbers(jj), '*', '*');        
-%         pathToWorkingFolder = fullfile(pathToFolder,'Working');
-%         infoRecipe = dir(fullfile(pathToWorkingFolder,namePattern));
-%         pathtoFullImage = fullfile(pathToWorkingFolder,infoRecipe.name,'renderings/Mitsuba/normal.mat');
-%         FullImageData   = load(pathtoFullImage);
-%         imageData   = FullImageData.multispectralImage;
-% %         croppedImage = imageData(380:580,540:740,:);
-%         croppedImage = imageData(100:140,140:180,:);
-%         [sRGBCroppedImage, ~, ~, tempScaleFactor] = rtbMultispectralToSRGB(croppedImage,[400,10,31],...
-%             'toneMapFactor',toneMapFactor, 'isScale',true);
-%         if tempScaleFactor < scaleFactor
-%             scaleFactor = tempScaleFactor;
-%         end
-%                 
-%     end
-% end
-
 %% Now plot the cropped image            
 for ii = 1:size(whichLuminaceForMosaic,2)
     for jj = 1:size(whichReflectancesForMosaic,2)
@@ -56,7 +35,7 @@ for ii = 1:size(whichLuminaceForMosaic,2)
         % Get the path corresponding to the luminance level and reflectance
         namePattern = FormatRecipeName(luminanceLevels(whichLuminaceForMosaic(ii)),...
             reflectanceNumbers(whichReflectancesForMosaic(jj)), '*', '*');        
-        pathToWorkingFolder = fullfile(pathToFolder,'Working');
+        pathToWorkingFolder = fullfile(getpref(projectName, 'baseFolder'),folderName,'Working');
         infoRecipe = dir(fullfile(pathToWorkingFolder,namePattern));
         pathtoFullImage = fullfile(pathToWorkingFolder,infoRecipe.name,'renderings/Mitsuba/normal.mat');
         FullImageData   = load(pathtoFullImage);
@@ -88,7 +67,8 @@ for ii = 1:size(whichLuminaceForMosaic,2)
     end
 end
 
-figFullMontage = fullfile(pathToFolder,['CroppedImageMontage_Scale_',num2str(scaleFactor,'%.4f'),'.eps']);
+figFullMontage = fullfile(getpref(projectName, 'baseFolder'),folderName,...
+    ['CroppedImageMontage_Scale_',num2str(scaleFactor,'%.4f'),'.eps']);
 set(gcf,'PaperPositionMode','auto');
 save2eps(figFullMontage,gcf,600);
 close;
