@@ -6,7 +6,9 @@
 % background object reflectnace spectra.
 %
 % 100 images are rendered at 10 equally spaced LRV levels between [0.2 0.6]
-%
+
+tic;
+
 RunToyVirtualWorldRecipes('outputName','Condition1', ...
     'imageWidth',320, ... % Pixel width of rendered image
     'imageHeight',240, ... % Pixel height of rendered image
@@ -35,3 +37,5 @@ RunToyVirtualWorldRecipes('outputName','Condition1', ...
                         % maxDepth = 1: Direct light from the light source.
                         % maxDepth = 2: Light bounced directly off the object. No secondary reflections
                         % maxDepth = N: (N-2) secondary reflections
+                        
+toc
