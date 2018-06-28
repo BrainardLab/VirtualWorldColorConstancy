@@ -7,8 +7,6 @@ Installation:
 1. Install ToolboxToolbox https://github.com/ToolboxHub/ToolboxToolbox
 2. Install Docker (https://www.docker.com/)
 3. In Matlab do: tbUseProject('VirtualWorldColorConstancy').
-4. The example files for render images are in Examples folder.
-
-
+4. The example files to render images are in Examples folder.
 
 We welcome comments on the code and share it freely.  Any use of the code or ideas expressed here should be treated like any other academic publication and cited.  
