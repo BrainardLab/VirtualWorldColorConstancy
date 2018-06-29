@@ -255,7 +255,6 @@ otherObjectReflectances = aioGetFiles('Reflectances', 'OtherObjects', ...
     'fullPaths', false);
 baseSceneReflectances = otherObjectReflectances;
 
-
 %% Predefine random orders for the case where the two intervals on a trial have the same background reflectances
 for ii = 1:nReflectances
     baseSceneReflectanceRandomOrder(ii,:) = randperm(length(otherObjectReflectances));
@@ -276,6 +275,7 @@ targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
     'fullPaths', false);
 
 %% Predefine scalings for the illuminants in each scene
+%
 % If the iluminants are scaled to match the variations in the mean value of
 % the spectra to natural scenes, we have decided to scale all the spectra
 % in the base scene with the same scale factor. This is chosen here.
@@ -322,7 +322,7 @@ for ll = 1:nLuminanceLevels
     end
 end
 
-% iterate scene records with one parfor loop
+% Iterate scene records with one parfor loop
 % Matlab does not support nested parfor loops
 parfor sceneIndex = 1:nScenes
     workingRecord = sceneRecord(sceneIndex);
@@ -361,7 +361,6 @@ parfor sceneIndex = 1:nScenes
             
             %% For each shape insert, choose a random spatial transformation.
             insertShapes = cell(1, nInsertObjects+1);
-            
             targetShape = objectShapes{targetShapeIndex};
             
             if parser.Results.targetPositionRandom
@@ -378,9 +377,9 @@ parfor sceneIndex = 1:nScenes
             if parser.Results.targetPositionRandom
                 targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
             else
-                % using fixed object position that works for the Library base scene
+               % using fixed object position that works for the Library base scene
 %              targetPosition = [ -0.010709 4.927981 0.482899]; % BigBall-Library Case 1  
-             targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
+               targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
 %              targetPosition = [ -0.510709 0.0527981 0.482899]; % BigBall-Library Case 3
 %              targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
             end
@@ -404,9 +403,9 @@ parfor sceneIndex = 1:nScenes
                 'name', 'shape-01', ...
                 'transformation', transformation);
  
-% % Store the shape, locations, rotation, etc. of the inserted objects in a
-% conditions.txt file
-% 
+            % Store the shape, locations, rotation, etc. of the inserted objects in a
+            % conditions.txt file
+            %
             % Basic setupe of the conditions.txt file
             allNames = {'imageName', 'groupName'};
             allValues = cat(1, {'normal', 'normal'}, {'mask', 'mask'});
@@ -620,12 +619,11 @@ parfor sceneIndex = 1:nScenes
                     'propertyName', 'radiance');
                 %areaLightSpectra.spectra = emitterSpectra;
                 
-                % If scaling =1, scale all the illuminant spectra in the
+                % If scaling = 1, scale all the illuminant spectra in the
                 % base scene by the same scale factor. To do this the
                 % pre-selected illuminants are rewritten in the resource
                 % folder of the recipe with the scaling and the paths are
                 % appropiately changed.
-                
                 if illuminantSpectraRandom
                     tempIlluminantIndex = randperm(length(illuminantSpectra),nBaseLights+nInsertedLights);
                     for iterTempIlluminantIndex = 1:length(tempIlluminantIndex)
@@ -633,6 +631,13 @@ parfor sceneIndex = 1:nScenes
                             illuminantSpectra(tempIlluminantIndex(iterTempIlluminantIndex)));
                         [tempWavelengths, tempMagnitudes] = rtbReadSpectrum(tempSpectrumFileName{1});
                         resourceFolder = fullfile(workingRecord.hints.workingFolder,recipeName,'resources');
+                        
+                        % Putting this here, so that the next time a
+                        % warning about resourceFolder being a temp
+                        % variable inside a parfor loop gets thrown, we'll
+                        % know the warning label and can turn off the
+                        % warning.
+                        [a,b] = lastwarn
                         tempFileName = fullfile(resourceFolder,'Illuminants','BaseScene',...
                             illuminantSpectra(tempIlluminantIndex(iterTempIlluminantIndex)));
                         rtbWriteSpectrumFile(tempWavelengths,workingRecord.scales*tempMagnitudes,tempFileName{1});
