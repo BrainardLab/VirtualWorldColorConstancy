@@ -1,8 +1,8 @@
 % Condition3.m
-% This script renders 1000 images for condition 3. 
-%
-% In the paper we have used 3000 images. This can be changed using the
-% option reflectanceNumbers by setting it to [1:300].
+% This script renders 3000 images for condition 3. 
+% This number rendered can be changed by setting
+% option reflectanceNumbers. For example, setting it to [1:100]
+% gives 1000 imaage, because there are 10 luminance levels.
 %
 % Condition:
 % Varaible target reflectance spectrum, Variable illuminant spectra,
@@ -21,7 +21,7 @@ RunToyVirtualWorldRecipes('outputName','Condition3', ...
     'cropImageHalfSize', 25, ... % Half width of the image area aroound the target used for simulating visual response
     'nOtherObjectSurfaceReflectance', 999, ... % Number of random surfaces to choose from
     'luminanceLevels', linspace(0.2,0.6,10), ... % LRV levels
-    'reflectanceNumbers',[1:100], ... % Number of images at each LRV level
+    'reflectanceNumbers',[1:300], ... % Number of images at each LRV level
     'nInsertedLights', 1, ... % Number of inserted lights
     'nInsertObjects', 0, ... % Number of objects inserted in the scene other than target object
     'otherObjectReflectanceRandom', true, ... % Background reflectance spectra, true -> random samples
