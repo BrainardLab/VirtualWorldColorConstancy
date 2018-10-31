@@ -6,13 +6,15 @@ function MakeToyRecipesByCombinations(varargin)
 % parameter values, drawing from each parameter set.
 %
 % Key/value pairs
-%   'outputName' - Output File Name, Default ExampleOutput
+%   'outputName'     - Output File Name, Default ExampleOutput
 %   'XYZorLuminance' - The labels are passed as XYZ color coordinates or
-%                   luminance values. Default 'luminance'
-%   'imageWidth' - image width, Should be kept small to keep redering time
-%                   low for rejected recipes
-%   'imageHeight'- image height, Should be kept small to keep redering time
-%                   low for rejected recipes
+%                      luminance values. Default 'luminance'
+%   'imageWidth'     - image width, Should be kept small to keep redering 
+%                      time low for rejected recipes
+%   'imageHeight'    - image height, Should be kept small to keep redering 
+%                      time low for rejected recipes
+%   'fovinDegrees'   - field of view in Degrees, string, 
+%                      defalut '0' = entire basescene
 %   'makeCropImageHalfSize'  - size of cropped patch
 %   'nOtherObjectSurfaceReflectance' - Number of spectra to be generated
 %                   for choosing background surface reflectance (max 999)
@@ -79,6 +81,7 @@ parser.addParameter('outputName','ExampleOutput',@ischar);
 parser.addParameter('XYZorLuminance','luminance',@ischar);
 parser.addParameter('imageWidth', 320, @isnumeric);
 parser.addParameter('imageHeight', 240, @isnumeric);
+parser.addParameter('fovinDegrees', 0, @isnumeric);
 parser.addParameter('cropImageHalfSize', 25, @isnumeric);
 parser.addParameter('nOtherObjectSurfaceReflectance', 100, @isnumeric);
 parser.addParameter('luminanceLevels', [0.2 0.6], @isnumeric);
@@ -91,6 +94,7 @@ parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
+parser.addParameter('bMakeD65', false, @islogical);
 parser.addParameter('minMeanIlluminantLevel', 10, @isnumeric);
 parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
 parser.addParameter('illuminantScaling', 0, @isnumeric);
@@ -116,6 +120,7 @@ parser.parse(varargin{:});
 XYZorLuminance = parser.Results.XYZorLuminance;
 imageWidth = parser.Results.imageWidth;
 imageHeight = parser.Results.imageHeight;
+fovinDegrees = parser.Results.fovinDegrees;
 cropImageHalfSize = parser.Results.cropImageHalfSize;
 nOtherObjectSurfaceReflectance = parser.Results.nOtherObjectSurfaceReflectance;
 luminanceLevels = parser.Results.luminanceLevels;
@@ -131,6 +136,7 @@ baseSceneReflectancesSameAcrossInterval = parser.Results.baseSceneReflectancesSa
 otherObjectReflectancesSameAcrossInterval = parser.Results.otherObjectReflectancesSameAcrossInterval;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
 illuminantSpectrumNotFlat = parser.Results.illuminantSpectrumNotFlat;
+bMakeD65 = parser.Results.bMakeD65;
 nInsertedLights = parser.Results.nInsertedLights;
 nInsertObjects = parser.Results.nInsertObjects;
 maxDepth = parser.Results.maxDepth;
@@ -153,6 +159,9 @@ end
 
 hints.imageHeight = imageHeight;
 hints.imageWidth = imageWidth;
+if ~(fovinDegrees==0)    
+    hints.fov = fovinDegrees*pi/180;
+end
 
 %% Configure where to find assets.
 aioPrefs.locations = aioLocation( ...
@@ -207,7 +216,9 @@ if illuminantSpectraRandom
     end
 else
     totalRandomLightSpectra = 1;
-    if (illuminantSpectrumNotFlat)
+    if (bMakeD65)
+        makeD65(illuminantsFolder);        
+    elseif (illuminantSpectrumNotFlat)
         makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0);
     else
         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
