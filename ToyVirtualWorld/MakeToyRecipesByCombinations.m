@@ -237,6 +237,8 @@ if (parser.Results.targetSpectrumNotFlat)
         makeTargetReflectanceScaledCopies(luminanceLevels,reflectanceNumbers, targetObjectFolder)
     elseif (strcmp(XYZorLuminance,'luminance'))
         makeTargetReflectance(luminanceLevels, reflectanceNumbers, targetObjectFolder);
+    elseif (strcmp(XYZorLuminance,'hue'))
+        makeTargetReflectanceHue(luminanceLevels, reflectanceNumbers, targetObjectFolder);
     else
         makeTargetReflectanceXYZ(luminanceLevels, reflectanceNumbers, targetObjectFolder);
     end
