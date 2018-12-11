@@ -87,9 +87,9 @@ for ii = 1:size(HueLevels,2)
     %% Convert Hue levels to XYZ 
     % First choose random levels of the saturation and 
     satMin = 0.2; 
-    satMax = 0.8;
+    satMax = 0.6;
     lightMin = 0.2;
-    lightMax = 0.8;
+    lightMax = 0.6;
 
     hueLevels = [0.1:0.1:1];
 
