@@ -728,6 +728,18 @@ parfor sceneIndex = 1:nScenes
             end
         end
         
+        % Get the factoid images
+        nativeSceneFiles = fullfile(workingRecord.hints.workingFolder, ...
+            workingRecord.hints.recipeName, 'scenes','Mitsuba','normal.xml');
+        factoidSceneFile = rtbWriteMitsubaFactoidScene(nativeSceneFiles, ...
+                    'hints', workingRecord.hints);
+        factoids = rtbRenderMitsubaFactoids(factoidSceneFile, ...
+                    'hints', workingRecord.hints);
+        
+        tempName=matfile(fullfile(workingRecord.hints.workingFolder,workingRecord.hints.recipeName, ...
+            'renderings','Mitsuba','normal-factoids.mat'),'Writable',true);
+        tempName.factoids=factoids;
+
         % keep track of attempts and rejections
         workingRecord.nAttempts = attempt;
         
@@ -746,14 +758,6 @@ parfor sceneIndex = 1:nScenes
             rtbPackUpRecipe(workingRecord.recipe, archiveFile, 'ignoreFolders', excludeFolders);
         end
         
-        % Get the factoid images
-        nativeSceneFiles = fullfile(workingRecord.hints.workingFolder, ...
-            workingRecord.hints.recipeName, 'scenes','Mitsuba','normal.xml');
-        factoidSceneFile = rtbWriteMitsubaFactoidScene(nativeSceneFiles, ...
-                    'hints', workingRecord.hints);
-        factoids = rtbRenderMitsubaFactoids(factoidSceneFile, ...
-                    'hints', workingRecord.hints);
-
         sceneRecord(sceneIndex) = workingRecord;
         
     catch err
