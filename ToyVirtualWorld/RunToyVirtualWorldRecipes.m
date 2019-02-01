@@ -143,9 +143,11 @@ integrationTime = parser.Results.integrationTime;
 saveRecipesConditionsTogether(parser);
 
 %% Set up ful-sized parpool if available.
+%
+% Set this not to crush my computer by only using half the cores.
 if exist('parpool', 'file')
     delete(gcp('nocreate'));
-    nCores = feature('numCores');
+    nCores = round(feature('numCores')/2);
     parpool('local', nCores);
 end
 
