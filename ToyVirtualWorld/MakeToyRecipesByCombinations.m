@@ -736,6 +736,12 @@ parfor sceneIndex = 1:nScenes
         factoids = rtbRenderMitsubaFactoids(factoidSceneFile, ...
                     'hints', workingRecord.hints);
         
+        % Get the reflectance image
+        pathToRecipeFolder = fullfile(workingRecord.hints.workingFolder,recipeName);
+        reflectanceImage = makeMultispectralReflectanceImage(pathToRecipeFolder, factoids);
+        factoids.reflectanceImage = reflectanceImage;
+        
+        % Save the factoid image
         tempName=matfile(fullfile(workingRecord.hints.workingFolder,workingRecord.hints.recipeName, ...
             'renderings','Mitsuba','normal-factoids.mat'),'Writable',true);
         tempName.factoids=factoids;
