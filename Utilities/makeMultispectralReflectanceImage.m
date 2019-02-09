@@ -36,7 +36,7 @@ for ii = 1:length(objectIndices)
     [row, col] = find(factoids.shapeIndex.data(:,:,1) == objectIndices(ii));
     
     % Read the reflectance file for this shape index
-    pathToReflectanceFile = fullfile(pathToRecipeFolder, shapeReflectances{ii}.spectrum.Attributes.filename);
+    pathToReflectanceFile = fullfile(pathToRecipeFolder, shapeReflectances{objectIndices(ii)+1}.spectrum.Attributes.filename);
     [wavelength, magnitude] = rtbReadSpectrum(pathToReflectanceFile);
     magnitudeResampled = SplineSrf(WlsToS(wavelength),magnitude,S);
 
