@@ -1,4 +1,4 @@
-function makeOtherObjectReflectance(nSurfaces, folderToStore)
+function makeOtherObjectReflectance(nSurfaces, folderToStore, varargin)
 % makeOtherObjectReflectance(nSurfaces, folderToStore)
 %
 % Usage: 
@@ -21,7 +21,17 @@ function makeOtherObjectReflectance(nSurfaces, folderToStore)
 %   nSurfaces = number of random spectra to generate
 %   folderToStore = folder where the spectra are stored
 %
+% Key/value pairs
+%   'covScaleFactor' - Factor for scaling the size of covariance matrix
+%
 % 8/10/16  VS  Wrote it.
+
+
+parser = inputParser();
+parser.addParameter('covScaleFactor', 1, @isnumeric);
+
+parser.parse(varargin{:});
+covScaleFactor = parser.Results.covScaleFactor;
 
 % Desired wl sampling
 S = [400 5 61];
@@ -49,6 +59,7 @@ B = FindLinMod(sur_all_mean_centered,6);
 sur_all_wgts = B\sur_all_mean_centered;
 mean_wgts = mean(sur_all_wgts,2);
 cov_wgts = cov(sur_all_wgts');
+cov_wgts = cov_wgts*covScaleFactor;
 
 %% Generate some new surfaces
 newSurfaces = zeros(S(3),nSurfaces);

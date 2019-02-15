@@ -36,6 +36,8 @@ function RunToyVirtualWorldRecipes(varargin)
 %                 should be present in the cropped image.
 %   'otherObjectReflectanceRandom' - boolean to specify if spectra of 
 %                   background objects is random or not. Default true
+%   'covScaleFactor' -  Factor to scale the size of the covariance matrix 
+%                   for the natural reflectance dataset. Default 1
 %   'illuminantSpectraRandom' - boolean to specify if spectra of 
 %                   illuminant is random or not. Default true
 %   'illuminantSpectrumNotFlat' - boolean to specify illumination spectra 
@@ -104,6 +106,7 @@ parser.addParameter('maxAttempts', 30, @isnumeric);
 parser.addParameter('targetPixelThresholdMin', 0.1, @isnumeric);
 parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
+parser.addParameter('covScaleFactor', 1, @isnumeric);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('bMakeD65', false, @islogical);
@@ -170,6 +173,7 @@ try
         'targetPixelThresholdMin',parser.Results.targetPixelThresholdMin, ...
         'targetPixelThresholdMax',parser.Results.targetPixelThresholdMax, ...
         'otherObjectReflectanceRandom',parser.Results.otherObjectReflectanceRandom,...
+        'covScaleFactor', parser.Results.covScaleFactor, ...
         'illuminantSpectraRandom',parser.Results.illuminantSpectraRandom,...
         'illuminantSpectrumNotFlat',parser.Results.illuminantSpectrumNotFlat,...
         'bMakeD65',parser.Results.bMakeD65,...
