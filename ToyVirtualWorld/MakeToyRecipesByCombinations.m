@@ -741,6 +741,13 @@ parfor sceneIndex = 1:nScenes
         reflectanceImage = makeMultispectralReflectanceImage(pathToRecipeFolder, factoids);
         factoids.reflectanceImage = reflectanceImage;
         
+        % Save the multispectral and shading image in the factoids too
+        pathToFactoidImage = fullfile(workingRecord.hints.workingFolder, ...
+            workingRecord.hints.recipeName, 'renderings','Mitsuba','normal.mat');
+        normalStruct = load(pathToFactoidImage);
+        factoids.multispectralImage = normalStruct.multispectralImage;
+        factoids.shadingImage = factoids.multispectralImage./factoids.reflectanceImage;
+        
         % Save the factoid image
         tempName=matfile(fullfile(workingRecord.hints.workingFolder,workingRecord.hints.recipeName, ...
             'renderings','Mitsuba','normal-factoids.mat'),'Writable',true);
