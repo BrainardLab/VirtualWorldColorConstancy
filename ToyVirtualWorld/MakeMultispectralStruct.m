@@ -129,7 +129,7 @@ parfor ii = 1:nScenes
         luminanceLevels(ii) = recipe.input.sceneRecord.targetLuminanceLevel;
         reflectanceNumber(ii) = recipe.input.sceneRecord.reflectanceNumber;
         multispectralImage(:,:,ii) = ImageToCalFormat(recipe.processing.croppedImage);
-        pathToFullImage{ii} = recipe.rendering.radianceDataFiles{2};
+        pathToFullImage{ii} = recipe.rendering.radianceDataFiles{end};
     catch err
         SaveToyVirutalWorldError(analysedFolder, err, recipe, varargin);
     end
