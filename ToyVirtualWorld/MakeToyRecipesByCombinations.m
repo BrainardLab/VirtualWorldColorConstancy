@@ -573,28 +573,28 @@ parfor sceneIndex = 1:nScenes
                 'elementTypeFilter', 'nodes', ...
                 'defaultSpectrum', '300:1 800:1');
             
-            % these styles make up the "mask" condition
-            workingRecord.styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
-            
-            %% Do the mask rendering and reject if required
-            innerModels = [insertShapes{:} insertLights{:}];
-            workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
-            
-            % generate scene files and render
-            workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
-            
-            workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
-                'imageWidth', imageWidth, ...
-                'imageHeight', imageHeight, ...
-                'targetPixelThresholdMin', targetPixelThresholdMin, ...
-                'targetPixelThresholdMax', targetPixelThresholdMax, ...
-                'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
-            if workingRecord.rejected
-                % delete this recipe and try again
-                rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
-                [~, ~] = rmdir(rejectedFolder, 's');
-                continue;
-            else
+%             % these styles make up the "mask" condition
+%             workingRecord.styles.mask = {quickRendering, allBlackDiffuse, firstShapeEmitter};
+%             
+%             %% Do the mask rendering and reject if required
+%             innerModels = [insertShapes{:} insertLights{:}];
+%             workingRecord.recipe = vseBuildRecipe(sceneData, innerModels, workingRecord.styles, 'hints', workingRecord.hints);
+%             
+%             % generate scene files and render
+%             workingRecord.recipe = rtbExecuteRecipe(workingRecord.recipe);
+%             
+%             workingRecord.rejected = CheckTargetObjectOcclusion(workingRecord.recipe, ...
+%                 'imageWidth', imageWidth, ...
+%                 'imageHeight', imageHeight, ...
+%                 'targetPixelThresholdMin', targetPixelThresholdMin, ...
+%                 'targetPixelThresholdMax', targetPixelThresholdMax, ...
+%                 'totalBoundingBoxPixels', (2*cropImageHalfSize+1)^2);
+%             if workingRecord.rejected
+%                 % delete this recipe and try again
+%                 rejectedFolder = rtbWorkingFolder('folder','', 'hint', workingRecord.hints);
+%                 [~, ~] = rmdir(rejectedFolder, 's');
+%                 continue;
+%             else
                 
                 %% Choose styles for the full radiance rendering.
                 fullRendering = VwccMitsubaRenderingQuality( ...
@@ -729,7 +729,7 @@ parfor sceneIndex = 1:nScenes
                 
                 % move on to save this recipe
                 break;
-            end
+%             end
         end
         
         % Get the factoid images

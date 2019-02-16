@@ -73,10 +73,11 @@ parfor ii = 1:nRecipes
         radiance = parload(pathToRadianceFile);
         wave = 400:10:700;
         
-        maskFilename = fullfile(recipe.input.hints.workingFolder, ...
-            recipe.input.hints.recipeName,'renderings','Mitsuba','mask.mat');
-        targetMask = load(maskFilename);
-        isTarget = 0 < sum(targetMask.multispectralImage, 3);
+%         factoidFilename = fullfile(recipe.input.hints.workingFolder, ...
+%             recipe.input.hints.recipeName,'renderings','Mitsuba','normal-factoids.mat');
+%         targetMask = load(factoidFilename);
+%         targetObjectIndex = unique(targetMask.factoids.shapeIndex.data(:,:,1)); 
+%         isTarget = (targetMask.factoids.shapeIndex.data(:,:,1) == targetObjectIndex(end));
         
         randomSeed = 4343;                       % nan results in new LMS mosaic generation, any other number results in reproducable mosaic
         lowPassFilter = 'matchConeStride';      % 'none' or 'matchConeStride'
@@ -85,7 +86,8 @@ parfor ii = 1:nRecipes
         randomAngles = [0 randi(360,1,parser.Results.nRandomRotations)];
         for iterRotations = 1 : length(randomAngles)
             if (iterRotations == 1)
-                [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
+%                 [cR, cC] = findTargetCenter(isTarget); % target center pixel row and column
+                cR = floor(size(radiance,1)/2); cC = floor(size(radiance,2)/2); % target center pixel row and column
                 croppedImage = radiance(cR-cropImageHalfSize:1:cR+cropImageHalfSize,...
                     cC-cropImageHalfSize:1:cC+cropImageHalfSize,:);
                 recipe.processing.croppedImage = croppedImage;

@@ -43,10 +43,11 @@ set(gca,'YTickLabel','');
 
 % Plot the mask image
 subplot(subPlotRows,subPlotColumns,2);
-pathtoImage = fullfile(workingFolder,archiveBase,'renderings','Mitsuba','mask.mat');
-imageData = parload(pathtoImage);
-[sRGBImage, ~, ~] = rtbMultispectralToSRGB(imageData,[400,10,31], 'toneMapFactor', toneMapFactor, 'isScale', isScale);
-image(sRGBImage);
+pathtoImage = fullfile(workingFolder,archiveBase,'renderings','Mitsuba','normal-factoids.mat');
+targetMask = load(pathtoImage);
+targetObjectIndex = unique(targetMask.factoids.shapeIndex.data(:,:,1)); 
+isTarget = (targetMask.factoids.shapeIndex.data(:,:,1) == targetObjectIndex(end));
+imagesc(isTarget);
 pbaspect([3 2 1]);
 set(gca,'XTickLabel','');
 set(gca,'YTickLabel','');
