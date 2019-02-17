@@ -40,6 +40,9 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   for the natural reflectance dataset. Default 1
 %   'illuminantSpectraRandom' - boolean to specify if spectra of 
 %                   illuminant is random or not. Default true
+%   'illuminantSpectraSameShape' - boolean to specify if spectra of
+%                   all illuminant in a scene has the same shape. Default
+%                   flase
 %   'illuminantSpectrumNotFlat' - boolean to specify illumination spectra 
 %                   shape to be not flat, i.e. random, (true= random)
 %   'minMeanIlluminantLevel' - Min of mean value of ilumination spectrum
@@ -108,6 +111,7 @@ parser.addParameter('targetPixelThresholdMax', 0.6, @isnumeric);
 parser.addParameter('otherObjectReflectanceRandom', true, @islogical);
 parser.addParameter('covScaleFactor', 1, @isnumeric);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
+parser.addParameter('illuminantSpectraSameShape', false, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('bMakeD65', false, @islogical);
 parser.addParameter('minMeanIlluminantLevel', 0.15, @isnumeric);
@@ -175,6 +179,7 @@ try
         'otherObjectReflectanceRandom',parser.Results.otherObjectReflectanceRandom,...
         'covScaleFactor', parser.Results.covScaleFactor, ...
         'illuminantSpectraRandom',parser.Results.illuminantSpectraRandom,...
+        'illuminantSpectraSameShape', parser.Results.illuminantSpectraSameShape, ...
         'illuminantSpectrumNotFlat',parser.Results.illuminantSpectrumNotFlat,...
         'bMakeD65',parser.Results.bMakeD65,...
         'minMeanIlluminantLevel', parser.Results.minMeanIlluminantLevel,...
