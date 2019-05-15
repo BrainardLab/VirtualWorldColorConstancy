@@ -162,6 +162,10 @@ hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results
 originalFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.outputName,'Originals');
 if (~exist(originalFolder, 'dir'))
     mkdir(originalFolder);
+else 
+    disp('*** Directory exists. Edit name or delete. ***');
+    pause(60);
+    return;
 end
 
 %% Set the size of the image
