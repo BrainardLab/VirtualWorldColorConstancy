@@ -29,8 +29,8 @@ hints.workingFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results
 archiveFiles = FindToyVirtualWorldRecipes(recipeFolder, luminanceLevels, reflectanceNumbers);
 nRecipes = numel(archiveFiles);
 
-for ii = 1:nRecipes
-    recipe = [];
+parfor ii = 1:nRecipes
+    workingRecord = [];
     try
         % get the recipe
         recipe = rtbUnpackRecipe(archiveFiles{ii}, 'hints', hints);

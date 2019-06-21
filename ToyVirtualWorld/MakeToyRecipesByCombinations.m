@@ -113,6 +113,7 @@ parser.addParameter('otherObjectReflectancesSameAcrossInterval', false, @islogic
 parser.addParameter('lightPositionRandom', true, @islogical);
 parser.addParameter('lightScaleRandom', true, @islogical);
 parser.addParameter('targetPositionRandom', true, @islogical);
+parser.addParameter('moveTargetInPerpendicularPlane', true, @islogical);
 parser.addParameter('targetScaleRandom', true, @islogical);
 parser.addParameter('targetRotationRandom', true, @islogical);
 parser.addParameter('objectShapeSet', ...
@@ -151,6 +152,7 @@ nInsertObjects = parser.Results.nInsertObjects;
 maxDepth = parser.Results.maxDepth;
 nLuminanceLevels = numel(luminanceLevels);
 nReflectances = numel(reflectanceNumbers);
+moveTargetInPerpendicularPlane = parser.Results.moveTargetInPerpendicularPlane;
 
 %% Basic setup we don't want to expose as parameters.
 projectName = 'VirtualWorldColorConstancy';
@@ -403,12 +405,25 @@ parfor sceneIndex = 1:nScenes
             if parser.Results.targetPositionRandom
                 targetPosition = GetRandomPosition([0 0; 0 0; 0 0], sceneInfo.objectBox);
             else
-               % using fixed object position that works for the Library base scene
-%              targetPosition = [ -0.010709 4.927981 0.482899]; % BigBall-Library Case 1  
-               targetPosition = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
-%              targetPosition = [ -0.510709 0.0527981 0.482899]; % BigBall-Library Case 3
-%              targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
+                % using fixed object position that works for the Library base scene
+                %              targetPosition = [ -0.010709 4.927981 0.482899]; % BigBall-Library Case 1
+                cameraLookat = [ 1.510709 5.527981 2.482899]; % BigBall-Library Case 2
+                %              targetPosition = [ -0.510709 0.0527981 0.482899]; % BigBall-Library Case 3
+                %              targetPosition = [-2.626092 -6.054515 1.223028]; % BigBall-Mill Case 4
+                
+                targetPosition = cameraLookat;
+                if (moveTargetInPerpendicularPlane && (reflectanceNumber>1))
+                    cameraPos = [1.9910 -5.8023 1.2662];
+                    cameraToTargetVector = cameraLookat -  cameraPos;
+                    cameraToTargetVector = cameraToTargetVector/norm(cameraToTargetVector);
+                    perpVec = []; randind = randperm(3);
+                    perpVec(randind(1:2)) = rand(1,2)-0.5;
+                    perpVec(randind(3)) = -cameraToTargetVector(randind(1:2))*perpVec(randind(1:2))'/cameraToTargetVector(randind(3));
+                    perpVec = perpVec/norm(perpVec);
+                    targetPosition = cameraLookat + 0.7*perpVec;
+                end
             end
+            
             
             if parser.Results.targetScaleRandom
                 targetScale = 0.3 + rand()/2;
@@ -499,7 +514,7 @@ parfor sceneIndex = 1:nScenes
             %   "up" direction is from the first camera "slot"
             eye = sceneInfo.cameraSlots(1).position;
             up = sceneInfo.cameraSlots(1).up;
-            lookAt = mexximpLookAt(eye, targetPosition, up);
+            lookAt = mexximpLookAt(eye, cameraLookat, up);
             
             cameraName = sceneData.model.cameras(1).name;
             isCameraNode = strcmp(cameraName, {sceneData.model.rootNode.children.name});
