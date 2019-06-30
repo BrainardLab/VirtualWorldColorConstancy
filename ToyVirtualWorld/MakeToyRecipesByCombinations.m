@@ -417,9 +417,9 @@ parfor sceneIndex = 1:nScenes
                 
                 targetPosition = cameraLookat;
                 if ((radiusOfPeripheralCircle >0) && (reflectanceNumber>1))
-                    if targetLuminanceLevel == 0.4
-                        targetPosition = cameraLookat;
-                    else
+%                     if targetLuminanceLevel == 0.4
+%                         targetPosition = cameraLookat;
+%                     else
                         cameraPos = [1.9910 -5.8023 1.2662];
                         cameraToTargetVector = cameraLookat -  cameraPos;
                         cameraToTargetVector = cameraToTargetVector/norm(cameraToTargetVector);
@@ -428,7 +428,7 @@ parfor sceneIndex = 1:nScenes
                         perpVec(randind(3)) = -cameraToTargetVector(randind(1:2))*perpVec(randind(1:2))'/cameraToTargetVector(randind(3));
                         perpVec = perpVec/norm(perpVec);
                         targetPosition = cameraLookat + radiusOfPeripheralCircle*perpVec;
-                    end
+%                     end
                 end
             end
             
