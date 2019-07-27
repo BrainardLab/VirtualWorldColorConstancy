@@ -1,4 +1,4 @@
-function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, coneMosaicImage, sceneRGBrendition, oiRGBrendition, processingOptions, visualizationInfo, varargout] = ...
+function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomerizationsMaps, isomerizationSRGBrendition, sceneRGBrendition, oiRGBrendition, processingOptions, visualizationInfo, varargout] = ...
     isomerizationMapFromRadiance(radiance, wave, varargin)
  
     % default parameters
@@ -151,8 +151,8 @@ function [isomerizationsVector, coneIndicator, conePositions, demosaicedIsomeriz
     end
     humanConeMosaic.pattern = subSampledPattern;
     
-    uData = humanConeMosaic.plot('cone mosaic', 'hf', 'none');
-    coneMosaicImage = uData.mosaicImage;
+%     uData = humanConeMosaic.plot('cone mosaic', 'hf', 'none');
+%     coneMosaicImage = uData.mosaicImage;
     
     % Compute the isomerization maps
     if (strcmp(p.isomerizationNoise,'frozen') || strcmp(p.isomerizationNoise,'random')) && (p.responseInstances > 1)
