@@ -227,7 +227,7 @@ illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 999;
-        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0);
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, bMakeD65);
     else
         totalRandomLightSpectra = 10;
         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...

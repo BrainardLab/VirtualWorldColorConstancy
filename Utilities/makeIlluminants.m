@@ -1,4 +1,4 @@
-function makeIlluminants(nIlluminances, folderToStore, scaleFactor)
+function makeIlluminants(nIlluminances, folderToStore, scaleFactor, bMakeD65)
 % makeIlluminants(nIlluminances, folderToStore, scaleFactor
 %
 % Usage: 
@@ -24,9 +24,10 @@ function makeIlluminants(nIlluminances, folderToStore, scaleFactor)
 %                 1 -> distribution of mean will be similar to Granada 
 %                 other number  -> distribution will be same as Granada
 %                 multiplied by this factor
+%   bMakeD65 = makes the mean value as D65
 %
-% VS wrote this
-% April 12, 2018
+% April 12, 2018: VS wrote this
+% Dec 30, 2019: VS modified this
 
 % Desired wl sampling
 rescaling = 1;  % O no rescaling
@@ -57,6 +58,19 @@ ill_granada_wgts = B\daylightGranadaRescaledMeanSubtracted;
 mean_wgts = mean(ill_granada_wgts,2);
 cov_wgts = cov(ill_granada_wgts');
 
+%% Get D65
+theIlluminantData = load('spd_D65');
+D65Illuminant = SplineSpd(theIlluminantData.S_D65,theIlluminantData.spd_D65,theWavelengths);
+D65Illuminant = D65Illuminant/mean(D65Illuminant);
+
+
+%% Mean to be added
+if (bMakeD65)
+    meanIlluminant = D65Illuminant;
+else
+    meanIlluminant = meandaylightGranadaRescaled;
+end
+
 %% Generate some new illuminants
 nNewIlluminaces = nIlluminances;
 newIlluminance = zeros(S(3),nNewIlluminaces);
@@ -70,7 +84,7 @@ for i = 1:nNewIlluminaces
     OK = false;
     while (~OK)
         ran_wgts = mvnrnd(mean_wgts',cov_wgts)';
-        ran_ill = B*ran_wgts+meandaylightGranadaRescaled;
+        ran_ill = B*ran_wgts + meanIlluminant;
         if (all(ran_ill >= 0))
             newIlluminance(:,newIndex) = ran_ill;
             if (scaleFactor ~= 0)
