@@ -33,6 +33,8 @@ function MakeToyRecipesByCombinations(varargin)
 %                   background objects is random or not. Default true
 %   'covScaleFactor' -  Factor to scale the size of the covariance matrix 
 %                   for the natural reflectance dataset. Default 1
+%   'illCovScaleFactor' -  Factor to scale the size of the covariance matrix 
+%                   for the natural illumiannt dataset. Default 1
 %   'illuminantSpectraRandom' - boolean to specify if spectra of
 %                   illuminant is random or not. Default true
 %   'illuminantSpectraSameShape' - boolean to specify if spectra of
@@ -105,6 +107,7 @@ parser.addParameter('covScaleFactor', 1, @isnumeric);
 parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectraSameShape', false, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
+parser.addParameter('illCovScaleFactor', 1, @isnumeric);
 parser.addParameter('bMakeD65', false, @islogical);
 parser.addParameter('minMeanIlluminantLevel', 10, @isnumeric);
 parser.addParameter('maxMeanIlluminantLevel', 30, @isnumeric);
@@ -145,6 +148,7 @@ lightShapeSet = parser.Results.lightShapeSet;
 baseSceneSet = parser.Results.baseSceneSet;
 otherObjectReflectanceRandom = parser.Results.otherObjectReflectanceRandom;
 covScaleFactor = parser.Results.covScaleFactor;
+illCovScaleFactor = parser.Results.illCovScaleFactor;
 baseSceneReflectancesSameAcrossInterval = parser.Results.baseSceneReflectancesSameAcrossInterval;
 otherObjectReflectancesSameAcrossInterval = parser.Results.otherObjectReflectancesSameAcrossInterval;
 illuminantSpectraRandom = parser.Results.illuminantSpectraRandom;
@@ -227,7 +231,7 @@ illuminantsFolder = fullfile(getpref(projectName, 'baseFolder'),parser.Results.o
 if illuminantSpectraRandom
     if (illuminantSpectrumNotFlat)
         totalRandomLightSpectra = 999;
-        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0, bMakeD65);
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, bMakeD65, 'covScaleFactor', illCovScaleFactor);
     else
         totalRandomLightSpectra = 10;
         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
@@ -238,11 +242,28 @@ else
     if (bMakeD65)
         makeD65(illuminantsFolder);        
     elseif (illuminantSpectrumNotFlat)
-        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, 0);
+        makeIlluminants(totalRandomLightSpectra,illuminantsFolder, bMakeD65, 'covScaleFactor', illCovScaleFactor);
     else
         makeFlatIlluminants(totalRandomLightSpectra,illuminantsFolder, ...
                 parser.Results.minMeanIlluminantLevel, parser.Results.maxMeanIlluminantLevel);
     end
+end
+
+%% Predefine scalings for the illuminants in each scene
+%
+% If the iluminants are scaled to match the variations in the mean value of
+% the spectra to natural scenes, we have decided to scale all the spectra
+% in the base scene with the same scale factor. This is chosen here.
+if parser.Results.illuminantScaling
+    
+    % Scales sampled from Granda dataset
+    % scales = generateIlluminantsScalesForScene(nLuminanceLevels * nReflectances);
+    
+    % Scales sampled uniformaly over Granda mean value range
+    scales = generateLogUniformScales(nLuminanceLevels * nReflectances, ...
+              parser.Results.maxMeanIlluminantLevel, parser.Results.minMeanIlluminantLevel);
+else
+    scales = ones(1,nLuminanceLevels * nReflectances);
 end
 
 %% Make some reflectances and store them where they want to be
@@ -305,27 +326,6 @@ targetAioPrefs.locations = targetLocations;
 targetObjectReflectance = aioGetFiles('Reflectances', 'TargetObjects', ...
     'aioPrefs', targetAioPrefs, ...
     'fullPaths', false);
-
-%% Predefine scalings for the illuminants in each scene
-%
-% If the iluminants are scaled to match the variations in the mean value of
-% the spectra to natural scenes, we have decided to scale all the spectra
-% in the base scene with the same scale factor. This is chosen here.
-if parser.Results.illuminantScaling
-    if illuminantSpectraRandom
-    % Scales sampled from true Granda mean value distribution
-    % scales = generateIlluminantsScalesForScene(nLuminanceLevels * nReflectances);
-    
-    % Scales sampled uniformaly over Granda mean value range
-    scales = generateLogUniformScales(nLuminanceLevels * nReflectances, ...
-                parser.Results.maxMeanIlluminantLevel, parser.Results.minMeanIlluminantLevel);
-    else
-        scales = generateLogUniformScales(1, parser.Results.maxMeanIlluminantLevel, ...
-            parser.Results.minMeanIlluminantLevel)*ones(1,nLuminanceLevels * nReflectances);
-    end
-else
-    scales = ones(1,nLuminanceLevels * nReflectances);
-end
 
 %% Assemble recipies by combinations of target luminances reflectances.
 nScenes = nLuminanceLevels * nReflectances;

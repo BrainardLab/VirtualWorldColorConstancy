@@ -1,4 +1,4 @@
-function makeIlluminants(nIlluminances, folderToStore, scaleFactor, bMakeD65)
+function makeIlluminants(nIlluminances, folderToStore, bMakeD65, varargin)
 % makeIlluminants(nIlluminances, folderToStore, scaleFactor
 %
 % Usage: 
@@ -29,6 +29,12 @@ function makeIlluminants(nIlluminances, folderToStore, scaleFactor, bMakeD65)
 % April 12, 2018: VS wrote this
 % Dec 30, 2019: VS modified this
 
+parser = inputParser();
+parser.addParameter('covScaleFactor', 1, @isnumeric);
+
+parser.parse(varargin{:});
+covScaleFactor = parser.Results.covScaleFactor;
+
 % Desired wl sampling
 rescaling = 1;  % O no rescaling
                 % 1 rescaling
@@ -57,6 +63,7 @@ B = FindLinMod(daylightGranadaRescaledMeanSubtracted,6);
 ill_granada_wgts = B\daylightGranadaRescaledMeanSubtracted;
 mean_wgts = mean(ill_granada_wgts,2);
 cov_wgts = cov(ill_granada_wgts');
+cov_wgts = cov_wgts*covScaleFactor;
 
 %% Get D65
 theIlluminantData = load('spd_D65');
@@ -87,10 +94,6 @@ for i = 1:nNewIlluminaces
         ran_ill = B*ran_wgts + meanIlluminant;
         if (all(ran_ill >= 0))
             newIlluminance(:,newIndex) = ran_ill;
-            if (scaleFactor ~= 0)
-                newIlluminance(:,newIndex) = newIlluminance(:,newIndex)*...
-                        (meanDaylightGranada(randi(length(meanDaylightGranada))))*scaleFactor;
-            end
             newIndex = newIndex+1;
             OK = true;
         end        

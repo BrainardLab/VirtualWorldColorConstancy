@@ -38,6 +38,8 @@ function RunToyVirtualWorldRecipes(varargin)
 %                   background objects is random or not. Default true
 %   'covScaleFactor' -  Factor to scale the size of the covariance matrix 
 %                   for the natural reflectance dataset. Default 1
+%   'illCovScaleFactor' -  Factor to scale the size of the covariance matrix 
+%                   for the natural illumiannt dataset. Default 1
 %   'illuminantSpectraRandom' - boolean to specify if spectra of 
 %                   illuminant is random or not. Default true
 %   'illuminantSpectraSameShape' - boolean to specify if spectra of
@@ -114,6 +116,7 @@ parser.addParameter('illuminantSpectraRandom', true, @islogical);
 parser.addParameter('illuminantSpectraSameShape', false, @islogical);
 parser.addParameter('illuminantSpectrumNotFlat', true, @islogical);
 parser.addParameter('bMakeD65', false, @islogical);
+parser.addParameter('illCovScaleFactor', 1, @isnumeric);
 parser.addParameter('minMeanIlluminantLevel', 0.15, @isnumeric);
 parser.addParameter('maxMeanIlluminantLevel', 150, @isnumeric);
 parser.addParameter('illuminantScaling', 0, @isnumeric);
@@ -182,6 +185,7 @@ try
         'illuminantSpectraRandom',parser.Results.illuminantSpectraRandom,...
         'illuminantSpectraSameShape', parser.Results.illuminantSpectraSameShape, ...
         'illuminantSpectrumNotFlat',parser.Results.illuminantSpectrumNotFlat,...
+        'illCovScaleFactor',parser.Results.illCovScaleFactor,...
         'bMakeD65',parser.Results.bMakeD65,...
         'minMeanIlluminantLevel', parser.Results.minMeanIlluminantLevel,...
         'maxMeanIlluminantLevel', parser.Results.maxMeanIlluminantLevel,...
