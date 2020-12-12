@@ -1,5 +1,5 @@
 function makeIlluminants(nIlluminances, folderToStore, bMakeD65, varargin)
-% makeIlluminants(nIlluminances, folderToStore, scaleFactor
+% makeIlluminants(nIlluminances, folderToStore, scaleFactor)
 %
 % Usage: 
 %     makeIlluminants(10,'Illuminants', 0);
